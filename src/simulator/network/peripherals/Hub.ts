@@ -2,7 +2,7 @@ import { Network } from "../Network";
 import { Device } from "./Device";
 import { Interface } from "./Interface";
 
-export class Switch extends Device {
+export class Hub extends Device {
     mac: string;
 
     constructor(network: Network, name: string, mac: string, ports: number) {
@@ -13,6 +13,10 @@ export class Switch extends Device {
     }
 
     onPacketReceived(iface: Interface, data: any): void {
+        for(const intf of Object.values(this.interfaces)) {
+            if (intf !== iface)
+                intf.send(data);
+        }
     }
 
     tick(): void {

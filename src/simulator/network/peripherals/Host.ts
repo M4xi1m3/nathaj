@@ -14,6 +14,10 @@ export class Host extends Device {
     onPacketReceived(iface: Interface, data: any): void {
     }
 
+    getMac(): string {
+        return this.mac;
+    }
+
     tick(): void {
     }
 }

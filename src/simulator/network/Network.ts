@@ -1,5 +1,6 @@
 
 import { Device } from './peripherals/Device';
+import { Interface } from './peripherals/Interface';
 
 class NetworkException extends Error {
     network: Network;
@@ -28,15 +29,31 @@ class NetworkNotRunningException extends NetworkException {
     }
 }
 
-export class Network {
+type PacketDirection = 'outgoing' | 'ingoing';
+
+export type PacketEventData = {
+    time: number;
+    packet: ArrayBuffer;
+    interface: Interface;
+    direction: PacketDirection;
+}
+
+export class Network extends EventTarget {
     devices: { [name: string]: Device };
     interval: number | null;
     running: boolean;
+    time_offset: number;
+    time_elapsed: number;
 
     constructor() {
+        super();
+
         this.devices = {}
         this.interval = null;
         this.running = false;
+        this.time_offset = 0;
+
+        this.time_elapsed = 0;
     }
 
     addDevice(device: Device): void {
@@ -59,18 +76,25 @@ export class Network {
         }
     }
 
+    time(): number {
+        return (performance.now() - this.time_offset + this.time_elapsed) / 1000;
+    }
+
     start(): void {
         if (this.interval !== null)
             throw new NetworkAlreadyRunningException(this);
 
+        this.time_offset = performance.now();
         this.interval = window.setInterval(() => {
-            this.tick()
+            this.tick();
         }, 0)
     }
 
     stop(): void {
         if (this.interval === null)
             throw new NetworkNotRunningException(this);
+
+        this.time_elapsed += performance.now() - this.time_offset;
 
         clearInterval(this.interval);
         this.interval = null;

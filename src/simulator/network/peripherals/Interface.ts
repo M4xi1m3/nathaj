@@ -1,4 +1,5 @@
 
+import { PacketEventData } from '../Network';
 import { Device } from './Device';
 
 export type ReceivedPacketEventData = {
@@ -52,7 +53,7 @@ export class Interface extends EventTarget {
     }
 
     getFullName(): string {
-        return this.getOwner().getName() + "-"  + this.getName();
+        return this.getOwner().getName() + "-" + this.getName();
     }
 
     getName(): string {
@@ -64,8 +65,8 @@ export class Interface extends EventTarget {
             throw new AlreadyConnectedException(this);
         if (other.connected_to !== null)
             throw new AlreadyConnectedException(other);
-        
-        if(this.getOwner().getNetwork() !== other.getOwner().getNetwork())
+
+        if (this.getOwner().getNetwork() !== other.getOwner().getNetwork())
             throw new NotInSameNetworkException(this, other);
 
         this.connected_to = other;
@@ -86,6 +87,15 @@ export class Interface extends EventTarget {
         if (packet === undefined)
             return;
 
+        this.getOwner().getNetwork().dispatchEvent(new CustomEvent<PacketEventData>('packet', {
+            detail: {
+                time: this.getOwner().getNetwork().time(),
+                packet,
+                interface: this,
+                direction: 'ingoing'
+            }
+        }));
+
         this.dispatchEvent(new CustomEvent<ReceivedPacketEventData>('receivedata', {
             detail: {
                 packet
@@ -96,6 +106,16 @@ export class Interface extends EventTarget {
     send(data: ArrayBuffer): void {
         if (this.connected_to === null)
             return;
+
+        this.getOwner().getNetwork().dispatchEvent(new CustomEvent<PacketEventData>('packet', {
+            detail: {
+                time: this.getOwner().getNetwork().time(),
+                packet: data,
+                interface: this,
+                direction: 'outgoing'
+            }
+        }));
+
         this.connected_to.receive_queue.push(data)
     }
 
