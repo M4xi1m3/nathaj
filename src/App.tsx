@@ -1,11 +1,10 @@
-import { useState } from 'react';
-import { Canvas } from './components/Canvas';
 import { Network } from './simulator/network/Network';
-import { Device } from './simulator/network/peripherals/Device';
 import { Host } from './simulator/network/peripherals/Host';
 import { Switch } from './simulator/network/peripherals/Switch';
 import { NetworkContext } from './NetworkContexxt';
 import { NetworkRenderer } from './components/NetworkRenderer';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
+import { AppBar, Box, Paper, Toolbar, Typography } from '@mui/material';
 
 const net = new Network();
 const s1 = new Switch(net, "s1", "00:0b:00:00:00:01", 5)
@@ -32,7 +31,40 @@ net.addLink("s1", "eth4", "s2", "eth4");
 function App() {
     return (
         <NetworkContext.Provider value={net}>
-            <NetworkRenderer />
+            <Box sx={{ display: 'flex', flexDirection: 'column', height: "100%", wudth: "100%" }}>
+                <Box sx={{ flexGrow: 1 }}>
+                    <AppBar position='static'>
+                        <Toolbar variant='dense'>
+                            <Typography variant='h6' component='div' sx={{ flexGrow: 1 }}>
+                                Web-NetSim
+                            </Typography>
+                        </Toolbar>
+                    </AppBar>
+                </Box>
+                <PanelGroup direction="vertical">
+                    <Panel defaultSize={75} style={{ display: "flex" }}>
+                        <PanelGroup direction="horizontal">
+                            <Panel defaultSize={75} style={{ display: "flex" }}>
+                                <Paper sx={{ flexGrow: 1, margin: 1 }}>
+                                    <NetworkRenderer />
+                                </Paper>
+                            </Panel>
+                            <PanelResizeHandle style={{ width: "10px" }} />
+                            <Panel style={{ display: "flex" }}>
+                                <Paper sx={{ flexGrow: 1, margin: 1 }}>
+                                    <Typography>Network logs</Typography>
+                                </Paper>
+                            </Panel>
+                        </PanelGroup>
+                    </Panel>
+                    <PanelResizeHandle style={{ height: "10px" }} />
+                    <Panel style={{ display: "flex" }}>
+                        <Paper sx={{ flexGrow: 1, margin: 1, marginTop: 1 }}>
+                            <Typography>Console</Typography>
+                        </Paper>
+                    </Panel>
+                </PanelGroup>
+            </Box>
         </NetworkContext.Provider>
     );
 }
