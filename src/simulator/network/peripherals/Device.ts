@@ -2,6 +2,7 @@
 import { Interface, ReceivedPacketEventData } from './Interface'
 import { Network } from '../Network';
 import { Drawable } from '../../drawing/Drawable';
+import { Vector2D } from '../../drawing/Vector2D';
 
 class DeviceException extends Error {
     device: Device;
@@ -31,33 +32,25 @@ export abstract class Device extends Drawable {
         this.network.addDevice(this);
     }
 
-    collision(x: number, y: number): boolean {
-        if (x > (this.x - 10) && x < (this.x + 10) && y > (this.y - 10) && y < (this.y + 10))
-            return true
-        return false
+    collision(other: Vector2D): boolean {
+        return this.position.sqdist(other) < 100;
     }
 
-    draw(ctx: CanvasRenderingContext2D, offsetX: number, offsetY: number): void {
+    draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
         ctx.fillStyle = "#000000";
         ctx.beginPath();
-        ctx.arc(this.x + offsetX, this.y + offsetY, 10, 0, 2 * Math.PI);
+        const drawPos = this.position.add(offset);
+        ctx.arc(drawPos.x, drawPos.y, 10, 0, 2 * Math.PI);
         ctx.fill();
 
         for (const intf of Object.values(this.interfaces)) {
             if (intf.connected_to !== null) {
-                const other_x = intf.connected_to.getOwner().x;
-                const other_y = intf.connected_to.getOwner().y;
-
-                const len = Math.sqrt((other_x - this.x) ** 2 + (other_y - this.y) ** 2);
-                const dx = (other_x - this.x) / len;
-                const dy = (other_y - this.y) / len;
-
-                const ix = this.x + offsetX + dx * 15;
-                const iy = this.y + offsetY + dy * 15;
+                const direction = this.position.direction(intf.connected_to.getOwner().position)
+                const intfPos = drawPos.add(direction.mul(15))
 
                 ctx.fillStyle = "#00ff00";
                 ctx.beginPath();
-                ctx.arc(ix, iy, 5, 0, 2 * Math.PI);
+                ctx.arc(intfPos.x, intfPos.y, 5, 0, 2 * Math.PI);
                 ctx.fill();
             }
         }

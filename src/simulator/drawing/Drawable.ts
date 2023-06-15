@@ -1,14 +1,13 @@
+import { Vector2D } from "./Vector2D";
 
 export abstract class Drawable {
-    x: number = 0;
-    y: number = 0;
+    position: Vector2D = new Vector2D();
 
-    abstract draw(ctx: CanvasRenderingContext2D, offsetX: number, offsetY: number): void;
-    abstract collision(x: number, y: number): boolean;
+    abstract draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void;
+    abstract collision(position: Vector2D): boolean;
     abstract getText(): string;
 
-    setPosition(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+    setPosition(position: Vector2D) {
+        this.position.copy(position);
     }
 }

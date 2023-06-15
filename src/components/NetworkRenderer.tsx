@@ -3,29 +3,38 @@ import { useContext, useState } from "react";
 import { NetworkContext } from "../NetworkContexxt";
 import { Canvas } from "./Canvas";
 import { Divider, Grid, IconButton, Stack, Typography } from "@mui/material";
-import { Label, LabelOff } from "@mui/icons-material";
+import { CenterFocusStrong, Hub, Label, LabelOff, Shuffle } from "@mui/icons-material";
+import { Vector2D } from "../simulator/drawing/Vector2D";
+import { Layout } from "../simulator/drawing/Layout";
 
 export const NetworkRenderer: React.FC = () => {
     const network = useContext(NetworkContext);
 
     const [dragging, setDragging] = useState(false);
     const [panning, setPanning] = useState(false);
-    const [offsetX, setOffsetX] = useState(0);
-    const [offsetY, setOffsetY] = useState(0);
-    const [mouseX, setMouseX] = useState(0);
-    const [mouseY, setMouseY] = useState(0);
+    const [offset, setOffset] = useState(new Vector2D);
+    const [mousePos, setMousePos] = useState(new Vector2D);
     const [dragged, setDragged] = useState<string | null>(null);
 
     const [showLabel, setShowLabel] = useState(false);
 
     return (
-        <Grid container direction="column">
-            <Grid item>
+        <Grid container direction="column" flexWrap="nowrap" sx={{ height: "100%" }}>
+            <Grid item sx={{ width: "100%" }}>
                 <Stack sx={{ p: 1, height: "32px" }} direction="row">
                     <Stack direction="row" flexGrow={1}>
                         <Typography component='h2' variant='h6'>Network</Typography>
                     </Stack>
                     <Stack direction="row">
+                        <IconButton onClick={() => Layout.random(network)} size="small">
+                            <Shuffle />
+                        </IconButton>
+                        <IconButton onClick={() => Layout.fruchterman_reingold(network)} size="small">
+                            <Hub />
+                        </IconButton>
+                        <IconButton onClick={() => Layout.re_center(network)} size="small">
+                            <CenterFocusStrong />
+                        </IconButton>
                         <IconButton onClick={() => setShowLabel(!showLabel)} size="small">
                             {showLabel ? <Label /> : <LabelOff />}
                         </IconButton>
@@ -33,13 +42,17 @@ export const NetworkRenderer: React.FC = () => {
                 </Stack>
                 <Divider />
             </Grid>
-            <Grid item>
+            <Grid item sx={{ height: "calc(100% - 50px)" }}>
                 <Canvas onMouseDown={(e) => {
-                    setMouseX(e.pageX - e.currentTarget.getBoundingClientRect().left);
-                    setMouseY(e.pageY - e.currentTarget.getBoundingClientRect().top);
+                    const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height).mul(-0.5);
+
+                    setMousePos(new Vector2D(
+                        e.pageX - e.currentTarget.getBoundingClientRect().left,
+                        e.pageY - e.currentTarget.getBoundingClientRect().top
+                    ));
 
                     for (const dev of Object.values(network.devices)) {
-                        if (dev.collision(mouseX - offsetX, mouseY - offsetY)) {
+                        if (dev.collision(mousePos.sub(offset).add(centerOffset))) {
                             e.currentTarget.style.cursor = 'grab';
                             setDragging(true);
                             setDragged(dev.name);
@@ -49,13 +62,16 @@ export const NetworkRenderer: React.FC = () => {
 
                     setPanning(true);
                 }} onMouseUp={(e) => {
-                    setMouseX(e.pageX - e.currentTarget.getBoundingClientRect().left);
-                    setMouseY(e.pageY - e.currentTarget.getBoundingClientRect().top);
+                    const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height).div(2);
+
+                    setMousePos(new Vector2D(
+                        e.pageX - e.currentTarget.getBoundingClientRect().left,
+                        e.pageY - e.currentTarget.getBoundingClientRect().top
+                    ));
 
                     if (dragging && dragged !== null) {
                         e.currentTarget.style.cursor = 'pointer';
-                        network.devices[dragged].x = mouseX - offsetX;
-                        network.devices[dragged].y = mouseY - offsetY;
+                        network.devices[dragged].position = mousePos.sub(offset.add(centerOffset));
                     } else if (panning) {
                         e.currentTarget.style.cursor = 'pointer';
                     }
@@ -64,20 +80,21 @@ export const NetworkRenderer: React.FC = () => {
                     setDragging(false);
                     setDragged(null);
                 }} onMouseMove={(e) => {
-                    setMouseX(e.pageX - e.currentTarget.getBoundingClientRect().left);
-                    setMouseY(e.pageY - e.currentTarget.getBoundingClientRect().top);
+                    const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height).div(2);
+                    setMousePos(new Vector2D(
+                        e.pageX - e.currentTarget.getBoundingClientRect().left,
+                        e.pageY - e.currentTarget.getBoundingClientRect().top
+                    ));
 
                     if (dragging && dragged !== null) {
                         e.currentTarget.style.cursor = 'grab';
-                        network.devices[dragged].x = mouseX - offsetX;
-                        network.devices[dragged].y = mouseY - offsetY;
+                        network.devices[dragged].position = mousePos.sub(offset.add(centerOffset));
                     } else if (panning) {
                         e.currentTarget.style.cursor = 'grab';
-                        setOffsetX(offsetX + e.movementX);
-                        setOffsetY(offsetY + e.movementY);
+                        setOffset(offset.add(new Vector2D(e.movementX, e.movementY)));
                     } else {
                         for (const dev of Object.values(network.devices)) {
-                            if (dev.collision(mouseX - offsetX, mouseY - offsetY)) {
+                            if (dev.collision(mousePos.sub(offset.add(centerOffset)))) {
                                 e.currentTarget.style.cursor = 'pointer';
                                 return;
                             }
@@ -85,47 +102,54 @@ export const NetworkRenderer: React.FC = () => {
                         e.currentTarget.style.cursor = 'default';
                     }
                 }} draw={(ctx, frame) => {
+                    const centerOffset = new Vector2D(ctx.canvas.width, ctx.canvas.height).div(2);
+                    const showText = (text: string, pos: Vector2D, center: boolean = false) => {
+                        const HEIGHT = 18;
+                        ctx.font = HEIGHT + "px monospace";
+                        const { width } = ctx.measureText(text);
+                        ctx.fillStyle = "#000000AA"
+                        const rectPos = pos.sub(new Vector2D(3 + (center ? width / 2 : 0), 0));
+                        ctx.fillRect(rectPos.x, rectPos.y, width + 6, HEIGHT + 3);
+                        ctx.fillStyle = "#FFFFFF"
+                        const textPos = pos.sub(new Vector2D((center ? width / 2 : 0), -HEIGHT));
+                        ctx.fillText(text, textPos.x, textPos.y);
+                    }
+
                     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    
 
                     for (const dev of Object.values(network.devices)) {
                         for (const intf of Object.values(dev.interfaces)) {
                             if (intf.connected_to !== null) {
                                 ctx.lineWidth = 2;
                                 ctx.beginPath();
-                                ctx.moveTo(dev.x + offsetX, dev.y + offsetY);
-                                ctx.lineTo(intf.connected_to.getOwner().x + offsetX, intf.connected_to.getOwner().y + offsetY);
+                                ctx.moveTo(...dev.position.add(offset.add(centerOffset)).array());
+                                ctx.lineTo(...intf.connected_to.getOwner().position.add(offset.add(centerOffset)).array());
                                 ctx.stroke();
                             }
                         }
                     }
 
                     for (const dev of Object.values(network.devices)) {
-                        dev.draw(ctx, offsetX, offsetY);
+                        dev.draw(ctx, offset.add(centerOffset));
 
                         if (showLabel) {
                             const text = dev.getText();
                             const HEIGHT = 18;
-                            ctx.font = HEIGHT + "px monospace";
-                            const { width } = ctx.measureText(text);
-                            ctx.fillStyle = "#000000AA"
-                            ctx.fillRect(dev.x + offsetX - 3 - width / 2, dev.y + offsetY - 40, width + 6, HEIGHT + 3);
-                            ctx.fillStyle = "#FFFFFF"
-                            ctx.fillText(text, dev.x + offsetX - width / 2, dev.y + offsetY + HEIGHT - 40);
+                            showText(text, dev.position.add(offset.add(centerOffset)).add(new Vector2D(0, -40)), true);
                         } else {
-                            if (dev.collision(mouseX - offsetX, mouseY - offsetY)) {
+                            if (dev.collision(mousePos.sub(offset.add(centerOffset)))) {
                                 const text = dev.getText();
-                                const HEIGHT = 18;
-                                ctx.font = HEIGHT + "px monospace";
-                                const { width } = ctx.measureText(text);
-                                ctx.fillStyle = "#000000AA"
-                                ctx.fillRect(mouseX - 3, mouseY - 20, width + 6, HEIGHT + 3);
-                                ctx.fillStyle = "#FFFFFF"
-                                ctx.fillText(text, mouseX, mouseY + HEIGHT - 20);
+                                showText(text, mousePos.add(new Vector2D(0, -20)));
                             }
                         }
                     }
 
-                }} style={{ width: "100%", height: "100%" }}></Canvas>
+                    showText("Offset: " + offset.x + ";" + offset.y, new Vector2D(0, 0));
+                    showText("Mouse: " + mousePos.x + ";" + mousePos.y, new Vector2D(0, 21));
+                    showText("Cetner: " + centerOffset.x + ";" + centerOffset.y, new Vector2D(0, 42));
+
+                }} style={{ width: "100%", height: "100%", borderRadius: '0 0 4px 4px' }}></Canvas>
             </Grid>
         </Grid>
     )
