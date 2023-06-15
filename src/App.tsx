@@ -37,12 +37,6 @@ net.addLink("h2", "eth0", "s1", "eth1");
 net.addLink("h3", "eth0", "s1", "eth2");
 net.addLink("h4", "eth0", "s1", "eth3");
 
-/*
-const h1 = new CustomHost(net, "h1", "00:0a:00:00:00:01");
-const h2 = new Host(net, "h2", "00:0a:00:00:00:02");
-net.addLink("h1", "eth0", "h2", "eth0");
-*/
-
 function App() {
     return (
         <NetworkContext.Provider value={net}>
