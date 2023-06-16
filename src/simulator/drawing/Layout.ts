@@ -2,6 +2,12 @@ import { Network } from "../network/Network";
 import { Vector2D } from "./Vector2D";
 
 export class Layout {
+    static spring_layout(net: Network) {
+        Layout.random(net);
+        Layout.fruchterman_reingold(net);
+        Layout.re_center(net);
+    }
+
     static random(net: Network, minX: number = -100, maxX: number = 100, minY: number = -100, maxY: number = 100) {
         Object.values(net.devices).forEach((dev) => {
             dev.position.x = Math.random() * (maxX - minX) + minX;

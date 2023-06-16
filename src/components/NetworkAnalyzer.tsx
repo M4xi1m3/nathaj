@@ -3,12 +3,14 @@ import { NetworkContext } from "../NetworkContexxt";
 import { PacketEventData } from "../simulator/network/Network";
 import { AnalyzedPacket } from "../simulator/network/packets/Packet";
 import { Ethernet } from "../simulator/network/packets/definitions/Ethernet";
-import { Divider, Grid, IconButton, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { CallMade, CallReceived, Delete, FileDownload, FileDownloadOff } from "@mui/icons-material";
+import { Divider, FormControl, Grid, IconButton, Input, InputAdornment, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
+import { CallMade, CallReceived, Clear, Delete, FileDownload, FileDownloadOff, Filter, FilterList } from "@mui/icons-material";
+import { compileExpression } from 'filtrex';
 
 export const NetworkAnalyzer: React.FC = () => {
     const network = useContext(NetworkContext);
 
+    const [filter, setFilter] = useState("");
     const [lastId, setLastId] = useState(0);
     const [packets, setPackets] = useState<AnalyzedPacket[]>([]);
     const [selectedPacket, setSelectedPacket] = useState<number | null>(null);
@@ -17,7 +19,7 @@ export const NetworkAnalyzer: React.FC = () => {
 
     const handlePacket = (e: CustomEvent<PacketEventData>) => {
         console.log(e.detail.time, e.detail.direction, e.detail.interface.getFullName());
-        const packet = new AnalyzedPacket(lastIdTmp, e.detail.time, e.detail.interface.getFullName(), e.detail.direction);
+        const packet = new AnalyzedPacket(lastIdTmp, e.detail.time, e.detail.interface.getOwner().getName(), e.detail.interface.getName(), e.detail.direction);
 
         const p = new Ethernet();
         p.parse(e.detail.packet);
@@ -66,6 +68,23 @@ export const NetworkAnalyzer: React.FC = () => {
         setSelectedPacket(null);
     }
 
+    let filterValid = true;
+    let displayPackets: AnalyzedPacket[] = [];
+
+    if (filter === "") {
+        displayPackets = packets;
+        filterValid = true;
+    } else {
+        try {
+            const filterFunc = compileExpression(filter);
+            displayPackets = packets.filter(filterFunc);
+            filterValid = true;
+        } catch (e) {
+            filterValid = false;
+            displayPackets = packets;
+        }
+    }
+
     return (
         <Grid container direction="column" wrap="nowrap" sx={{ height: "100%", width: "100%", overflowX: "auto" }}>
             <Grid item sx={{ width: "100%" }}>
@@ -83,6 +102,22 @@ export const NetworkAnalyzer: React.FC = () => {
                     </Stack>
                 </Stack>
                 <Divider />
+                <Stack>
+                    <FormControl variant="standard" fullWidth size="medium">
+                        <Input error={!filterValid} placeholder="Filter" startAdornment={
+                            <InputAdornment position="start">
+                                <FilterList />
+                            </InputAdornment>
+                        } endAdornment={
+                            <InputAdornment position="end">
+                                <IconButton onClick={() => setFilter("")}>
+                                    <Clear />
+                                </IconButton>
+                            </InputAdornment>
+                        } value={filter} onChange={(e) => setFilter(e.currentTarget.value)}></Input>
+                    </FormControl>
+                </Stack>
+                <Divider />
             </Grid>
             <Grid item sx={{ flexGrow: 1, width: "100%", overflowX: 'scroll', overflowY: 'scroll' }}>
                 <TableContainer sx={{ overflowX: 'visible' }}>
@@ -91,7 +126,10 @@ export const NetworkAnalyzer: React.FC = () => {
                             <TableRow>
                                 <TableCell sx={commonSX}>#</TableCell>
                                 <TableCell sx={commonSX}>Time</TableCell>
-                                <TableCell sx={commonSX}>Origin</TableCell>
+                                <TableCell sx={commonSX}>Origin
+                                    {/* <IconButton size="small">
+                                    <FilterList fontSize="inherit" />
+                                </IconButton>*/}</TableCell>
                                 <TableCell sx={commonSX}>Direction</TableCell>
                                 <TableCell sx={commonSX}>Source</TableCell>
                                 <TableCell sx={commonSX}>Destination</TableCell>
@@ -100,7 +138,7 @@ export const NetworkAnalyzer: React.FC = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {packets.map((v, i) => (
+                            {displayPackets.map((v, i) => (
                                 <TableRow key={i} hover selected={selectedPacket === i} onClick={(e) => { e.stopPropagation(); setSelectedPacket(i) }}>
                                     <TableCell sx={monoSX}>{v.id}</TableCell>
                                     <TableCell sx={monoSX}>{v.time}</TableCell>

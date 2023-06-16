@@ -21,4 +21,7 @@ export class Hub extends Device {
 
     tick(): void {
     }
+
+    reset(): void {
+    }
 }

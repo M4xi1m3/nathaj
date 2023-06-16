@@ -7,16 +7,20 @@ export class AnalyzedPacket {
     time: number;
     origin: string;
     direction: string;
+    dev: string;
+    intf: string;
 
     source: string | null = null;
     destination: string | null = null;
     protocol: string | null = null;
     info: string | null = null;
 
-    constructor(id: number, time: number, origin: string, direction: string) {
+    constructor(id: number, time: number, dev: string, intf: string, direction: string) {
         this.id = id;
         this.time = time;
-        this.origin = origin;
+        this.dev = dev;
+        this.intf = intf;
+        this.origin = dev + "-" + intf;
         this.direction = direction;
     }
 }

@@ -20,4 +20,7 @@ export class Host extends Device {
 
     tick(): void {
     }
+
+    reset(): void {
+    }
 }

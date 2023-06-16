@@ -62,6 +62,7 @@ export abstract class Device extends Drawable {
 
     abstract onPacketReceived(iface: Interface, data: any): void;
     abstract tick(): void;
+    abstract reset(): void;
 
     addInterface(name: string): Interface {
         if (name in this.interfaces)

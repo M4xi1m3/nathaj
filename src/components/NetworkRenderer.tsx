@@ -26,13 +26,10 @@ export const NetworkRenderer: React.FC = () => {
                         <Typography component='h2' variant='h6'>Network</Typography>
                     </Stack>
                     <Stack direction="row">
-                        <IconButton onClick={() => Layout.random(network)} size="small">
-                            <Shuffle />
-                        </IconButton>
-                        <IconButton onClick={() => Layout.fruchterman_reingold(network)} size="small">
+                        <IconButton onClick={() => Layout.spring_layout(network)} size="small">
                             <Hub />
                         </IconButton>
-                        <IconButton onClick={() => Layout.re_center(network)} size="small">
+                        <IconButton onClick={() => setOffset(new Vector2D(0,0))} size="small">
                             <CenterFocusStrong />
                         </IconButton>
                         <IconButton onClick={() => setShowLabel(!showLabel)} size="small">
@@ -146,8 +143,7 @@ export const NetworkRenderer: React.FC = () => {
                     }
 
                     showText("Offset: " + offset.x + ";" + offset.y, new Vector2D(0, 0));
-                    showText("Mouse: " + mousePos.x + ";" + mousePos.y, new Vector2D(0, 21));
-                    showText("Cetner: " + centerOffset.x + ";" + centerOffset.y, new Vector2D(0, 42));
+                    showText("Time: " + network.time(), new Vector2D(0, 21));
 
                 }} style={{ width: "100%", height: "100%", borderRadius: '0 0 4px 4px' }}></Canvas>
             </Grid>

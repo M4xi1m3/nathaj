@@ -23,6 +23,10 @@ class CustomHost extends Host {
             this.getInterface("eth0").send(packet.raw());
         }
     }
+
+    reset(): void {
+        this.timer = 0;
+    }
 }
 
 const net = new Network();

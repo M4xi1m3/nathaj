@@ -1,4 +1,4 @@
-import { Pause, PlayArrow } from "@mui/icons-material";
+import { Pause, PlayArrow, RestartAlt } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import React, { useContext, useState } from "react";
 import { NetworkContext } from "../NetworkContexxt";
@@ -8,20 +8,29 @@ export const NetworkActions: React.FC = () => {
     const [playing, setPlaying] = useState(false);
 
     const handlePlay = () => {
-        if (playing)
+        if (network.isRunning())
             network.stop();
         else
             network.start();
-        setPlaying(!playing);
+        setPlaying(network.isRunning());
+    }
+
+    const handleReset = () => {
+        network.reset();
+        setPlaying(network.isRunning());
     }
 
     return (
         <div>
             <IconButton
                 size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
+                onClick={handleReset}
+                color="inherit"
+            >
+                <RestartAlt />
+            </IconButton>
+            <IconButton
+                size="large"
                 onClick={handlePlay}
                 color="inherit"
             >
