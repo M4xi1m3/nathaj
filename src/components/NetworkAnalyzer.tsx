@@ -6,6 +6,65 @@ import { Ethernet } from "../simulator/network/packets/definitions/Ethernet";
 import { Divider, FormControl, Grid, IconButton, Input, InputAdornment, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import { CallMade, CallReceived, Clear, Delete, FileDownload, FileDownloadOff, Filter, FilterList } from "@mui/icons-material";
 import { compileExpression } from 'filtrex';
+import { TableComponents, TableVirtuoso, Virtuoso } from 'react-virtuoso'
+
+const VirtuosoTableComponents: TableComponents<AnalyzedPacket> = {
+    Scroller: React.forwardRef<HTMLDivElement>((props, ref) => (
+        <TableContainer {...props} ref={ref} />
+    )),
+    Table: (props) => (
+        <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />
+    ),
+    TableHead,
+    TableRow: ({ item: _item, ...props }) => <TableRow {...props} />,
+    TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
+        <TableBody {...props} ref={ref} />
+    )),
+};
+
+const commonSX = {
+    padding: "2px 6px",
+    background: "white",
+}
+
+const monoSX = {
+    ...commonSX,
+    fontFamily: "Roboto Mono",
+    fontSize: "0.75em",
+    whiteSpace: 'nowrap'
+}
+
+const FixedHeaderContent = () => (
+    <TableRow>
+        <TableCell sx={{ ...commonSX, width: "80px" }}>#</TableCell>
+        <TableCell sx={{ ...commonSX, width: "80px" }}>Time</TableCell>
+        <TableCell sx={{ ...commonSX, width: "80px" }}>Origin</TableCell>
+        <TableCell sx={{ ...commonSX, width: "100px" }}>Direction</TableCell>
+        <TableCell sx={{ ...commonSX, width: "140px" }}>Source</TableCell>
+        <TableCell sx={{ ...commonSX, width: "140px" }}>Destination</TableCell>
+        <TableCell sx={{ ...commonSX, width: "80px" }}>Protocol</TableCell>
+        <TableCell sx={{ ...commonSX, width: "320px" }}>Info</TableCell>
+    </TableRow>
+)
+
+const RowContent = (i: number, v: AnalyzedPacket) => (
+    <React.Fragment>
+        <TableCell sx={{ ...monoSX }}>{v.id}</TableCell>
+        <TableCell sx={{ ...monoSX }}>{v.time}</TableCell>
+        <TableCell sx={{ ...monoSX }}>{v.origin}</TableCell>
+        <TableCell sx={{ ...{ ...monoSX }, display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
+            {v.direction === 'ingoing' ?
+                <CallReceived sx={{ fontSize: 16, mr: 1 }} /> :
+                <CallMade sx={{ fontSize: 16, mr: 1 }} />
+            }
+            {v.direction}
+        </TableCell>
+        <TableCell sx={{ ...monoSX }}>{v.source}</TableCell>
+        <TableCell sx={{ ...monoSX }}>{v.destination}</TableCell>
+        <TableCell sx={{ ...monoSX }}>{v.protocol}</TableCell>
+        <TableCell sx={{ ...monoSX }}>{v.info}</TableCell>
+    </React.Fragment>
+)
 
 export const NetworkAnalyzer: React.FC = () => {
     const network = useContext(NetworkContext);
@@ -36,17 +95,6 @@ export const NetworkAnalyzer: React.FC = () => {
             network.removeEventListener('packet', handlePacket as EventListener);
         }
     });
-
-    const commonSX = {
-        padding: "2px 6px",
-    }
-
-    const monoSX = {
-        ...commonSX,
-        fontFamily: "Roboto Mono",
-        fontSize: "0.75em",
-        whiteSpace: 'nowrap'
-    }
 
     const [autoScroll, setAutoScroll] = useState(true);
     const tableEndRef = useRef<HTMLTableRowElement>(null);
@@ -119,46 +167,8 @@ export const NetworkAnalyzer: React.FC = () => {
                 <Divider />
             </Grid>
             <Grid item sx={{ flexGrow: 1, width: "100%", overflowX: 'scroll', overflowY: 'scroll' }}>
-                <TableContainer sx={{ overflowX: 'visible' }}>
-                    <Table stickyHeader size="small">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell sx={commonSX}>#</TableCell>
-                                <TableCell sx={commonSX}>Time</TableCell>
-                                <TableCell sx={commonSX}>Origin
-                                    {/* <IconButton size="small">
-                                    <FilterList fontSize="inherit" />
-                                </IconButton>*/}</TableCell>
-                                <TableCell sx={commonSX}>Direction</TableCell>
-                                <TableCell sx={commonSX}>Source</TableCell>
-                                <TableCell sx={commonSX}>Destination</TableCell>
-                                <TableCell sx={commonSX}>Protocol</TableCell>
-                                <TableCell sx={commonSX}>Info</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {displayPackets.map((v, i) => (
-                                <TableRow key={i} hover selected={selectedPacket === i} onClick={(e) => { e.stopPropagation(); setSelectedPacket(i) }}>
-                                    <TableCell sx={monoSX}>{v.id}</TableCell>
-                                    <TableCell sx={monoSX}>{v.time}</TableCell>
-                                    <TableCell sx={monoSX}>{v.origin}</TableCell>
-                                    <TableCell sx={{ ...monoSX, display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
-                                        {v.direction === 'ingoing' ?
-                                            <CallReceived sx={{ fontSize: 16, mr: 1 }} /> :
-                                            <CallMade sx={{ fontSize: 16, mr: 1 }} />
-                                        }
-                                        {v.direction}
-                                    </TableCell>
-                                    <TableCell sx={monoSX}>{v.source}</TableCell>
-                                    <TableCell sx={monoSX}>{v.destination}</TableCell>
-                                    <TableCell sx={monoSX}>{v.protocol}</TableCell>
-                                    <TableCell sx={monoSX}>{v.info}</TableCell>
-                                </TableRow>
-                            ))}
-                            <tr style={{width: 0, height: 0}} ref={tableEndRef}></tr>
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                <TableVirtuoso data={displayPackets} components={VirtuosoTableComponents}
+                    fixedHeaderContent={FixedHeaderContent} itemContent={RowContent} followOutput={(isAtBottom: boolean) => (autoScroll ? 'smooth' : false)} />
             </Grid>
         </Grid>
     )
