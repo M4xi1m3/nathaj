@@ -8,16 +8,28 @@ import { AppBar, Box, Paper, Toolbar, Typography } from '@mui/material';
 import { NetworkActions } from './components/NetworkActions';
 import { Ethernet } from './simulator/network/packets/definitions/Ethernet';
 import { NetworkAnalyzer } from './components/NetworkAnalyzer';
+import { Switch } from './simulator/network/peripherals/Switch';
+import { off } from 'process';
 
 class CustomHost extends Host {
     timer: number = 0;
+    sendto: string;
+    delay: number;
+    offset: number;
+
+    constructor(network: Network, name: string, mac: string, sendto: string, delay: number = 2, offset: number = 0) {
+        super(network, name, mac);
+        this.sendto = sendto;
+        this.delay = delay;
+        this.offset = offset;
+    }
 
     tick(): void {
-        if (this.getNetwork().time() > this.timer) {
-            this.timer = this.getNetwork().time() + 2;
+        if (this.getNetwork().time() > this.timer - this.offset) {
+            this.timer = this.getNetwork().time() + this.delay;
             const packet = new Ethernet({
                 src: this.getMac(),
-                dst: "ff:ff:ff:ff:ff:ff",
+                dst: this.sendto,
                 type: 0
             });
             this.getInterface("eth0").send(packet.raw());
@@ -31,9 +43,9 @@ class CustomHost extends Host {
 
 const net = new Network();
 
-const s1 = new Hub(net, "s1", "00:0b:00:00:00:01", 4)
-const h1 = new CustomHost(net, "h1", "00:0a:00:00:00:01");
-const h2 = new Host(net, "h2", "00:0a:00:00:00:02");
+const s1 = new Switch(net, "s1", "00:0b:00:00:00:01", 4)
+const h1 = new CustomHost(net, "h1", "00:0a:00:00:00:01", "00:0a:00:00:00:02", 4, 0);
+const h2 = new CustomHost(net, "h2", "00:0a:00:00:00:02", "00:0a:00:00:00:01", 4, 2);
 const h3 = new Host(net, "h3", "00:0a:00:00:00:03");
 const h4 = new Host(net, "h4", "00:0a:00:00:00:04");
 net.addLink("h1", "eth0", "s1", "eth0");

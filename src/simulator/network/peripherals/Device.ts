@@ -60,7 +60,7 @@ export abstract class Device extends Drawable {
         return this.getName();
     }
 
-    abstract onPacketReceived(iface: Interface, data: any): void;
+    abstract onPacketReceived(iface: Interface, data: ArrayBuffer): void;
     abstract tick(): void;
     abstract reset(): void;
 

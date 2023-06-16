@@ -11,7 +11,7 @@ export class Host extends Device {
         this.mac = mac;
     }
 
-    onPacketReceived(iface: Interface, data: any): void {
+    onPacketReceived(iface: Interface, data: ArrayBuffer): void {
     }
 
     getMac(): string {

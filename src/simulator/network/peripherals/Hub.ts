@@ -12,7 +12,7 @@ export class Hub extends Device {
         this.mac = mac;
     }
 
-    onPacketReceived(iface: Interface, data: any): void {
+    onPacketReceived(iface: Interface, data: ArrayBuffer): void {
         for(const intf of Object.values(this.interfaces)) {
             if (intf !== iface)
                 intf.send(data);

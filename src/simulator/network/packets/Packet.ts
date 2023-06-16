@@ -33,13 +33,17 @@ export class _Packet<T> {
     static dissector: Dissector<any>;
     next?: _Packet<any>;
 
-    constructor(data?: { [key in keyof T]: any }) {
+    constructor(data?: { [key in keyof T]: any | ArrayBuffer }) {
         if (data !== undefined) {
-            for (const field of this.getFields()) {
-                if (field.name in data) {
-                    (this as { [key: string]: any })[field.name] = (data as { [key: string]: any })[field.name];
-                } else {
-                    (this as { [key: string]: any })[field.name] = undefined;
+            if (data instanceof ArrayBuffer) {
+                this.parse(data);
+            } else {
+                for (const field of this.getFields()) {
+                    if (field.name in data) {
+                        (this as { [key: string]: any })[field.name] = (data as { [key: string]: any })[field.name];
+                    } else {
+                        (this as { [key: string]: any })[field.name] = undefined;
+                    }
                 }
             }
         }
@@ -110,5 +114,5 @@ export class _Packet<T> {
 }
 
 export const Packet = _Packet as ({
-    new <T>(data?: T): _Packet<T> & T
+    new <T>(data?: T | ArrayBuffer): _Packet<T> & T
 });
