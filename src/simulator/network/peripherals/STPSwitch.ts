@@ -3,12 +3,12 @@ import { Network } from "../Network";
 import { Ethernet } from "../packets/definitions/Ethernet";
 import { Hub } from "./Hub";
 import { Interface } from "./Interface";
-import SwitchImg from '../../../assets/switch.png';
+import STPSwitchImg from '../../../assets/stp-switch.png';
 
-const SwitchImage = new Image()
-SwitchImage.src = SwitchImg
+const STPSwitchImage = new Image()
+STPSwitchImage.src = STPSwitchImg
 
-export class Switch extends Hub {
+export class STPSwitch extends Hub {
     mac_address_table: { [mac: string]: string };
 
     constructor(network: Network, name: string, mac: string, ports: number) {
@@ -37,7 +37,7 @@ export class Switch extends Hub {
         ctx.fillStyle = "#000000";
         const drawPos = this.position.add(offset);
         ctx.fillRect(drawPos.x - DEV_RADIUS, drawPos.y - DEV_RADIUS, DEV_RADIUS * 2, DEV_RADIUS * 2)
-        ctx.drawImage(SwitchImage, drawPos.x - DEV_RADIUS, drawPos.y - DEV_RADIUS, 2 * DEV_RADIUS, 2 * DEV_RADIUS);
+        ctx.drawImage(STPSwitchImage, drawPos.x - DEV_RADIUS, drawPos.y - DEV_RADIUS, 2 * DEV_RADIUS, 2 * DEV_RADIUS);
 
         for (const intf of Object.values(this.interfaces)) {
             if (intf.connected_to !== null) {
@@ -67,7 +67,5 @@ export class Switch extends Hub {
     }
 
     reset(): void {
-        super.reset()
-        this.mac_address_table = {};
     }
 }

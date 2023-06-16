@@ -18,7 +18,6 @@ export const NetworkAnalyzer: React.FC = () => {
     let lastIdTmp = lastId;
 
     const handlePacket = (e: CustomEvent<PacketEventData>) => {
-        console.log(e.detail.time, e.detail.direction, e.detail.interface.getFullName());
         const packet = new AnalyzedPacket(lastIdTmp, e.detail.time, e.detail.interface.getOwner().getName(), e.detail.interface.getName(), e.detail.direction);
 
         const p = new Ethernet();
@@ -50,7 +49,7 @@ export const NetworkAnalyzer: React.FC = () => {
     }
 
     const [autoScroll, setAutoScroll] = useState(true);
-    const tableEndRef = useRef<HTMLDivElement>(null);
+    const tableEndRef = useRef<HTMLTableRowElement>(null);
     useEffect(() => {
         if (autoScroll)
             tableEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -156,7 +155,7 @@ export const NetworkAnalyzer: React.FC = () => {
                                     <TableCell sx={monoSX}>{v.info}</TableCell>
                                 </TableRow>
                             ))}
-                            <div ref={tableEndRef}></div>
+                            <tr style={{width: 0, height: 0}} ref={tableEndRef}></tr>
                         </TableBody>
                     </Table>
                 </TableContainer>

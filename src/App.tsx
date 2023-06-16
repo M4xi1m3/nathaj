@@ -1,57 +1,34 @@
 import { Network } from './simulator/network/Network';
 import { Host } from './simulator/network/peripherals/Host';
-import { Hub } from './simulator/network/peripherals/Hub';
 import { NetworkContext } from './NetworkContexxt';
 import { NetworkRenderer } from './components/NetworkRenderer';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { AppBar, Box, Paper, Toolbar, Typography } from '@mui/material';
 import { NetworkActions } from './components/NetworkActions';
-import { Ethernet } from './simulator/network/packets/definitions/Ethernet';
 import { NetworkAnalyzer } from './components/NetworkAnalyzer';
-import { Switch } from './simulator/network/peripherals/Switch';
-import { off } from 'process';
-
-class CustomHost extends Host {
-    timer: number = 0;
-    sendto: string;
-    delay: number;
-    offset: number;
-
-    constructor(network: Network, name: string, mac: string, sendto: string, delay: number = 2, offset: number = 0) {
-        super(network, name, mac);
-        this.sendto = sendto;
-        this.delay = delay;
-        this.offset = offset;
-    }
-
-    tick(): void {
-        if (this.getNetwork().time() > this.timer - this.offset) {
-            this.timer = this.getNetwork().time() + this.delay;
-            const packet = new Ethernet({
-                src: this.getMac(),
-                dst: this.sendto,
-                type: 0
-            });
-            this.getInterface("eth0").send(packet.raw());
-        }
-    }
-
-    reset(): void {
-        this.timer = 0;
-    }
-}
+import { STPSwitch } from './simulator/network/peripherals/STPSwitch';
+import { Vector2D } from './simulator/drawing/Vector2D';
 
 const net = new Network();
 
-const s1 = new Switch(net, "s1", "00:0b:00:00:00:01", 4)
-const h1 = new CustomHost(net, "h1", "00:0a:00:00:00:01", "00:0a:00:00:00:02", 4, 0);
-const h2 = new CustomHost(net, "h2", "00:0a:00:00:00:02", "00:0a:00:00:00:01", 4, 2);
-const h3 = new Host(net, "h3", "00:0a:00:00:00:03");
-const h4 = new Host(net, "h4", "00:0a:00:00:00:04");
-net.addLink("h1", "eth0", "s1", "eth0");
-net.addLink("h2", "eth0", "s1", "eth1");
-net.addLink("h3", "eth0", "s1", "eth2");
-net.addLink("h4", "eth0", "s1", "eth3");
+for (let i = 0; i < 10; i++) {
+    const sw = new STPSwitch(net, "s" + (i + 1), "00:0b:00:00:00:" + (i + 1), 4);
+    const h = new Host(net, "h" + (i + 1), "00:0a:00:00:00:" + (i + 1));
+    net.addLink("h" + (i + 1), "eth0", "s" + (i + 1), "eth3");
+    if (i < 5) {
+        sw.position = new Vector2D(0, i * 100)
+        h.position = new Vector2D(-100, i * 100)
+    } else {
+        sw.position = new Vector2D(100, (9 - i) * 100)
+        h.position = new Vector2D(200, (9 - i) * 100)
+    }
+}
+for (let i = 0; i < 10; i++) {
+    net.addLink("s" + (i + 1), "eth0", "s" + ((i + 1) % 10 + 1), "eth1");
+}
+for (let i = 1; i < 5; i++) {
+    net.addLink("s" + (i + 1), "eth2", "s" + (10 - i), "eth2");
+}
 
 function App() {
     return (

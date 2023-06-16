@@ -33,24 +33,27 @@ export abstract class Device extends Drawable {
     }
 
     collision(other: Vector2D): boolean {
-        return this.position.sqdist(other) < 100;
+        return this.position.sqdist(other) < 7*7;
     }
 
     draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
+        const DEV_RADIUS = 7;
+        const INTF_RADIUS = 4;
+
         ctx.fillStyle = "#000000";
         ctx.beginPath();
         const drawPos = this.position.add(offset);
-        ctx.arc(drawPos.x, drawPos.y, 10, 0, 2 * Math.PI);
+        ctx.arc(drawPos.x, drawPos.y, DEV_RADIUS, 0, 2 * Math.PI);
         ctx.fill();
 
         for (const intf of Object.values(this.interfaces)) {
             if (intf.connected_to !== null) {
                 const direction = this.position.direction(intf.connected_to.getOwner().position)
-                const intfPos = drawPos.add(direction.mul(15))
+                const intfPos = drawPos.add(direction.mul(DEV_RADIUS + INTF_RADIUS))
 
                 ctx.fillStyle = "#00ff00";
                 ctx.beginPath();
-                ctx.arc(intfPos.x, intfPos.y, 5, 0, 2 * Math.PI);
+                ctx.arc(intfPos.x, intfPos.y, INTF_RADIUS, 0, 2 * Math.PI);
                 ctx.fill();
             }
         }
