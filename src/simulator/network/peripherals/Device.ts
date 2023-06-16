@@ -83,6 +83,10 @@ export abstract class Device extends Drawable {
         return this.interfaces[name];
     }
 
+    getFreeInterface(): Interface | undefined {
+        return Object.values(this.interfaces).find(i => i.connected_to === null);
+    }
+
     getName(): string {
         return this.name;
     }

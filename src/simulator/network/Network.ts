@@ -62,8 +62,17 @@ export class Network extends EventTarget {
         this.devices[device.getName()] = device;
     }
 
-    addLink(dev1: string, intf1: string, dev2: string, intf2: string) {
-        this.devices[dev1].getInterface(intf1).connect(this.devices[dev2].getInterface(intf2));
+    addLink(dev1: string, intf1: string, dev2?: string, intf2?: string) {
+        if (dev2 !== undefined && intf2 !== undefined) {
+            this.devices[dev1].getInterface(intf1).connect(this.devices[dev2].getInterface(intf2));
+        } else {
+            const inf1 = this.devices[dev1].getFreeInterface()
+            const inf2 = this.devices[intf1].getFreeInterface()
+
+            if (inf1 !== undefined && inf2 !== undefined) {
+                inf1.connect(inf2);
+            }
+        }
     }
 
     tick(): void {
