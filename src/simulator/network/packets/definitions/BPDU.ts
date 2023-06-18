@@ -1,3 +1,4 @@
+import { parseJsonConfigFileContent } from "typescript";
 import { Field, IntField, MacField, ShortField, XShortField } from "../Field";
 import { Layer } from "../Layer";
 import { Dissector, Packet } from "../Packet";
@@ -25,7 +26,7 @@ export class BPDU extends Packet<BPDUFields> {
 
     static dissector: Dissector<BPDUFields> = (packet, analyzed) => {
         analyzed.protocol = "STP";
-        analyzed.info = packet.root_priority + "." + packet.root_mac + "-" + packet.root_cost;
+        analyzed.info = packet.root_priority + "." + packet.root_mac + "-" + packet.root_cost + " " + packet.bridge_priority + "." + packet.bridge_mac + "-" + packet.bridge_port;
     }
 }
 

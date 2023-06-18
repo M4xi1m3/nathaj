@@ -133,7 +133,7 @@ class PortData {
     initialize() {
         this.state = PortState.Blocking;
         this.role = PortRole.Designated;
-        this.bpdu = new BPDU(this.controller.identifier, 0, this.controller.identifier, this.id);
+        this.bpdu = new BPDU(this.controller.identifier, this.path_cost, this.controller.identifier, this.id);
 
         this.hold_timer_expiry = this.controller.network.time() + this.controller.hold_time;
         this.message_age_expiry = this.controller.network.time() + this.controller.message_age;
@@ -288,7 +288,7 @@ export class STPSwitch extends Hub {
             return;
 
         const best = this.getBestBPDU();
-        const bpdu = new BPDU(best.root_id, best.root_cost + port.path_cost, this.identifier, port.id);
+        const bpdu = new BPDU(best.root_id, best.bridge_id.eq(this.identifier) ? port.path_cost : best.root_cost + port.path_cost, this.identifier, port.id);
 
         intf.send(bpdu.toPacket(this.mac).raw());
     }
@@ -323,7 +323,13 @@ export class STPSwitch extends Hub {
             const port = this.port_infos[intf.name];
 
             if (best.root_id.eq(this.identifier)) {
-                port.makeDesignated();
+                const would_be_bpdu = new BPDU(best.root_id, best.root_cost, this.identifier, port.id);
+
+                if (would_be_bpdu.lt(port.bpdu) || would_be_bpdu.eq(port.bpdu)) {
+                    port.makeDesignated();
+                } else {
+                    port.makeBlocking();
+                }
             } else if (best.eq(port.bpdu)) {
                 port.makeRoot();
             } else {
