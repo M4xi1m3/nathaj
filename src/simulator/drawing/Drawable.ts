@@ -29,16 +29,20 @@ export abstract class Drawable {
         return direction;
     }
 
-    drawInterfaces(ctx: CanvasRenderingContext2D, drawPos: Vector2D, devRadius: number, interfaces: Interface[], intfRadius: number, intfPosition: (direction: Vector2D) => Vector2D = this.intfPositionCircle, intfColor: (name: string) => string = () => "#00ff00") {
+    drawSimpleInterface(ctx: CanvasRenderingContext2D, intf: Interface, devRadius: number, drawPos: Vector2D, direction: Vector2D, color: string = "#00FF00") {
+        const intfPos = drawPos.add(direction.mul(devRadius + 5))
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(intfPos.x, intfPos.y, 5, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+
+    drawInterfaces(ctx: CanvasRenderingContext2D, drawPos: Vector2D, devRadius: number, interfaces: Interface[], intfPosition: (direction: Vector2D) => Vector2D = this.intfPositionCircle, drawIntferface: (ctx: CanvasRenderingContext2D, intf: Interface, devRadius: number, drawPos: Vector2D, direction: Vector2D) => void = this.drawSimpleInterface) {
         for (const intf of interfaces) {
             if (intf.connected_to !== null) {
                 const direction = intfPosition(this.position.direction(intf.connected_to.getOwner().position))
-                const intfPos = drawPos.add(direction.mul(devRadius + intfRadius))
-
-                ctx.fillStyle = intfColor(intf.name);
-                ctx.beginPath();
-                ctx.arc(intfPos.x, intfPos.y, intfRadius, 0, 2 * Math.PI);
-                ctx.fill();
+                drawIntferface(ctx, intf, devRadius, drawPos, direction);
             }
         }
     }

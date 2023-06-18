@@ -38,7 +38,7 @@ export abstract class Device extends Drawable {
 
     draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
         this.drawCircle(ctx, this.position.add(offset), 7);
-        this.drawInterfaces(ctx, this.position.add(offset), 7, Object.values(this.interfaces), 5);
+        this.drawInterfaces(ctx, this.position.add(offset), 7, Object.values(this.interfaces));
     }
 
     getText(): string {

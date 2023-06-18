@@ -43,23 +43,25 @@ class CustomHost extends Host {
 
 const net = new Network();
 
-const h1 = new CustomHost(net, "h1", "00:0a:00:00:00:01", "00:0a:00:00:00:02");
-h1.setPosition(new Vector2D(-100, 0));
+// const h1 = new CustomHost(net, "h1", "00:0a:00:00:00:01", "00:0a:00:00:00:02");
+// h1.setPosition(new Vector2D(-100, 0));
 const s1 = new STPSwitch(net, "s1", "00:0b:00:00:00:01", 4);
 s1.setPosition(new Vector2D(0, 0));
-const s2 = new STPSwitch(net, "s2", "00:0b:00:00:00:01", 4);
+const s2 = new STPSwitch(net, "s2", "00:0b:00:00:00:02", 4);
 s2.setPosition(new Vector2D(100, 0));
-const s3 = new STPSwitch(net, "s3", "00:0b:00:00:00:01", 4);
+const s3 = new STPSwitch(net, "s3", "00:0b:00:00:00:03", 4);
 s3.setPosition(new Vector2D(100, 100));
-const s4 = new STPSwitch(net, "s4", "00:0b:00:00:00:01", 4);
+const s4 = new STPSwitch(net, "s4", "00:0b:00:00:00:04", 4);
 s4.setPosition(new Vector2D(0, 100));
 
 net.addLink("s1", "s2")
 net.addLink("s2", "s3")
 net.addLink("s3", "s4")
 net.addLink("s4", "s1")
-net.addLink("s1", "h1")
+// net.addLink("s1", "h1")
 net.addLink("s1", "s3")
+
+console.log(net)
 
 Layout.re_center(net);
 
@@ -88,7 +90,6 @@ function App() {
                             <PanelResizeHandle style={{ width: "10px" }} />
                             <Panel style={{ display: "flex" }}>
                                 <Paper sx={{ flexGrow: 1, maxWidth: "100%", overflowX: 'auto', margin: 1 }}>
-                                    <NetworkAnalyzer />
                                 </Paper>
                             </Panel>
                         </PanelGroup>
@@ -96,6 +97,7 @@ function App() {
                     <PanelResizeHandle style={{ height: "10px" }} />
                     <Panel style={{ display: "flex" }}>
                         <Paper sx={{ flexGrow: 1, maxWidth: "100%", overflowX: 'auto', margin: 1 }}>
+                            <NetworkAnalyzer />
                         </Paper>
                     </Panel>
                 </PanelGroup>
