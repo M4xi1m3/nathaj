@@ -1,5 +1,5 @@
 import { Network } from './simulator/network/Network';
-import { NetworkContext } from './NetworkContexxt';
+import { NetworkContext } from './NetworkContext';
 import { NetworkRenderer } from './components/NetworkRenderer';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { AppBar, Box, Paper, Toolbar, Typography } from '@mui/material';
@@ -10,6 +10,7 @@ import { Switch } from './simulator/network/peripherals/Switch';
 import { Host } from './simulator/network/peripherals/Host';
 import { Ethernet } from './simulator/network/packets/definitions/Ethernet';
 import { Layout } from './simulator/drawing/Layout';
+import { STPSwitch } from './simulator/network/peripherals/STPSwitch';
 
 class CustomHost extends Host {
     sent: boolean;
@@ -44,13 +45,13 @@ const net = new Network();
 
 const h1 = new CustomHost(net, "h1", "00:0a:00:00:00:01", "00:0a:00:00:00:02");
 h1.setPosition(new Vector2D(-100, 0));
-const s1 = new Switch(net, "s1", "00:0b:00:00:00:01", 4);
+const s1 = new STPSwitch(net, "s1", "00:0b:00:00:00:01", 4);
 s1.setPosition(new Vector2D(0, 0));
-const s2 = new Switch(net, "s2", "00:0b:00:00:00:01", 4);
+const s2 = new STPSwitch(net, "s2", "00:0b:00:00:00:01", 4);
 s2.setPosition(new Vector2D(100, 0));
-const s3 = new Switch(net, "s3", "00:0b:00:00:00:01", 4);
+const s3 = new STPSwitch(net, "s3", "00:0b:00:00:00:01", 4);
 s3.setPosition(new Vector2D(100, 100));
-const s4 = new Switch(net, "s4", "00:0b:00:00:00:01", 4);
+const s4 = new STPSwitch(net, "s4", "00:0b:00:00:00:01", 4);
 s4.setPosition(new Vector2D(0, 100));
 
 net.addLink("s1", "s2")

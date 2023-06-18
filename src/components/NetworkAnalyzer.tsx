@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { NetworkContext } from "../NetworkContexxt";
+import { NetworkContext } from "../NetworkContext";
 import { PacketEventData } from "../simulator/network/Network";
 import { AnalyzedPacket } from "../simulator/network/packets/Packet";
 import { Ethernet } from "../simulator/network/packets/definitions/Ethernet";
@@ -166,7 +166,7 @@ export const NetworkAnalyzer: React.FC = () => {
                 </Stack>
                 <Divider />
             </Grid>
-            <Grid item sx={{ flexGrow: 1, width: "100%", overflowX: 'scroll', overflowY: 'scroll' }}>
+            <Grid item sx={{ flexGrow: 1, width: "100%" }}>
                 <TableVirtuoso data={displayPackets} components={VirtuosoTableComponents}
                     fixedHeaderContent={FixedHeaderContent} itemContent={RowContent} followOutput={(isAtBottom: boolean) => (autoScroll ? 'smooth' : false)} />
             </Grid>

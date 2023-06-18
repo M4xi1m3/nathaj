@@ -31,7 +31,7 @@ export class Layout {
         });
     }
 
-    static fruchterman_reingold(net: Network, epsilon: number = 0.1, max_iter: number = 1000, ideal_length: number = 50, cooling_factor: number = 0.99): void {
+    static fruchterman_reingold(net: Network, epsilon: number = 0.01, max_iter: number = 1000, ideal_length: number = 100, cooling_factor: number = 0.99): void {
         Layout.random(net);
         let iter = 0; // Iteration count
         let max_force = 1000; // Maximum force in the system

@@ -1,6 +1,6 @@
 
 import { useContext, useState } from "react";
-import { NetworkContext } from "../NetworkContexxt";
+import { NetworkContext } from "../NetworkContext";
 import { Canvas } from "./Canvas";
 import { Divider, Grid, IconButton, Stack, Typography } from "@mui/material";
 import { CenterFocusStrong, Hub, Label, LabelOff, Shuffle } from "@mui/icons-material";

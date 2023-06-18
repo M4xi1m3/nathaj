@@ -1,7 +1,7 @@
 import { Pause, PlayArrow, RestartAlt } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import React, { useContext, useState } from "react";
-import { NetworkContext } from "../NetworkContexxt";
+import { NetworkContext } from "../NetworkContext";
 
 export const NetworkActions: React.FC = () => {
     const network = useContext(NetworkContext);

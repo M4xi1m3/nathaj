@@ -31,7 +31,8 @@ export class Switch extends Hub {
     }
 
     draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
-        this.drawSquareImage(ctx, this.position.add(offset), SwitchImage, 12, Object.values(this.interfaces), 5);
+        this.drawSquareImage(ctx, this.position.add(offset), SwitchImage, 12);
+        this.drawInterfaces(ctx, this.position.add(offset), 12, Object.values(this.interfaces), 5, this.intfPositionSquare);
     }
 
     tick(): void {
