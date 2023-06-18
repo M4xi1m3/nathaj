@@ -6,7 +6,7 @@ build:
   image: node:latest
   stage: build
   variables:
-    PUBLIC_URL: https://maxime-friess.pages.unistra.fr/web-netsim-react/
+    PUBLIC_URL: https://maxime.friess.pages.unistra.fr/web-netsim-react/
   script:
     - yarn install
     - yarn build
