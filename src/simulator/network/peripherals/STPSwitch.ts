@@ -4,7 +4,6 @@ import { Ethernet } from "../packets/definitions/Ethernet";
 import { Hub } from "./Hub";
 import { Interface } from "./Interface";
 import STPSwitchImg from '../../../assets/stp-switch.png';
-import { MedicalInformationSharp, ThirteenMp, ThirtyFpsSelectRounded } from "@mui/icons-material";
 import { BPDU as BPDUPacket } from '../packets/definitions/BPDU';
 
 const STPSwitchImage = new Image()
@@ -40,7 +39,7 @@ class Identifier {
             mac <<= 8
             mac |= parseInt(v, 16) & 0xFF
         });
-        return this.priority << 48 | mac;
+        return (this.priority << 48) | mac;
     }
 
     eq(other: Identifier) {
@@ -200,7 +199,7 @@ class PortData {
         if (this.disabled())
             return;
 
-        if (this.state == PortState.Blocking && this.role == PortRole.Blocking)
+        if (this.state === PortState.Blocking && this.role === PortRole.Blocking)
             return;
 
         this.updateState(PortState.Blocking, PortRole.Blocking);
@@ -210,7 +209,7 @@ class PortData {
         if (this.disabled())
             return;
 
-        if (this.state != PortState.Blocking && this.role == PortRole.Root)
+        if (this.state !== PortState.Blocking && this.role === PortRole.Root)
             return;
 
         this.updateState(PortState.Listening, PortRole.Root);
@@ -220,7 +219,7 @@ class PortData {
         if (this.disabled())
             return;
 
-        if (this.state != PortState.Blocking && this.role == PortRole.Designated)
+        if (this.state !== PortState.Blocking && this.role === PortRole.Designated)
             return;
 
         this.updateState(PortState.Listening, PortRole.Designated);

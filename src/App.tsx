@@ -5,55 +5,20 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { AppBar, Box, Paper, Toolbar, Typography } from '@mui/material';
 import { NetworkActions } from './components/NetworkActions';
 import { NetworkAnalyzer } from './components/NetworkAnalyzer';
-import { Vector2D } from './simulator/drawing/Vector2D';
-import { Switch } from './simulator/network/peripherals/Switch';
-import { Host } from './simulator/network/peripherals/Host';
-import { Ethernet } from './simulator/network/packets/definitions/Ethernet';
 import { Layout } from './simulator/drawing/Layout';
 import { STPSwitch } from './simulator/network/peripherals/STPSwitch';
 import { Hub } from './simulator/network/peripherals/Hub';
 
-class CustomHost extends Host {
-    sent: boolean;
-    sendto: string;
-
-    constructor(network: Network, name: string, mac: string, sendto: string) {
-        super(network, name, mac);
-        this.sendto = sendto;
-        this.sent = false;
-    }
-
-    tick(): void {
-        if (!this.sent) {
-            const packet = new Ethernet({
-                src: this.getMac(),
-                dst: this.sendto,
-                type: 0
-            });
-            this.getInterface("eth0").send(packet.raw());
-        }
-        this.sent = true;
-    }
-
-    reset(): void {
-        this.sent = false;
-    }
-}
-
-
-
 const net = new Network();
 
-// const h1 = new CustomHost(net, "h1", "00:0a:00:00:00:01", "00:0a:00:00:00:02");
-// h1.setPosition(new Vector2D(-100, 0));
-const s1 = new STPSwitch(net, "s1", "00:0b:00:00:00:01", 5);
-const s2 = new STPSwitch(net, "s2", "00:0b:00:00:00:02", 5);
-const s3 = new STPSwitch(net, "s3", "00:0b:00:00:00:03", 4);
-const s4 = new STPSwitch(net, "s4", "00:0b:00:00:00:04", 4);
+new STPSwitch(net, "s1", "00:0b:00:00:00:01", 5);
+new STPSwitch(net, "s2", "00:0b:00:00:00:02", 5);
+new STPSwitch(net, "s3", "00:0b:00:00:00:03", 4);
+new STPSwitch(net, "s4", "00:0b:00:00:00:04", 4);
 
-const h1 = new Hub(net, "h1", "00:0c:00:00:00:01", 4);
-const h2 = new Hub(net, "h2", "00:0c:00:00:00:01", 4);
-const h3 = new Hub(net, "h3", "00:0c:00:00:00:01", 4);
+new Hub(net, "h1", "00:0c:00:00:00:01", 4);
+new Hub(net, "h2", "00:0c:00:00:00:01", 4);
+new Hub(net, "h3", "00:0c:00:00:00:01", 4);
 
 net.addLink("s1", "s2")
 net.addLink("s2", "s3")

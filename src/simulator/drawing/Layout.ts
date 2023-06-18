@@ -36,7 +36,6 @@ export class Layout {
         let iter = 0; // Iteration count
         let max_force = 1000; // Maximum force in the system
         let temp = 1; // Temperature of the system
-        let max_temp = temp; // Maimum temperature of the system
 
         const forces: { [name: string]: Vector2D } = {};
 
@@ -76,17 +75,15 @@ export class Layout {
                 });
             });
 
-
             // Apply forces
-            Object.entries(net.devices).forEach(([u_name, u_dev]) => {
+            for (const [u_name, u_dev] of Object.entries(net.devices)) {
                 if (Number.isNaN(forces[u_name].x) || Number.isNaN(forces[u_name].y))
                     return
 
                 forces[u_name] = apply_temperature(forces[u_name], temp);
                 max_force = Math.max(max_force, forces[u_name].length());
                 u_dev.position = u_dev.position.add(forces[u_name]);
-            });
-
+            }
 
             // Cool the system
             temp *= cooling_factor;

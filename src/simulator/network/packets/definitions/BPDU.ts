@@ -1,5 +1,4 @@
-import { parseJsonConfigFileContent } from "typescript";
-import { Field, IntField, MacField, ShortField, XShortField } from "../Field";
+import { Field, IntField, MacField, ShortField } from "../Field";
 import { Layer } from "../Layer";
 import { Dissector, Packet } from "../Packet";
 import { Ethernet } from "./Ethernet";

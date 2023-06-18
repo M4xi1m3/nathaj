@@ -3,12 +3,17 @@ import { NetworkContext } from "../NetworkContext";
 import { PacketEventData } from "../simulator/network/Network";
 import { AnalyzedPacket } from "../simulator/network/packets/Packet";
 import { Ethernet } from "../simulator/network/packets/definitions/Ethernet";
-import { Divider, FormControl, Grid, IconButton, Input, InputAdornment, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
-import { CallMade, CallReceived, Clear, Delete, FileDownload, FileDownloadOff, Filter, FilterList } from "@mui/icons-material";
+import { Divider, FormControl, Grid, IconButton, Input, InputAdornment, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { CallMade, CallReceived, Clear, Delete, FileDownload, FileDownloadOff, FilterList } from "@mui/icons-material";
 import { compileExpression } from 'filtrex';
-import { TableComponents, TableVirtuoso, Virtuoso } from 'react-virtuoso'
+import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 
-const VirtuosoTableComponents: TableComponents<AnalyzedPacket> = {
+interface RowContext {
+    selected: null | number;
+    setSelected: (id: number) => void;
+}
+
+const VirtuosoTableComponents: TableComponents<AnalyzedPacket, RowContext> = {
     Scroller: React.forwardRef<HTMLDivElement>((props, ref) => (
         <TableContainer {...props} ref={ref} />
     )),
@@ -16,7 +21,7 @@ const VirtuosoTableComponents: TableComponents<AnalyzedPacket> = {
         <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />
     ),
     TableHead,
-    TableRow: ({ item: _item, ...props }) => <TableRow {...props} />,
+    TableRow: ({ item: _item, context: _context, ...props }) => <TableRow {...props} hover={true} onClick={() => _context?.setSelected(_item.id)} selected={_item.id === _context?.selected} />,
     TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
         <TableBody {...props} ref={ref} />
     )),
@@ -24,7 +29,6 @@ const VirtuosoTableComponents: TableComponents<AnalyzedPacket> = {
 
 const commonSX = {
     padding: "2px 6px",
-    background: "white",
 }
 
 const monoSX = {
@@ -35,7 +39,7 @@ const monoSX = {
 }
 
 const FixedHeaderContent = () => (
-    <TableRow>
+    <TableRow style={{background: 'white'}}>
         <TableCell sx={{ ...commonSX, width: "80px" }}>#</TableCell>
         <TableCell sx={{ ...commonSX, width: "80px" }}>Time</TableCell>
         <TableCell sx={{ ...commonSX, width: "80px" }}>Origin</TableCell>
@@ -47,7 +51,7 @@ const FixedHeaderContent = () => (
     </TableRow>
 )
 
-const RowContent = (i: number, v: AnalyzedPacket) => (
+const RowContent = (i: number, v: AnalyzedPacket, c: RowContext) => (
     <React.Fragment>
         <TableCell sx={{ ...monoSX }}>{v.id}</TableCell>
         <TableCell sx={{ ...monoSX }}>{v.time}</TableCell>
@@ -167,7 +171,7 @@ export const NetworkAnalyzer: React.FC = () => {
                 <Divider />
             </Grid>
             <Grid item sx={{ flexGrow: 1, width: "100%" }}>
-                <TableVirtuoso data={displayPackets} components={VirtuosoTableComponents}
+                <TableVirtuoso data={displayPackets} context={{selected: selectedPacket, setSelected: setSelectedPacket}} components={VirtuosoTableComponents}
                     fixedHeaderContent={FixedHeaderContent} itemContent={RowContent} followOutput={(isAtBottom: boolean) => (autoScroll ? 'smooth' : false)} />
             </Grid>
         </Grid>

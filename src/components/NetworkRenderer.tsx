@@ -3,7 +3,7 @@ import { useContext, useState } from "react";
 import { NetworkContext } from "../NetworkContext";
 import { Canvas } from "./Canvas";
 import { Divider, Grid, IconButton, Stack, Typography } from "@mui/material";
-import { CenterFocusStrong, Hub, Label, LabelOff, Shuffle } from "@mui/icons-material";
+import { CenterFocusStrong, Hub, Label, LabelOff } from "@mui/icons-material";
 import { Vector2D } from "../simulator/drawing/Vector2D";
 import { Layout } from "../simulator/drawing/Layout";
 
@@ -12,8 +12,8 @@ export const NetworkRenderer: React.FC = () => {
 
     const [dragging, setDragging] = useState(false);
     const [panning, setPanning] = useState(false);
-    const [offset, setOffset] = useState(new Vector2D);
-    const [mousePos, setMousePos] = useState(new Vector2D);
+    const [offset, setOffset] = useState(new Vector2D());
+    const [mousePos, setMousePos] = useState(new Vector2D());
     const [dragged, setDragged] = useState<string | null>(null);
 
     const [showLabel, setShowLabel] = useState(false);
@@ -132,7 +132,6 @@ export const NetworkRenderer: React.FC = () => {
 
                         if (showLabel) {
                             const text = dev.getText();
-                            const HEIGHT = 18;
                             showText(text, dev.position.add(offset.add(centerOffset)).add(new Vector2D(0, -40)), true);
                         } else {
                             if (dev.collision(mousePos.sub(offset.add(centerOffset)))) {
