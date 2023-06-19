@@ -4,7 +4,10 @@ import { Network } from '../Network';
 import { Drawable } from '../../drawing/Drawable';
 import { Vector2D } from '../../drawing/Vector2D';
 
-class DeviceException extends Error {
+/**
+ * Excpetion thrown for an error related to a device
+ */
+export class DeviceException extends Error {
     device: Device;
 
     constructor(description: string, device: Device) {
@@ -13,18 +16,41 @@ class DeviceException extends Error {
     }
 }
 
-class InterfaceNameTaken extends DeviceException {
+/**
+ * Exception thrown when trying to add a device to a device which name is already used
+ */
+export class InterfaceNameTaken extends DeviceException {
     constructor(device: Device, name: string) {
         super("Device " + device.getName() + " already has an interface named " + name + ".", device);
     }
 }
 
+/**
+ * A device in the network simulation
+ */
 export abstract class Device extends Drawable {
-    interfaces: { [id: string]: Interface };
-    network: Network
-    name: string;
+    /**
+     * Ijnterfaces of the device, indexed by name
+     */
+    private interfaces: { [id: string]: Interface };
 
-    constructor(network: Network, name: string = "unknown") {
+    /**
+     * Network the device is associated with
+     */
+    private network: Network;
+
+    /**
+     * Name of the device
+     */
+    private name: string;
+
+    /**
+     * Initialize a device
+     * 
+     * @param {Network} network Network to which the device belongs
+     * @param [string="unknown"] name Name of the device in the network
+     */
+    public constructor(network: Network, name: string = "unknown") {
         super();
         this.interfaces = {};
         this.name = name;
@@ -32,24 +58,44 @@ export abstract class Device extends Drawable {
         this.network.addDevice(this);
     }
 
-    collision(other: Vector2D): boolean {
-        return this.position.sqdist(other) < 7*7;
+    public collision(other: Vector2D): boolean {
+        return this.getPosition().sqdist(other) < 7 * 7;
     }
 
-    draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
-        this.drawCircle(ctx, this.position.add(offset), 7);
-        this.drawInterfaces(ctx, this.position.add(offset), 7, Object.values(this.interfaces));
+    public draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
+        this.drawCircle(ctx, this.getPosition().add(offset), 7);
+        this.drawInterfaces(ctx, this.getPosition().add(offset), 7, Object.values(this.interfaces));
     }
 
-    getText(): string {
+    public getText(): string {
         return this.getName();
     }
 
-    abstract onPacketReceived(iface: Interface, data: ArrayBuffer): void;
-    abstract tick(): void;
-    abstract reset(): void;
+    /**
+     * Event handler called when a packet is received on an interface
+     * 
+     * @param {Interface} iface Interfave on whick the packet has been received
+     * @param {ArrayBuffer} data Data in the packet
+     */
+    public abstract onPacketReceived(iface: Interface, data: ArrayBuffer): void;
 
-    addInterface(name: string): Interface {
+    /**
+     * Method called every network tick
+     */
+    public abstract tick(): void;
+
+    /**
+     * Reset the device
+     */
+    public abstract reset(): void;
+
+    /**
+     * Add an interface to the device
+     * 
+     * @param {string} name Name of the interface
+     * @returns {Interface} The new interface
+     */
+    public addInterface(name: string): Interface {
         if (name in this.interfaces)
             throw new InterfaceNameTaken(this, name);
 
@@ -61,23 +107,67 @@ export abstract class Device extends Drawable {
         return intf;
     }
 
-    getInterface(name: string): Interface {
+    /**
+     * Get an interface by name
+     * 
+     * @param {string} name Name of the interface to get
+     * @returns {Interface} The interface
+     */
+    public getInterface(name: string): Interface {
         return this.interfaces[name];
     }
 
-    getFreeInterface(): Interface | undefined {
-        return Object.values(this.interfaces).find(i => i.connected_to === null);
+    /**
+     * Get all the interfaces of the device
+     * 
+     * @returns {Interface[]} List of interfaces
+     */
+    public getInterfaces(): Interface[] {
+        return Object.values(this.interfaces);
     }
 
-    getName(): string {
+    /**
+     * Get the first available interface
+     * 
+     * @returns {Interface | undefined} Available interface, or undefined if no interfaces available
+     */
+    public getFreeInterface(): Interface | undefined {
+        return Object.values(this.interfaces).find(i => i.getConnection() === null);
+    }
+
+    /**
+     * Get the name of the device
+     * 
+     * @returns {string} Name of the device
+     */
+    public getName(): string {
         return this.name;
     }
 
-    getNetwork(): Network {
+    /**
+     * Get the network the device belongs to
+     * 
+     * @returns {Network} The network the device belongs to
+     */
+    public getNetwork(): Network {
         return this.network;
     }
 
-    toString(): string {
+    /**
+     * Get a string representation of the device
+     * 
+     * @returns {string} String representation of the device
+     */
+    public toString(): string {
         return "<Device " + this.getName() + ">";
+    }
+
+    /**
+     * Get the network time
+     * 
+     * @returns {number} Network time
+     */
+    public time(): number {
+        return this.network.time();
     }
 }

@@ -2,10 +2,16 @@
 import { PacketEventData } from '../Network';
 import { Device } from './Device';
 
+/**
+ * Data of the packet received event
+ */
 export type ReceivedPacketEventData = {
     packet: ArrayBuffer
 }
 
+/**
+ * Excpetion thrown for an error related to an interface
+ */
 export class InterfaceException extends Error {
     iface: Interface;
 
@@ -15,31 +21,64 @@ export class InterfaceException extends Error {
     }
 }
 
+/**
+ * Eception thrown when tyring to connect an interface that is already connected
+ */
 export class AlreadyConnectedException extends InterfaceException {
     constructor(iface: Interface) {
         super("Interface " + iface.getFullName() + " is already connected.", iface);
     }
 }
 
+/**
+ * Exception thrown when trying to connect an interface that is in another network
+ */
 export class NotInSameNetworkException extends InterfaceException {
     constructor(iface: Interface, other: Interface) {
         super("Interface " + iface.getFullName() + " and " + other.getFullName() + " are not in the same network.", iface);
     }
 }
 
+/**
+ * Exception thrown when the interface isn't connected
+ */
 export class NotConnectedException extends InterfaceException {
     constructor(iface: Interface) {
         super("Interface " + iface.getFullName() + " is not connected.", iface);
     }
 }
 
+
+/**
+ * Network interface, which can send and receive packets
+ */
 export class Interface extends EventTarget {
-    name: string;
-    owner: Device;
-    connected_to: Interface | null;
+    /**
+     * Name of the interface
+     */
+    private name: string;
 
-    receive_queue: ArrayBuffer[];
+    /**
+     * Device that owns the interface
+     */
+    private owner: Device;
 
+    /**
+     * Interface to which the interface is connected
+     */
+    private connected_to: Interface | null;
+
+    /**
+     * Receive queue of the interface
+     */
+    private receive_queue: ArrayBuffer[];
+
+    /**
+     * Create the interface
+     * 
+     * @param {Device} owner Owner of the interface
+     * @param {string} name Name of the interface
+     */
     constructor(owner: Device, name: string) {
         super();
         this.owner = owner;
@@ -48,18 +87,47 @@ export class Interface extends EventTarget {
         this.receive_queue = [];
     }
 
+    /**
+     * Get the owner of the interface
+     * 
+     * @returns {Device} owner of the interface
+     */
     getOwner(): Device {
         return this.owner
     }
 
+    /**
+     * Get the full name of the interface
+     * 
+     * @returns {string} Full name of the interface
+     */
     getFullName(): string {
         return this.getOwner().getName() + "-" + this.getName();
     }
 
+    /**
+     * Get the name of the interface
+     * 
+     * @returns {string} Name of the interface
+     */
     getName(): string {
         return this.name
     }
 
+    /**
+     * Get the interface to which the interface is connected to
+     * 
+     * @returns {Interface | null} Interface to which the interface is connected to or null if not connected
+     */
+    getConnection() {
+        return this.connected_to;
+    }
+
+    /**
+     * Connect the interface to another interface
+     * 
+     * @param {Interface} other Interface to connect to
+     */
     connect(other: Interface): void {
         if (this.connected_to !== null)
             throw new AlreadyConnectedException(this);
@@ -73,6 +141,9 @@ export class Interface extends EventTarget {
         other.connected_to = this;
     }
 
+    /**
+     * Disconnect the interface
+     */
     disconnect(): void {
         if (this.connected_to === null)
             throw new NotConnectedException(this);
@@ -81,6 +152,9 @@ export class Interface extends EventTarget {
         this.connected_to = null;
     }
 
+    /**
+     * Process the receive queue
+     */
     tick(): void {
         const packet = this.receive_queue.pop();
 
@@ -103,6 +177,14 @@ export class Interface extends EventTarget {
         }));
     }
 
+    /**
+     * Send a packet to the connected interface
+     * 
+     * Internally, this puts the packet in the other interface's receive queue.
+     * It will be processes at the next tick.
+     * 
+     * @param {ArrayBuffer} data Packet to send
+     */
     send(data: ArrayBuffer): void {
         if (this.connected_to === null)
             return;
@@ -119,6 +201,11 @@ export class Interface extends EventTarget {
         this.connected_to.receive_queue.push(data)
     }
 
+    /**
+     * Get a string representation of the interface
+     * 
+     * @returns {string} String representation of the interface 
+     */
     toString(): string {
         return "<Interface " + this.owner.getName() + "-" + this.getName() + ">";
     }

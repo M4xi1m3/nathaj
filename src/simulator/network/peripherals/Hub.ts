@@ -7,30 +7,30 @@ import HubImg from '../../../assets/hub.png';
 const HubImage = new Image()
 HubImage.src = HubImg
 
+/**
+ * Simple ethernet hub
+ * 
+ * Upon receiving a packet on one of its interface, a hub
+ * re-transmits it, untouched, on all of its other interfaces
+ */
 export class Hub extends Device {
-    mac: string;
-
-    constructor(network: Network, name: string, mac: string, ports: number) {
+    constructor(network: Network, name: string, ports: number) {
         super(network, name)
         for (let i = 0; i < ports; i++)
             this.addInterface("eth" + i);
-        this.mac = mac;
     }
 
     onPacketReceived(iface: Interface, data: ArrayBuffer): void {
-        for (const intf of Object.values(this.interfaces)) {
-            if (intf !== iface)
-                intf.send(data);
-        }
+        this.getInterfaces().filter(intf => intf !== iface).forEach((intf) => intf.send(data))
     }
 
     collision(other: Vector2D): boolean {
-        return this.position.sqdist(other) < 12*12;
+        return this.getPosition().sqdist(other) < 12*12;
     }
 
     draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
-        this.drawSquareImage(ctx, this.position.add(offset), HubImage, 12);
-        this.drawInterfaces(ctx, this.position.add(offset), 12, Object.values(this.interfaces), this.intfPositionSquare);
+        this.drawSquareImage(ctx, this.getPosition().add(offset), HubImage, 12);
+        this.drawInterfaces(ctx, this.getPosition().add(offset), 12, this.getInterfaces(), this.intfPositionSquare);
     }
 
     tick(): void {

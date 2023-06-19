@@ -8,6 +8,7 @@ import { NetworkAnalyzer } from './components/NetworkAnalyzer';
 import { Layout } from './simulator/drawing/Layout';
 import { STPSwitch } from './simulator/network/peripherals/STPSwitch';
 import { HorizontalDivider, VerticalDivider } from './components/Dividers';
+import React from 'react';
 
 const net = new Network();
 
@@ -18,7 +19,7 @@ net.addLink("s1", "s2");
 
 Layout.spring_layout(net);
 
-function App() {
+const App: React.FC = () => {
     return (
         <NetworkContext.Provider value={net}>
             <Box sx={{ display: 'flex', flexDirection: 'column', height: "100%", wudth: "100%" }}>

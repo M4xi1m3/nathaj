@@ -48,11 +48,11 @@ export const NetworkRenderer: React.FC = () => {
                         e.pageY - e.currentTarget.getBoundingClientRect().top
                     ));
 
-                    for (const dev of Object.values(network.devices)) {
+                    for (const dev of network.getDevices()) {
                         if (dev.collision(mousePos.sub(offset).add(centerOffset))) {
                             e.currentTarget.style.cursor = 'grab';
                             setDragging(true);
-                            setDragged(dev.name);
+                            setDragged(dev.getName());
                             return;
                         }
                     }
@@ -68,7 +68,7 @@ export const NetworkRenderer: React.FC = () => {
 
                     if (dragging && dragged !== null) {
                         e.currentTarget.style.cursor = 'pointer';
-                        network.devices[dragged].position = mousePos.sub(offset.add(centerOffset));
+                        network.getDevice(dragged).setPosition(mousePos.sub(offset.add(centerOffset)));
                     } else if (panning) {
                         e.currentTarget.style.cursor = 'pointer';
                     }
@@ -85,12 +85,12 @@ export const NetworkRenderer: React.FC = () => {
 
                     if (dragging && dragged !== null) {
                         e.currentTarget.style.cursor = 'grab';
-                        network.devices[dragged].position = mousePos.sub(offset.add(centerOffset));
+                        network.getDevice(dragged).setPosition(mousePos.sub(offset.add(centerOffset)));
                     } else if (panning) {
                         e.currentTarget.style.cursor = 'grab';
                         setOffset(offset.add(new Vector2D(e.movementX, e.movementY)));
                     } else {
-                        for (const dev of Object.values(network.devices)) {
+                        for (const dev of network.getDevices()) {
                             if (dev.collision(mousePos.sub(offset.add(centerOffset)))) {
                                 e.currentTarget.style.cursor = 'pointer';
                                 return;
@@ -115,24 +115,24 @@ export const NetworkRenderer: React.FC = () => {
                     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
                     
 
-                    for (const dev of Object.values(network.devices)) {
-                        for (const intf of Object.values(dev.interfaces)) {
-                            if (intf.connected_to !== null) {
+                    for (const dev of network.getDevices()) {
+                        for (const intf of dev.getInterfaces()) {
+                            if (intf.getConnection() !== null) {
                                 ctx.lineWidth = 2;
                                 ctx.beginPath();
-                                ctx.moveTo(...dev.position.add(offset.add(centerOffset)).array());
-                                ctx.lineTo(...intf.connected_to.getOwner().position.add(offset.add(centerOffset)).array());
+                                ctx.moveTo(...dev.getPosition().add(offset.add(centerOffset)).array());
+                                ctx.lineTo(...intf.getConnection()?.getOwner()?.getPosition()?.add(offset.add(centerOffset))?.array() ?? [0, 0]);
                                 ctx.stroke();
                             }
                         }
                     }
 
-                    for (const dev of Object.values(network.devices)) {
+                    for (const dev of network.getDevices()) {
                         dev.draw(ctx, offset.add(centerOffset));
 
                         if (showLabel) {
                             const text = dev.getText();
-                            showText(text, dev.position.add(offset.add(centerOffset)).add(new Vector2D(0, -40)), true);
+                            showText(text, dev.getPosition().add(offset.add(centerOffset)).add(new Vector2D(0, -40)), true);
                         } else {
                             if (dev.collision(mousePos.sub(offset.add(centerOffset)))) {
                                 const text = dev.getText();

@@ -22,5 +22,11 @@
   },
   "include": [
     "src"
-  ]
+  ],
+  "typedocOptions": {
+      "entryPoints": ["src/simulator"],
+      "entryPointStrategy": "expand",
+      "excludeInternal": true,
+      "out": "docs"
+  }
 }

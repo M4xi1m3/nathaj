@@ -1,14 +1,17 @@
 import { Vector2D } from "../../drawing/Vector2D";
 import { Network } from "../Network";
 import { Ethernet } from "../packets/definitions/Ethernet";
-import { Hub } from "./Hub";
 import { Interface } from "./Interface";
 import STPSwitchImg from '../../../assets/stp-switch.png';
 import { BPDU as BPDUPacket } from '../packets/definitions/BPDU';
+import { Switch } from "./Switch";
 
 const STPSwitchImage = new Image()
 STPSwitchImage.src = STPSwitchImg
 
+/**
+ * State of the ports
+ */
 enum PortState {
     Blocking = 0,
     Listening = 1,
@@ -17,6 +20,9 @@ enum PortState {
     Disabled = 4
 }
 
+/**
+ * Roles of the ports
+ */
 enum PortRole {
     Root = 0,
     Designated = 1,
@@ -24,15 +30,40 @@ enum PortRole {
     Disabled = 3
 }
 
+/**
+ * Bridge identifier
+ * 
+ * @internal
+ */
 class Identifier {
+    /**
+     * Bridge priority
+     */
     priority: number;
+
+
+    /**
+     * Bridge mac address
+     */
     mac: string;
 
+    /**
+     * Create an identifier
+     * 
+     * @param {number} priority Bridge priority
+     * @param {string} mac Bridge mac address
+     */
     constructor(priority: number, mac: string) {
         this.priority = priority;
         this.mac = mac;
     }
 
+
+    /**
+     * Convert the identifier to a 64 bit number
+     * 
+     * @returns {number} Number corresponding to the identifier
+     */
     toNumber() {
         let mac = 0;
         this.mac.split(":").forEach((v: string, k: number) => {
@@ -42,17 +73,51 @@ class Identifier {
         return (this.priority << 48) | mac;
     }
 
+    /**
+     * Check equality between two identifiers
+     * 
+     * @param {Identifier} other Identifier to check against
+     * @returns {boolean} True if the identifier are equal, false otherwise
+     */
     eq(other: Identifier) {
         return this.toNumber() === other.toNumber();
     }
 }
 
+/**
+ * Bridge Protocol Data Unit class
+ * 
+ * @internal
+ */
 class BPDU {
+    /**
+     * Identifier of the root
+     */
     root_id: Identifier;
+
+    /**
+     * Cost of the path to the root
+     */
     root_cost: number;
+
+    /**
+     * Identifier of the bridge
+     */
     bridge_id: Identifier;
+
+    /**
+     * Identifier of the port
+     */
     port_id: number;
 
+    /**
+     * Create a BPDU
+     * 
+     * @param {Identifier} root_id ID of the root
+     * @param {number} root_cost Cost to the root
+     * @param {Identifier} bridge_id ID of the bridge
+     * @param {number} port_id ID of the port
+     */
     constructor(root_id: Identifier, root_cost: number, bridge_id: Identifier, port_id: number) {
         this.root_id = root_id;
         this.root_cost = root_cost;
@@ -60,7 +125,13 @@ class BPDU {
         this.port_id = port_id;
     }
 
-    static fromPacket(packet: BPDUPacket) {
+    /**
+     * Convert a BPDU packet to a BPDU
+     * 
+     * @param {BPDUPacket} packet Packet to convert from
+     * @returns {BPDU} The extracted BPDU
+     */
+    static fromPacket(packet: BPDUPacket): BPDU {
         return new BPDU(
             new Identifier(packet.root_priority, packet.root_mac),
             packet.root_cost,
@@ -69,6 +140,12 @@ class BPDU {
         )
     }
 
+    /**
+     * Convert the BPDU to a packet
+     * 
+     * @param {string} mac Ethernet packet's source address
+     * @returns {Ethernet} Ethernet packet containing the BPDU
+     */
     toPacket(mac: string): Ethernet {
         const ether = new Ethernet({
             dst: '01:81:c2:00:00:00',
@@ -86,6 +163,11 @@ class BPDU {
         return ether;
     }
 
+    /**
+     * Compare the BPDU with another bpdu
+     * @param {BPDU} other BPDU to compare against
+     * @returns {boolean} True if this bpdu is better than the other
+     */
     lt(other: BPDU): boolean {
         if (this.root_id.toNumber() !== other.root_id.toNumber())
             return this.root_id.toNumber() < other.root_id.toNumber();
@@ -98,6 +180,12 @@ class BPDU {
         return false;
     }
 
+    /**
+     * Check for equality with another BPDU
+     * 
+     * @param {BPDU} other BPDU to check for equality
+     * @returns {boolean} True if the BPDUs are equal, false otherwise
+     */
     eq(other: BPDU): boolean {
         return (this.root_id.toNumber() === other.root_id.toNumber())
             && (this.root_cost === other.root_cost)
@@ -105,21 +193,66 @@ class BPDU {
             && (this.port_id === other.port_id);
     }
 
+    /**
+     * Get the best BPDU
+     * 
+     * @param {BPDU} other BPDU to compare against
+     * @returns {BPDU} Best BPDU
+     */
     winner(other: BPDU) {
         return this.lt(other) ? this : other;
     }
 }
 
+/**
+ * Class storing the data of a port in an STP switch
+ * 
+ * @internal
+ */
 class PortData {
+    /**
+     * Controller to which the port is attached
+     */
     controller: STPSwitch;
+
+    /**
+     * ID of the port
+     */
     id: number;
+
+    /**
+     * Cost of traveling trough the port
+     */
     path_cost: number;
+
+    /**
+     * State of the port
+     */
     state: PortState = PortState.Blocking;
+
+    /**
+     * Role of the port
+     */
     role: PortRole = PortRole.Designated;
+
+    /**
+     * Best BPDU received by the port
+     */
     bpdu: BPDU = new BPDU(new Identifier(0, '00:00:00:00:00:00'), 0, new Identifier(0, '00:00:00:00:00:00'), 0);
 
+    /**
+     * Expiry timestamp of the port's hold timer
+     */
     hold_timer_expiry: number = 0;
+
+    /**
+     * Expiry timestamp of the port's message age timer
+     */
     message_age_expiry: number = 0;
+
+    /**
+     * Expiry timestamp of the port's forward timer
+     */
     forward_delay_expiry: number = 0;
 
     constructor(controller: STPSwitch, id: number, path_cost: number) {
@@ -129,52 +262,84 @@ class PortData {
         this.initialize();
     }
 
+    /**
+     * Initialize the port's data
+     */
     initialize() {
         this.state = PortState.Blocking;
         this.role = PortRole.Designated;
         this.bpdu = new BPDU(this.controller.identifier, this.path_cost, this.controller.identifier, this.id);
 
-        this.hold_timer_expiry = this.controller.network.time() + this.controller.hold_time;
-        this.message_age_expiry = this.controller.network.time() + this.controller.message_age;
-        this.forward_delay_expiry = this.controller.network.time() + this.controller.forward_delay;
+        this.hold_timer_expiry = this.controller.time() + this.controller.hold_time;
+        this.message_age_expiry = this.controller.time() + this.controller.message_age;
+        this.forward_delay_expiry = this.controller.time() + this.controller.forward_delay;
     }
 
+    /**
+     * Check if the port can send a BPDU
+     * 
+     * @returns {boolean} True if the port can send BPDUs
+     */
     canSend(): boolean {
         if (this.disabled() || this.blocking())
             return false;
 
-        if (this.controller.network.time() < this.hold_timer_expiry)
+        if (this.controller.time() < this.hold_timer_expiry)
             return false;
 
         return true;
     }
 
+    /**
+     * Enable the port
+     */
     enable() {
         this.initialize()
     }
 
+    /**
+     * Disable the port
+     */
     disable() {
         this.makeDesignated();
         this.updateState(PortState.Disabled, PortRole.Disabled);
     }
 
+    /**
+     * Check if the port is disabled
+     * 
+     * @returns {boolean} True if the port is disabled, false otherwise
+     */
     disabled(): boolean {
         return this.role === PortRole.Disabled;
     }
 
+    /**
+     * Check if the port is blocking
+     * 
+     * @returns {boolean} True if the port is blocking, false otherwise
+     */
     blocking(): boolean {
         return this.role === PortRole.Blocking;
     }
 
+    /**
+     * Update the configuration with the received BPDU
+     * 
+     * @param {BPDU} config Received BPDU
+     */
     updateConfig(config: BPDU) {
         this.bpdu = this.bpdu.winner(config);
 
-        this.message_age_expiry = this.controller.network.time() + this.controller.message_age;
+        this.message_age_expiry = this.controller.time() + this.controller.message_age;
         this.controller.portAssignation();
     }
 
+    /**
+     * Advance in the Listening -> Learning -> Forwarding state cycle
+     */
     doForward() {
-        if (this.controller.network.time() > this.forward_delay_expiry) {
+        if (this.controller.time() > this.forward_delay_expiry) {
             switch (this.state) {
                 case PortState.Listening:
                     this.updateState(PortState.Learning, this.role);
@@ -184,17 +349,26 @@ class PortData {
                     break;
             }
 
-            this.forward_delay_expiry = this.controller.network.time() + this.controller.forward_delay;
+            this.forward_delay_expiry = this.controller.time() + this.controller.forward_delay;
         }
     }
 
+    /**
+     * Update the state and role of the port
+     * 
+     * @param {PortState} state New state of the port
+     * @param {PortRole} role New role of the port
+     */
     updateState(state: PortState, role: PortRole) {
         this.state = state;
         this.role = role;
 
-        this.message_age_expiry = this.controller.network.time() + this.controller.message_age;
+        this.message_age_expiry = this.controller.time() + this.controller.message_age;
     }
 
+    /**
+     * Make the port blocking
+     */
     makeBlocking() {
         if (this.disabled())
             return;
@@ -205,6 +379,9 @@ class PortData {
         this.updateState(PortState.Blocking, PortRole.Blocking);
     }
 
+    /**
+     * Make the port root
+     */
     makeRoot() {
         if (this.disabled())
             return;
@@ -215,6 +392,9 @@ class PortData {
         this.updateState(PortState.Listening, PortRole.Root);
     }
 
+    /**
+     * Make the port designated
+     */
     makeDesignated() {
         if (this.disabled())
             return;
@@ -226,20 +406,41 @@ class PortData {
     }
 }
 
-export class STPSwitch extends Hub {
-    mac_address_table: { [mac: string]: string };
+/**
+ * Switch implementing the spanninf tree protocol
+ * 
+ * See IEEE 802.1D (1998) section 8 and 9
+ */
+export class STPSwitch extends Switch {
+    /**
+     * Switch identifier
+     * @internal
+     */
     identifier: Identifier;
-    hello_timer_expiry: number = 0;
-    port_infos: { [intf: string]: PortData }
+
+    private hello_timer_expiry: number = 0;
+
+    /**
+     * Ports informations
+     * @internal
+     */
+    private port_infos: { [intf: string]: PortData }
 
     hold_time: number;
     message_age: number;
     forward_delay: number;
     hello_time: number;
 
+    /**
+     * Create a stp-capable switch
+     * 
+     * @param {Network} network Network to put the switch in
+     * @param {string} name Name of the switch
+     * @param {string} mac MAC address of the switch
+     * @param {number} ports Number of interfaces to create
+     */
     constructor(network: Network, name: string, mac: string, ports: number) {
         super(network, name, mac, ports);
-        this.mac_address_table = {};
         this.identifier = new Identifier(32768, mac);
         this.port_infos = {};
 
@@ -250,60 +451,91 @@ export class STPSwitch extends Hub {
         this.initialize();
     }
 
-    initialize() {
+    /**
+     * Initialize the states
+     */
+    private initialize() {
         let i = 0;
-        Object.values(this.interfaces).forEach(intf => {
-            this.port_infos[intf.name] = new PortData(this, i, 1);
-            this.port_infos[intf.name].initialize();
+        this.getInterfaces().forEach(intf => {
+            this.port_infos[intf.getName()] = new PortData(this, i, 1);
+            this.port_infos[intf.getName()].initialize();
             i++;
         });
 
-        this.hello_timer_expiry = this.network.time() + this.hello_time;
+        this.hello_timer_expiry = this.time() + this.hello_time;
     }
 
-    getBestBPDU(): BPDU {
-        let best = this.port_infos[Object.values(this.interfaces)[0].name].bpdu
-        Object.values(this.interfaces).forEach(intf => {
-            best = best.winner(this.port_infos[intf.name].bpdu);
+    /**
+     * Get the best stored BPDU
+     * 
+     * @returns {BPDU} Best stored BPDU
+     * @internal
+     */
+    private getBestBPDU(): BPDU {
+        let best = this.port_infos[this.getInterfaces()[0].getName()].bpdu
+        this.getInterfaces().forEach(intf => {
+            best = best.winner(this.port_infos[intf.getName()].bpdu);
         });
         return best;
     }
 
-    getRootPort(): PortData | null {
+    /**
+     * Get the root port's data
+     * 
+     * @returns {PortData | null} Root's port data, or null if the switch has no root port (ie. is a root switch)
+     * @internal
+     */
+    private getRootPort(): PortData | null {
         if (this.getBestBPDU().root_id.eq(this.identifier))
             return null;
 
-        let best = this.port_infos[Object.values(this.interfaces)[0].name]
-        Object.values(this.interfaces).forEach(intf => {
-            const tmp = best.bpdu.winner(this.port_infos[intf.name].bpdu);
-            best = tmp === best.bpdu ? best : this.port_infos[intf.name];
+        let best = this.port_infos[this.getInterfaces()[0].getName()]
+
+        this.getInterfaces().forEach(intf => {
+            const tmp = best.bpdu.winner(this.port_infos[intf.getName()].bpdu);
+            best = tmp === best.bpdu ? best : this.port_infos[intf.getName()];
         });
         return best;
     }
 
-    transmitConfig(intf: Interface) {
-        const port = this.port_infos[intf.name];
+    /**
+     * Transmit a BPDU to an interface
+     * 
+     * @param {Interface} intf Interface to tramit a BPDU to
+     */
+    private transmitConfig(intf: Interface): void {
+        const port = this.port_infos[intf.getName()];
         if (!port.canSend())
             return;
 
         const best = this.getBestBPDU();
         const bpdu = new BPDU(best.root_id, best.bridge_id.eq(this.identifier) ? port.path_cost : best.root_cost + port.path_cost, this.identifier, port.id);
 
-        intf.send(bpdu.toPacket(this.mac).raw());
+        intf.send(bpdu.toPacket(this.getMac()).raw());
     }
 
-    broadcastConfig() {
-        for (const intf of Object.values(this.interfaces)) {
+    /**
+     * Transmit a BPDU on all the interfaces
+     */
+    private broadcastConfig() {
+        for (const intf of this.getInterfaces()) {
             this.transmitConfig(intf);
         }
 
-        if (this.network.time() > this.hello_timer_expiry) {
-            this.hello_timer_expiry = this.network.time() + this.hello_time;
+        if (this.time() > this.hello_timer_expiry) {
+            this.hello_timer_expiry = this.time() + this.hello_time;
         }
     }
 
-    handleBPDU(bpdu: BPDU, intf: Interface) {
-        const port = this.port_infos[intf.name];
+    /**
+     * Handle a received BPDU
+     * 
+     * @param {BPDU} bpdu BPDU to handle
+     * @param {Interface} intf Interface on which the BPDU was received
+     * @internal
+     */
+    private handleBPDU(bpdu: BPDU, intf: Interface) {
+        const port = this.port_infos[intf.getName()];
         port.updateConfig(bpdu);
         this.portAssignation();
 
@@ -315,11 +547,14 @@ export class STPSwitch extends Hub {
         }
     }
 
+    /**
+     * Calculate port assignations
+     */
     portAssignation() {
         const best = this.getBestBPDU();
 
-        for (const intf of Object.values(this.interfaces)) {
-            const port = this.port_infos[intf.name];
+        for (const intf of this.getInterfaces()) {
+            const port = this.port_infos[intf.getName()];
 
             if (best.root_id.eq(this.identifier)) {
                 const would_be_bpdu = new BPDU(best.root_id, best.root_cost, this.identifier, port.id);
@@ -346,27 +581,34 @@ export class STPSwitch extends Hub {
     onPacketReceived(iface: Interface, data: ArrayBuffer): void {
         const packet = new Ethernet(data);
 
-        this.mac_address_table[packet.src] = iface.name;
+        this.mac_address_table[packet.src] = iface.getName();
         if (packet.dst === '01:81:c2:00:00:00') {
-            if (packet.next instanceof BPDUPacket) {
-                const bpdu_packet = packet.next as BPDUPacket;
+            if (packet.getNext() instanceof BPDUPacket) {
+                const bpdu_packet = packet.getNext() as BPDUPacket;
                 const bpdu = BPDU.fromPacket(bpdu_packet);
                 this.handleBPDU(bpdu, iface);
             }
         } else if (packet.dst in this.mac_address_table) {
             this.getInterface(this.mac_address_table[packet.dst]).send(data);
         } else {
-            for (const intf of Object.values(this.interfaces)) {
-                if (intf !== iface)
-                    intf.send(data);
-            }
+            this.getInterfaces().filter(intf => intf !== iface).forEach((intf) => intf.send(data))
         }
     }
 
-    drawSTPInterface(ctx: CanvasRenderingContext2D, intf: Interface, devRadius: number, drawPos: Vector2D, direction: Vector2D) {
+    /**
+     * Draw an STP interface
+     * 
+     * @param {CanvasRenderingContext2D} ctx Canvas context used to draw
+     * @param {Interface} intf Interface to draw
+     * @param {number} devRadius Radius of the device to draw the interface on
+     * @param {Vector2D} drawPos Draw position of the device
+     * @param {Vector2D} direction Direction at which to put the interface
+     * @param {string} color Color of the interface
+     */
+    private drawSTPInterface(ctx: CanvasRenderingContext2D, intf: Interface, devRadius: number, drawPos: Vector2D, direction: Vector2D) {
         const intfPos = drawPos.add(direction.mul(devRadius + 5))
 
-        switch (this.port_infos[intf.name].role) {
+        switch (this.port_infos[intf.getName()].role) {
             case PortRole.Disabled:
                 ctx.fillStyle = "#DD0000";
                 break;
@@ -385,7 +627,7 @@ export class STPSwitch extends Hub {
         ctx.arc(intfPos.x, intfPos.y, 5, 0.25 * Math.PI, 1.25 * Math.PI);
         ctx.fill();
 
-        switch (this.port_infos[intf.name].state) {
+        switch (this.port_infos[intf.getName()].state) {
             case PortState.Disabled:
                 ctx.fillStyle = "#DD0000";
                 break;
@@ -409,13 +651,13 @@ export class STPSwitch extends Hub {
     }
 
     draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
-        this.drawSquareImage(ctx, this.position.add(offset), STPSwitchImage, 12);
-        this.drawInterfaces(ctx, this.position.add(offset), 12, Object.values(this.interfaces), this.intfPositionSquare, this.drawSTPInterface.bind(this));
+        this.drawSquareImage(ctx, this.getPosition().add(offset), STPSwitchImage, 12);
+        this.drawInterfaces(ctx, this.getPosition().add(offset), 12, this.getInterfaces(), this.intfPositionSquare, this.drawSTPInterface.bind(this));
     }
 
     tick(): void {
         if (this.getBestBPDU().root_id.eq(this.identifier)) {
-            if (this.network.time() > this.hello_timer_expiry) {
+            if (this.time() > this.hello_timer_expiry) {
                 this.broadcastConfig();
             }
         }
@@ -423,7 +665,7 @@ export class STPSwitch extends Hub {
         for (const port of Object.values(this.port_infos)) {
             port.doForward();
 
-            if (this.network.time() > port.message_age_expiry) {
+            if (this.time() > port.message_age_expiry) {
                 port.bpdu = new BPDU(this.identifier, 0, this.identifier, port.id);
                 port.makeDesignated();
                 this.portAssignation();

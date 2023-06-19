@@ -3,15 +3,44 @@ import { Layer } from "../Layer";
 import { Dissector, Packet } from "../Packet";
 import { Ethernet } from "./Ethernet";
 
-interface BPDUFields {
+/**
+ * Fields used in a BPDU packet
+ */
+export interface BPDUFields {
+    /**
+     * Priority of the root bridge
+     */
     root_priority: number;
+
+    /**
+     * MAC address of the root bridge
+     */
     root_mac: string;
+
+    /**
+     * Cost to the root
+     */
     root_cost: number;
+
+    /**
+     * Priority of the bridge
+     */
     bridge_priority: number;
+
+    /**
+     * MAC address of the bridge
+     */
     bridge_mac: string;
+
+    /**
+     * Port id
+     */
     bridge_port: number;
 }
 
+/**
+ * Bridge Protocol Data Unit Packet
+ */
 export class BPDU extends Packet<BPDUFields> {
     static proto: string = "STP";
     static fields: Field[] = [

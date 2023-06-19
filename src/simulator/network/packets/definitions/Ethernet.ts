@@ -2,12 +2,29 @@
 import { Field, MacField, XShortField } from "../Field";
 import { Dissector, Packet } from "../Packet";
 
-interface EthernetFields {
+/**
+ * Fields used in an Ethernet packet
+ */
+export interface EthernetFields {
+    /**
+     * Source MAC address
+     */
     src: string;
+
+    /**
+     * Destination MAC address
+     */
     dst: string;
+
+    /**
+     * Protocol type
+     */
     type: number;
 }
 
+/**
+ * Ethernet packet
+ */
 export class Ethernet extends Packet<EthernetFields> {
     static proto: string = "Ethernet";
     static fields: Field[] = [
