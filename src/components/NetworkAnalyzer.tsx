@@ -44,12 +44,12 @@ const monoSX = {
 
 const FixedHeaderContent = () => (
     <TableRow style={{ background: 'white' }}>
-        <TableCell sx={{ ...commonSX, width: "80px" }}>#</TableCell>
-        <TableCell sx={{ ...commonSX, width: "80px" }}>Time</TableCell>
-        <TableCell sx={{ ...commonSX, width: "80px" }}>Origin</TableCell>
-        <TableCell sx={{ ...commonSX, width: "100px" }}>Direction</TableCell>
-        <TableCell sx={{ ...commonSX, width: "140px" }}>Source</TableCell>
-        <TableCell sx={{ ...commonSX, width: "140px" }}>Destination</TableCell>
+        <TableCell sx={{ ...commonSX, width: "60px" }}>#</TableCell>
+        <TableCell sx={{ ...commonSX, width: "60px" }}>Time</TableCell>
+        <TableCell sx={{ ...commonSX, width: "60px" }}>Origin</TableCell>
+        <TableCell sx={{ ...commonSX, width: "80px" }}>Direction</TableCell>
+        <TableCell sx={{ ...commonSX, width: "100px" }}>Source</TableCell>
+        <TableCell sx={{ ...commonSX, width: "100px" }}>Destination</TableCell>
         <TableCell sx={{ ...commonSX, width: "80px" }}>Protocol</TableCell>
         <TableCell sx={{ ...commonSX, width: "320px" }}>Info</TableCell>
     </TableRow>
@@ -119,58 +119,55 @@ export const HexDumpRenderer: React.FC<{ buffer: ArrayBuffer, space: number, new
         [start, end] = selection;
     }
 
-    return (
 
-        <Grid container flexDirection="column">
+    return <Grid container spacing={2}>
+        <Grid item>
             {data.map((line, line_no) => (
-                <Grid container item key={line_no} flexWrap="nowrap">
-                    <Grid container item flexWrap="nowrap" flexShrink={1} flexGrow={0} minWidth={"260px"}>
-                        <Typography sx={{
-                            fontFamily: "Roboto Mono",
-                            fontSize: "0.75em",
-                            whiteSpace: 'pre'
-                        }}>
-                            {line.map((group, group_no) => (
-                                <React.Fragment key={group_no}>
-                                    {group.map((v, byte_no) => {
-                                        const index = line_no * newline + group_no * space + byte_no;
+                <Typography sx={{
+                    fontFamily: "Roboto Mono",
+                    fontSize: "0.75em",
+                    whiteSpace: 'pre'
+                }} key={line_no}>
+                    {line.map((group, group_no) => (
+                        <React.Fragment key={group_no}>
+                            {group.map((v, byte_no) => {
+                                const index = line_no * newline + group_no * space + byte_no;
 
-                                        if (index >= start && index <= end)
-                                            return <span key={byte_no} style={{ backgroundColor: "rgba(25, 118, 210, 0.2)" }}>{v.toString(16).padStart(2, '0')}</span>
-                                        else
-                                            return <span key={byte_no}>{v.toString(16).padStart(2, '0')}</span>
-                                    })}
-                                    <span> </span>
-                                </React.Fragment>
-                            ))}
-                        </Typography>
-                    </Grid>
-                    <Grid container item flexWrap="nowrap" flexShrink={1} flexGrow={0}>
-                        <Typography sx={{
-                            fontFamily: "Roboto Mono",
-                            fontSize: "0.75em",
-                            whiteSpace: 'pre'
-                        }}>
-                            {line.map((group, group_no) => (
-                                <React.Fragment key={group_no}>
-                                    {group.map((v, byte_no) => {
-                                        const index = line_no * newline + group_no * space + byte_no;
+                                if (index >= start && index <= end)
+                                    return <span key={byte_no} style={{ backgroundColor: "rgba(25, 118, 210, 0.2)" }}>{v.toString(16).padStart(2, '0')}</span>
+                                else
+                                    return <span key={byte_no}>{v.toString(16).padStart(2, '0')}</span>
+                            })}
+                            <span> </span>
+                        </React.Fragment>
+                    ))}
+                </Typography>
+            ))}
+        </Grid>
+        <Grid item>
+            {data.map((line, line_no) => (
+                <Typography sx={{
+                    fontFamily: "Roboto Mono",
+                    fontSize: "0.75em",
+                    whiteSpace: 'pre'
+                }} key={line_no}>
+                    {line.map((group, group_no) => (
+                        <React.Fragment key={group_no}>
+                            {group.map((v, byte_no) => {
+                                const index = line_no * newline + group_no * space + byte_no;
 
-                                        if (index >= start && index <= end)
-                                            return <span key={byte_no} style={{ backgroundColor: "rgba(25, 118, 210, 0.2)" }}>{numberToPrintableChar(v)}</span>
-                                        else
-                                            return <span key={byte_no}>{numberToPrintableChar(v)}</span>
-                                    })}
-                                    <span> </span>
-                                </React.Fragment>
-                            ))}
-                        </Typography>
-                    </Grid>
-                </Grid>
-            ))
-            }
-        </Grid >
-    )
+                                if (index >= start && index <= end)
+                                    return <span key={byte_no} style={{ backgroundColor: "rgba(25, 118, 210, 0.2)" }}>{numberToPrintableChar(v)}</span>
+                                else
+                                    return <span key={byte_no}>{numberToPrintableChar(v)}</span>
+                            })}
+                            <span> </span>
+                        </React.Fragment>
+                    ))}
+                </Typography>
+            ))}
+        </Grid>
+    </Grid>
 }
 
 export const NetworkAnalyzer: React.FC = () => {
@@ -305,8 +302,8 @@ export const NetworkAnalyzer: React.FC = () => {
             {selectedPacket !== null ? <>
                 <HorizontalDivider />
                 <Panel>
-                    <PanelGroup direction="horizontal">
-                        <Panel defaultSize={50} style={{ display: "flex", overflow: 'auto' }}>
+                    <Grid container style={{ height: "100%" }}>
+                        <Grid item style={{ display: "flex", overflow: 'auto', flexGrow: 1, height: "100%" }}>
                             <TreeView
                                 style={{ width: "100%" }}
                                 defaultCollapseIcon={<ExpandMore />}
@@ -315,12 +312,14 @@ export const NetworkAnalyzer: React.FC = () => {
                             >
                                 <TreeRenderer id="0" item={packets[selectedPacket].tree} />
                             </TreeView>
-                        </Panel>
-                        <VerticalDivider />
-                        <Panel style={{ display: "flex", overflow: "auto" }}>
+                        </Grid>
+                        <Grid item>
+                            <Divider orientation="vertical" />
+                        </Grid>
+                        <Grid item style={{ overflow: 'auto', height: "100%", marginLeft: 8 }}>
                             <HexDumpRenderer buffer={packets[selectedPacket].data} space={8} newline={16} selection={selectionBounds} />
-                        </Panel>
-                    </PanelGroup>
+                        </Grid>
+                    </Grid>
                 </Panel>
             </> : <></>}
         </PanelGroup>
