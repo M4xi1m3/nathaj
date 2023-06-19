@@ -10,9 +10,11 @@ build:
   script:
     - yarn install
     - yarn build
+    - yarn typedoc
   artifacts:
     paths:
       - build/
+      - docs/
 
 pages:
   image: alpine:latest
@@ -21,6 +23,7 @@ pages:
     GIT_STRATEGY: none
   script:
     - mv build public
+    - mv docs public/docs
   artifacts:
     paths:
       - public
