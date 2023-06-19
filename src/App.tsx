@@ -1,40 +1,20 @@
 import { Network } from './simulator/network/Network';
 import { NetworkContext } from './NetworkContext';
 import { NetworkRenderer } from './components/NetworkRenderer';
-import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
+import { Panel, PanelGroup } from 'react-resizable-panels';
 import { AppBar, Box, Paper, Toolbar, Typography } from '@mui/material';
 import { NetworkActions } from './components/NetworkActions';
 import { NetworkAnalyzer } from './components/NetworkAnalyzer';
 import { Layout } from './simulator/drawing/Layout';
 import { STPSwitch } from './simulator/network/peripherals/STPSwitch';
-import { Hub } from './simulator/network/peripherals/Hub';
+import { HorizontalDivider, VerticalDivider } from './components/Dividers';
 
 const net = new Network();
 
 new STPSwitch(net, "s1", "00:0b:00:00:00:01", 5);
 new STPSwitch(net, "s2", "00:0b:00:00:00:02", 5);
-new STPSwitch(net, "s3", "00:0b:00:00:00:03", 4);
-new STPSwitch(net, "s4", "00:0b:00:00:00:04", 4);
 
-new Hub(net, "h1", "00:0c:00:00:00:01", 4);
-new Hub(net, "h2", "00:0c:00:00:00:01", 4);
-new Hub(net, "h3", "00:0c:00:00:00:01", 4);
-
-net.addLink("s1", "s2")
-net.addLink("s2", "s3")
-net.addLink("s3", "s4")
-net.addLink("s4", "s1")
-
-net.addLink("s1", "h1")
-net.addLink("s2", "h1")
-net.addLink("s3", "h1")
-net.addLink("s4", "h1")
-
-net.addLink("s1", "h2")
-net.addLink("h2", "h3")
-net.addLink("s1", "h3")
-
-console.log(net)
+net.addLink("s1", "s2");
 
 Layout.spring_layout(net);
 
@@ -60,14 +40,14 @@ function App() {
                                     <NetworkRenderer />
                                 </Paper>
                             </Panel>
-                            <PanelResizeHandle style={{ width: "10px" }} />
+                            <VerticalDivider />
                             <Panel style={{ display: "flex" }}>
                                 <Paper sx={{ flexGrow: 1, maxWidth: "100%", overflowX: 'auto', margin: 1 }}>
                                 </Paper>
                             </Panel>
                         </PanelGroup>
                     </Panel>
-                    <PanelResizeHandle style={{ height: "10px" }} />
+                    <HorizontalDivider />
                     <Panel style={{ display: "flex" }}>
                         <Paper sx={{ flexGrow: 1, maxWidth: "100%", overflowX: 'auto', margin: 1 }}>
                             <NetworkAnalyzer />

@@ -21,5 +21,10 @@ export class Ethernet extends Packet<EthernetFields> {
         analyzed.destination = packet.dst;
         analyzed.protocol = this.fields[2].repr(packet.type);
         analyzed.info = "Ethernet";
+
+        const sub = analyzed.tree.addSubTree("Ethernet", 0, 14);
+        sub?.addItem("Source: " + packet.src, 0, 6);
+        sub?.addItem("Destionation: " + packet.src, 6, 6);
+        sub?.addItem("Type: " + packet.type, 12, 2);
     }
 }
