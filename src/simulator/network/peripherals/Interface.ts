@@ -1,4 +1,3 @@
-
 import { PacketEventData } from '../Network';
 import { Device } from './Device';
 
@@ -6,8 +5,8 @@ import { Device } from './Device';
  * Data of the packet received event
  */
 export type ReceivedPacketEventData = {
-    packet: ArrayBuffer
-}
+    packet: ArrayBuffer;
+};
 
 /**
  * Excpetion thrown for an error related to an interface
@@ -26,7 +25,7 @@ export class InterfaceException extends Error {
  */
 export class AlreadyConnectedException extends InterfaceException {
     constructor(iface: Interface) {
-        super("Interface " + iface.getFullName() + " is already connected.", iface);
+        super('Interface ' + iface.getFullName() + ' is already connected.', iface);
     }
 }
 
@@ -35,7 +34,10 @@ export class AlreadyConnectedException extends InterfaceException {
  */
 export class NotInSameNetworkException extends InterfaceException {
     constructor(iface: Interface, other: Interface) {
-        super("Interface " + iface.getFullName() + " and " + other.getFullName() + " are not in the same network.", iface);
+        super(
+            'Interface ' + iface.getFullName() + ' and ' + other.getFullName() + ' are not in the same network.',
+            iface
+        );
     }
 }
 
@@ -44,10 +46,9 @@ export class NotInSameNetworkException extends InterfaceException {
  */
 export class NotConnectedException extends InterfaceException {
     constructor(iface: Interface) {
-        super("Interface " + iface.getFullName() + " is not connected.", iface);
+        super('Interface ' + iface.getFullName() + ' is not connected.', iface);
     }
 }
-
 
 /**
  * Network interface, which can send and receive packets
@@ -75,7 +76,7 @@ export class Interface extends EventTarget {
 
     /**
      * Create the interface
-     * 
+     *
      * @param {Device} owner Owner of the interface
      * @param {string} name Name of the interface
      */
@@ -89,34 +90,34 @@ export class Interface extends EventTarget {
 
     /**
      * Get the owner of the interface
-     * 
+     *
      * @returns {Device} owner of the interface
      */
     getOwner(): Device {
-        return this.owner
+        return this.owner;
     }
 
     /**
      * Get the full name of the interface
-     * 
+     *
      * @returns {string} Full name of the interface
      */
     getFullName(): string {
-        return this.getOwner().getName() + "-" + this.getName();
+        return this.getOwner().getName() + '-' + this.getName();
     }
 
     /**
      * Get the name of the interface
-     * 
+     *
      * @returns {string} Name of the interface
      */
     getName(): string {
-        return this.name
+        return this.name;
     }
 
     /**
      * Get the interface to which the interface is connected to
-     * 
+     *
      * @returns {Interface | null} Interface to which the interface is connected to or null if not connected
      */
     getConnection() {
@@ -125,14 +126,12 @@ export class Interface extends EventTarget {
 
     /**
      * Connect the interface to another interface
-     * 
+     *
      * @param {Interface} other Interface to connect to
      */
     connect(other: Interface): void {
-        if (this.connected_to !== null)
-            throw new AlreadyConnectedException(this);
-        if (other.connected_to !== null)
-            throw new AlreadyConnectedException(other);
+        if (this.connected_to !== null) throw new AlreadyConnectedException(this);
+        if (other.connected_to !== null) throw new AlreadyConnectedException(other);
 
         if (this.getOwner().getNetwork() !== other.getOwner().getNetwork())
             throw new NotInSameNetworkException(this, other);
@@ -145,8 +144,7 @@ export class Interface extends EventTarget {
      * Disconnect the interface
      */
     disconnect(): void {
-        if (this.connected_to === null)
-            throw new NotConnectedException(this);
+        if (this.connected_to === null) throw new NotConnectedException(this);
 
         this.connected_to.connected_to = null;
         this.connected_to = null;
@@ -158,55 +156,63 @@ export class Interface extends EventTarget {
     tick(): void {
         const packet = this.receive_queue.pop();
 
-        if (packet === undefined)
-            return;
+        if (packet === undefined) return;
 
-        this.getOwner().getNetwork().dispatchEvent(new CustomEvent<PacketEventData>('packet', {
-            detail: {
-                time: this.getOwner().getNetwork().time(),
-                packet,
-                interface: this,
-                direction: 'ingoing'
-            }
-        }));
+        this.getOwner()
+            .getNetwork()
+            .dispatchEvent(
+                new CustomEvent<PacketEventData>('packet', {
+                    detail: {
+                        time: this.getOwner().getNetwork().time(),
+                        packet,
+                        interface: this,
+                        direction: 'ingoing',
+                    },
+                })
+            );
 
-        this.dispatchEvent(new CustomEvent<ReceivedPacketEventData>('receivedata', {
-            detail: {
-                packet
-            }
-        }));
+        this.dispatchEvent(
+            new CustomEvent<ReceivedPacketEventData>('receivedata', {
+                detail: {
+                    packet,
+                },
+            })
+        );
     }
 
     /**
      * Send a packet to the connected interface
-     * 
+     *
      * Internally, this puts the packet in the other interface's receive queue.
      * It will be processes at the next tick.
-     * 
+     *
      * @param {ArrayBuffer} data Packet to send
      */
     send(data: ArrayBuffer): void {
-        if (this.connected_to === null)
-            return;
+        if (this.connected_to === null) return;
 
-        this.getOwner().getNetwork().dispatchEvent(new CustomEvent<PacketEventData>('packet', {
-            detail: {
-                time: this.getOwner().getNetwork().time(),
-                packet: data,
-                interface: this,
-                direction: 'outgoing'
-            }
-        }));
+        this.getOwner()
+            .getNetwork()
+            .dispatchEvent(
+                new CustomEvent<PacketEventData>('packet', {
+                    detail: {
+                        time: this.getOwner().getNetwork().time(),
+                        packet: data,
+                        interface: this,
+                        direction: 'outgoing',
+                    },
+                })
+            );
 
-        this.connected_to.receive_queue.push(data)
+        this.connected_to.receive_queue.push(data);
     }
 
     /**
      * Get a string representation of the interface
-     * 
-     * @returns {string} String representation of the interface 
+     *
+     * @returns {string} String representation of the interface
      */
     toString(): string {
-        return "<Interface " + this.owner.getName() + "-" + this.getName() + ">";
+        return '<Interface ' + this.owner.getName() + '-' + this.getName() + '>';
     }
 }

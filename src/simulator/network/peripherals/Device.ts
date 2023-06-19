@@ -1,5 +1,4 @@
-
-import { Interface, ReceivedPacketEventData } from './Interface'
+import { Interface, ReceivedPacketEventData } from './Interface';
 import { Network } from '../Network';
 import { Drawable } from '../../drawing/Drawable';
 import { Vector2D } from '../../drawing/Vector2D';
@@ -21,7 +20,7 @@ export class DeviceException extends Error {
  */
 export class InterfaceNameTaken extends DeviceException {
     constructor(device: Device, name: string) {
-        super("Device " + device.getName() + " already has an interface named " + name + ".", device);
+        super('Device ' + device.getName() + ' already has an interface named ' + name + '.', device);
     }
 }
 
@@ -46,11 +45,11 @@ export abstract class Device extends Drawable {
 
     /**
      * Initialize a device
-     * 
+     *
      * @param {Network} network Network to which the device belongs
      * @param [string="unknown"] name Name of the device in the network
      */
-    public constructor(network: Network, name: string = "unknown") {
+    public constructor(network: Network, name = 'unknown') {
         super();
         this.interfaces = {};
         this.name = name;
@@ -73,7 +72,7 @@ export abstract class Device extends Drawable {
 
     /**
      * Event handler called when a packet is received on an interface
-     * 
+     *
      * @param {Interface} iface Interfave on whick the packet has been received
      * @param {ArrayBuffer} data Data in the packet
      */
@@ -91,13 +90,12 @@ export abstract class Device extends Drawable {
 
     /**
      * Add an interface to the device
-     * 
+     *
      * @param {string} name Name of the interface
      * @returns {Interface} The new interface
      */
     public addInterface(name: string): Interface {
-        if (name in this.interfaces)
-            throw new InterfaceNameTaken(this, name);
+        if (name in this.interfaces) throw new InterfaceNameTaken(this, name);
 
         const intf: Interface = new Interface(this, name);
         intf.addEventListener('receivedata', ((e: CustomEvent<ReceivedPacketEventData>) => {
@@ -109,7 +107,7 @@ export abstract class Device extends Drawable {
 
     /**
      * Get an interface by name
-     * 
+     *
      * @param {string} name Name of the interface to get
      * @returns {Interface} The interface
      */
@@ -119,7 +117,7 @@ export abstract class Device extends Drawable {
 
     /**
      * Get all the interfaces of the device
-     * 
+     *
      * @returns {Interface[]} List of interfaces
      */
     public getInterfaces(): Interface[] {
@@ -128,16 +126,16 @@ export abstract class Device extends Drawable {
 
     /**
      * Get the first available interface
-     * 
+     *
      * @returns {Interface | undefined} Available interface, or undefined if no interfaces available
      */
     public getFreeInterface(): Interface | undefined {
-        return Object.values(this.interfaces).find(i => i.getConnection() === null);
+        return Object.values(this.interfaces).find((i) => i.getConnection() === null);
     }
 
     /**
      * Get the name of the device
-     * 
+     *
      * @returns {string} Name of the device
      */
     public getName(): string {
@@ -146,7 +144,7 @@ export abstract class Device extends Drawable {
 
     /**
      * Get the network the device belongs to
-     * 
+     *
      * @returns {Network} The network the device belongs to
      */
     public getNetwork(): Network {
@@ -155,16 +153,16 @@ export abstract class Device extends Drawable {
 
     /**
      * Get a string representation of the device
-     * 
+     *
      * @returns {string} String representation of the device
      */
     public toString(): string {
-        return "<Device " + this.getName() + ">";
+        return '<Device ' + this.getName() + '>';
     }
 
     /**
      * Get the network time
-     * 
+     *
      * @returns {number} Network time
      */
     public time(): number {

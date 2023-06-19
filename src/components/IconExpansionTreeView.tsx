@@ -1,35 +1,13 @@
 import * as React from 'react';
-import TreeItem, {
-    TreeItemProps,
-    useTreeItem,
-    TreeItemContentProps,
-} from '@mui/lab/TreeItem';
+import TreeItem, { TreeItemProps, useTreeItem, TreeItemContentProps } from '@mui/lab/TreeItem';
 import clsx from 'clsx';
 import Typography from '@mui/material/Typography';
 
-const CustomContent = React.forwardRef(function CustomContent(
-    props: TreeItemContentProps,
-    ref,
-) {
-    const {
-        classes,
-        className,
-        label,
-        nodeId,
-        icon: iconProp,
-        expansionIcon,
-        displayIcon,
-    } = props;
+const CustomContent = React.forwardRef(function CustomContent(props: TreeItemContentProps, ref) {
+    const { classes, className, label, nodeId, icon: iconProp, expansionIcon, displayIcon } = props;
 
-    const {
-        disabled,
-        expanded,
-        selected,
-        focused,
-        handleExpansion,
-        handleSelection,
-        preventSelection,
-    } = useTreeItem(nodeId);
+    const { disabled, expanded, selected, focused, handleExpansion, handleSelection, preventSelection } =
+        useTreeItem(nodeId);
 
     const icon = iconProp || expansionIcon || displayIcon;
 
@@ -37,20 +15,15 @@ const CustomContent = React.forwardRef(function CustomContent(
         preventSelection(event);
     };
 
-    const handleExpansionClick = (
-        event: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    ) => {
+    const handleExpansionClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         handleExpansion(event);
     };
 
-    const handleSelectionClick = (
-        event: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    ) => {
+    const handleSelectionClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         handleSelection(event);
     };
 
     return (
-        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
         <div
             className={clsx(className, classes.root, {
                 [classes.expanded]: expanded,
@@ -60,17 +33,11 @@ const CustomContent = React.forwardRef(function CustomContent(
             })}
             onMouseDown={handleMouseDown}
             ref={ref as React.Ref<HTMLDivElement>}
-            style={{padding: 0}}
-        >
-            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
+            style={{ padding: 0 }}>
             <div onClick={handleExpansionClick} className={classes.iconContainer}>
                 {icon}
             </div>
-            <Typography
-                onClick={handleSelectionClick}
-                component="div"
-                className={classes.label}
-            >
+            <Typography onClick={handleSelectionClick} component='div' className={classes.label}>
                 {label}
             </Typography>
         </div>

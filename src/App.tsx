@@ -12,17 +12,17 @@ import React from 'react';
 
 const net = new Network();
 
-new STPSwitch(net, "s1", "00:0b:00:00:00:01", 5);
-new STPSwitch(net, "s2", "00:0b:00:00:00:02", 5);
+new STPSwitch(net, 's1', '00:0b:00:00:00:01', 5);
+new STPSwitch(net, 's2', '00:0b:00:00:00:02', 5);
 
-net.addLink("s1", "s2");
+net.addLink('s1', 's2');
 
 Layout.spring_layout(net);
 
 const App: React.FC = () => {
     return (
         <NetworkContext.Provider value={net}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', height: "100%", wudth: "100%" }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', wudth: '100%' }}>
                 <Box sx={{ flexGrow: 1 }}>
                     <AppBar position='static'>
                         <Toolbar variant='dense'>
@@ -33,24 +33,23 @@ const App: React.FC = () => {
                         </Toolbar>
                     </AppBar>
                 </Box>
-                <PanelGroup direction="vertical">
-                    <Panel defaultSize={50} style={{ display: "flex" }}>
-                        <PanelGroup direction="horizontal">
-                            <Panel defaultSize={50} style={{ display: "flex" }}>
+                <PanelGroup direction='vertical'>
+                    <Panel defaultSize={50} style={{ display: 'flex' }}>
+                        <PanelGroup direction='horizontal'>
+                            <Panel defaultSize={50} style={{ display: 'flex' }}>
                                 <Paper sx={{ flexGrow: 1, margin: 1 }}>
                                     <NetworkRenderer />
                                 </Paper>
                             </Panel>
                             <VerticalDivider />
-                            <Panel style={{ display: "flex" }}>
-                                <Paper sx={{ flexGrow: 1, maxWidth: "100%", overflowX: 'auto', margin: 1 }}>
-                                </Paper>
+                            <Panel style={{ display: 'flex' }}>
+                                <Paper sx={{ flexGrow: 1, maxWidth: '100%', overflowX: 'auto', margin: 1 }}></Paper>
                             </Panel>
                         </PanelGroup>
                     </Panel>
                     <HorizontalDivider />
-                    <Panel style={{ display: "flex" }}>
-                        <Paper sx={{ flexGrow: 1, maxWidth: "100%", overflowX: 'auto', margin: 1 }}>
+                    <Panel style={{ display: 'flex' }}>
+                        <Paper sx={{ flexGrow: 1, maxWidth: '100%', overflowX: 'auto', margin: 1 }}>
                             <NetworkAnalyzer />
                         </Paper>
                     </Panel>
@@ -58,6 +57,6 @@ const App: React.FC = () => {
             </Box>
         </NetworkContext.Provider>
     );
-}
+};
 
 export default App;

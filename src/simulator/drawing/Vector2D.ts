@@ -1,4 +1,3 @@
-
 /**
  * Two-dimmensionnal vector class
  */
@@ -18,14 +17,14 @@ export class Vector2D {
      * @param {number} [x=0] X value
      * @param {number} [y=0] Y value
      */
-    public constructor(x: number = 0, y: number = 0) {
+    public constructor(x = 0, y = 0) {
         this.x = x;
         this.y = y;
     }
 
     /**
      * Copy another vector to this vector
-     * 
+     *
      * @param {Vector2D} other Vector to copy
      */
     public copy(other: Vector2D) {
@@ -35,59 +34,47 @@ export class Vector2D {
 
     /**
      * Add another vector and return the result
-     * 
+     *
      * @param {Vector2D} other Vector to add
      * @returns {Vector2D} Result of the addition
      */
     public add(other: Vector2D) {
-        return new Vector2D(
-            this.x + other.x,
-            this.y + other.y
-        )
+        return new Vector2D(this.x + other.x, this.y + other.y);
     }
 
     /**
      * Substract another vector and return the result
-     * 
+     *
      * @param {Vector2D} other Vector to substract
      * @returns {Vector2D} Result of the substraction
      */
     public sub(other: Vector2D) {
-        return new Vector2D(
-            this.x - other.x,
-            this.y - other.y
-        )
+        return new Vector2D(this.x - other.x, this.y - other.y);
     }
 
     /**
      * Divide the vector by a scalar and return the result
-     * 
+     *
      * @param {number} a Number to divide with
      * @returns {Vector2D} Result of the division
      */
     public div(a: number) {
-        return new Vector2D(
-            this.x / a,
-            this.y / a
-        )
+        return new Vector2D(this.x / a, this.y / a);
     }
 
     /**
      * Multiply the vector by a scalar and return the result
-     * 
+     *
      * @param {number} a Number to multiply with
      * @returns {Vector2D} Result of the multiplication
      */
     public mul(a: number) {
-        return new Vector2D(
-            this.x * a,
-            this.y * a
-        )
+        return new Vector2D(this.x * a, this.y * a);
     }
 
     /**
      * Get the length of the vector
-     * 
+     *
      * @returns {number} Length of the vector
      */
     public length(): number {
@@ -96,7 +83,7 @@ export class Vector2D {
 
     /**
      * Get the square length of the vector
-     * 
+     *
      * @returns {number} Square length of the vector
      */
     public sqlength(): number {
@@ -105,38 +92,37 @@ export class Vector2D {
 
     /**
      * Get the distance between this and an other vector
-     * 
+     *
      * @param {Vector2D} other Vector to measure the distance of
      * @returns {number} Distance between the two vectors
      */
     public dist(other: Vector2D) {
-        return this.sub(other).length()
+        return this.sub(other).length();
     }
 
     /**
      * Get the square distance between this and an other vector
-     * 
+     *
      * @param {Vector2D} other Vector to measure the distance of
      * @returns {number} Square distance between the two vectors
      */
     public sqdist(other: Vector2D) {
-        return this.sub(other).sqlength()
+        return this.sub(other).sqlength();
     }
 
     /**
      * Normalize the vector
-     * 
+     *
      * @returns {Vector2D} Normalized vector
      */
     public normalize() {
-        if (this.length() === 0)
-            return new Vector2D()
+        if (this.length() === 0) return new Vector2D();
         return this.div(this.length());
     }
 
     /**
      * Get the direction between this vector and another vector
-     * 
+     *
      * @param {Vector2D} other Vector to get the direciton to
      * @returns {Vector2D} Direction to the other vector (normalized)
      */

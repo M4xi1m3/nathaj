@@ -1,4 +1,4 @@
-import { DataViewField } from "./DataViewField";
+import { DataViewField } from './DataViewField';
 
 /**
  * Signed 2 bytes integer field

@@ -1,4 +1,4 @@
-import { ShortField } from "./ShortField";
+import { ShortField } from './ShortField';
 
 /**
  * Unsigned 2 bytes hexadecimal integer field

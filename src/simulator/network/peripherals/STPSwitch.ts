@@ -1,13 +1,13 @@
-import { Vector2D } from "../../drawing/Vector2D";
-import { Network } from "../Network";
-import { Ethernet } from "../packets/definitions/Ethernet";
-import { Interface } from "./Interface";
+import { Vector2D } from '../../drawing/Vector2D';
+import { Network } from '../Network';
+import { Ethernet } from '../packets/definitions/Ethernet';
+import { Interface } from './Interface';
 import STPSwitchImg from '../../../assets/stp-switch.png';
 import { BPDU as BPDUPacket } from '../packets/definitions/BPDU';
-import { Switch } from "./Switch";
+import { Switch } from './Switch';
 
-const STPSwitchImage = new Image()
-STPSwitchImage.src = STPSwitchImg
+const STPSwitchImage = new Image();
+STPSwitchImage.src = STPSwitchImg;
 
 /**
  * State of the ports
@@ -17,7 +17,7 @@ enum PortState {
     Listening = 1,
     Learning = 2,
     Forwarding = 3,
-    Disabled = 4
+    Disabled = 4,
 }
 
 /**
@@ -27,12 +27,12 @@ enum PortRole {
     Root = 0,
     Designated = 1,
     Blocking = 2,
-    Disabled = 3
+    Disabled = 3,
 }
 
 /**
  * Bridge identifier
- * 
+ *
  * @internal
  */
 class Identifier {
@@ -41,7 +41,6 @@ class Identifier {
      */
     priority: number;
 
-
     /**
      * Bridge mac address
      */
@@ -49,7 +48,7 @@ class Identifier {
 
     /**
      * Create an identifier
-     * 
+     *
      * @param {number} priority Bridge priority
      * @param {string} mac Bridge mac address
      */
@@ -58,24 +57,23 @@ class Identifier {
         this.mac = mac;
     }
 
-
     /**
      * Convert the identifier to a 64 bit number
-     * 
+     *
      * @returns {number} Number corresponding to the identifier
      */
     toNumber() {
         let mac = 0;
-        this.mac.split(":").forEach((v: string, k: number) => {
-            mac <<= 8
-            mac |= parseInt(v, 16) & 0xFF
+        this.mac.split(':').forEach((v: string) => {
+            mac <<= 8;
+            mac |= parseInt(v, 16) & 0xff;
         });
         return (this.priority << 48) | mac;
     }
 
     /**
      * Check equality between two identifiers
-     * 
+     *
      * @param {Identifier} other Identifier to check against
      * @returns {boolean} True if the identifier are equal, false otherwise
      */
@@ -86,7 +84,7 @@ class Identifier {
 
 /**
  * Bridge Protocol Data Unit class
- * 
+ *
  * @internal
  */
 class BPDU {
@@ -112,7 +110,7 @@ class BPDU {
 
     /**
      * Create a BPDU
-     * 
+     *
      * @param {Identifier} root_id ID of the root
      * @param {number} root_cost Cost to the root
      * @param {Identifier} bridge_id ID of the bridge
@@ -127,7 +125,7 @@ class BPDU {
 
     /**
      * Convert a BPDU packet to a BPDU
-     * 
+     *
      * @param {BPDUPacket} packet Packet to convert from
      * @returns {BPDU} The extracted BPDU
      */
@@ -137,12 +135,12 @@ class BPDU {
             packet.root_cost,
             new Identifier(packet.bridge_priority, packet.bridge_mac),
             packet.bridge_port
-        )
+        );
     }
 
     /**
      * Convert the BPDU to a packet
-     * 
+     *
      * @param {string} mac Ethernet packet's source address
      * @returns {Ethernet} Ethernet packet containing the BPDU
      */
@@ -150,16 +148,18 @@ class BPDU {
         const ether = new Ethernet({
             dst: '01:81:c2:00:00:00',
             src: mac,
-            type: 0x8042
-        })
-        ether.setNext(new BPDUPacket({
-            root_priority: this.root_id.priority,
-            root_mac: this.root_id.mac,
-            root_cost: this.root_cost,
-            bridge_priority: this.bridge_id.priority,
-            bridge_mac: this.bridge_id.mac,
-            bridge_port: this.port_id
-        }));
+            type: 0x8042,
+        });
+        ether.setNext(
+            new BPDUPacket({
+                root_priority: this.root_id.priority,
+                root_mac: this.root_id.mac,
+                root_cost: this.root_cost,
+                bridge_priority: this.bridge_id.priority,
+                bridge_mac: this.bridge_id.mac,
+                bridge_port: this.port_id,
+            })
+        );
         return ether;
     }
 
@@ -171,31 +171,31 @@ class BPDU {
     lt(other: BPDU): boolean {
         if (this.root_id.toNumber() !== other.root_id.toNumber())
             return this.root_id.toNumber() < other.root_id.toNumber();
-        if (this.root_cost !== other.root_cost)
-            return this.root_cost < other.root_cost;
+        if (this.root_cost !== other.root_cost) return this.root_cost < other.root_cost;
         if (this.bridge_id.toNumber() !== other.bridge_id.toNumber())
             return this.bridge_id.toNumber() < other.bridge_id.toNumber();
-        if (this.port_id !== other.port_id)
-            return this.port_id < other.port_id;
+        if (this.port_id !== other.port_id) return this.port_id < other.port_id;
         return false;
     }
 
     /**
      * Check for equality with another BPDU
-     * 
+     *
      * @param {BPDU} other BPDU to check for equality
      * @returns {boolean} True if the BPDUs are equal, false otherwise
      */
     eq(other: BPDU): boolean {
-        return (this.root_id.toNumber() === other.root_id.toNumber())
-            && (this.root_cost === other.root_cost)
-            && (this.bridge_id.toNumber() === other.bridge_id.toNumber())
-            && (this.port_id === other.port_id);
+        return (
+            this.root_id.toNumber() === other.root_id.toNumber() &&
+            this.root_cost === other.root_cost &&
+            this.bridge_id.toNumber() === other.bridge_id.toNumber() &&
+            this.port_id === other.port_id
+        );
     }
 
     /**
      * Get the best BPDU
-     * 
+     *
      * @param {BPDU} other BPDU to compare against
      * @returns {BPDU} Best BPDU
      */
@@ -206,7 +206,7 @@ class BPDU {
 
 /**
  * Class storing the data of a port in an STP switch
- * 
+ *
  * @internal
  */
 class PortData {
@@ -243,17 +243,17 @@ class PortData {
     /**
      * Expiry timestamp of the port's hold timer
      */
-    hold_timer_expiry: number = 0;
+    hold_timer_expiry = 0;
 
     /**
      * Expiry timestamp of the port's message age timer
      */
-    message_age_expiry: number = 0;
+    message_age_expiry = 0;
 
     /**
      * Expiry timestamp of the port's forward timer
      */
-    forward_delay_expiry: number = 0;
+    forward_delay_expiry = 0;
 
     constructor(controller: STPSwitch, id: number, path_cost: number) {
         this.controller = controller;
@@ -277,15 +277,13 @@ class PortData {
 
     /**
      * Check if the port can send a BPDU
-     * 
+     *
      * @returns {boolean} True if the port can send BPDUs
      */
     canSend(): boolean {
-        if (this.disabled() || this.blocking())
-            return false;
+        if (this.disabled() || this.blocking()) return false;
 
-        if (this.controller.time() < this.hold_timer_expiry)
-            return false;
+        if (this.controller.time() < this.hold_timer_expiry) return false;
 
         return true;
     }
@@ -294,7 +292,7 @@ class PortData {
      * Enable the port
      */
     enable() {
-        this.initialize()
+        this.initialize();
     }
 
     /**
@@ -307,7 +305,7 @@ class PortData {
 
     /**
      * Check if the port is disabled
-     * 
+     *
      * @returns {boolean} True if the port is disabled, false otherwise
      */
     disabled(): boolean {
@@ -316,7 +314,7 @@ class PortData {
 
     /**
      * Check if the port is blocking
-     * 
+     *
      * @returns {boolean} True if the port is blocking, false otherwise
      */
     blocking(): boolean {
@@ -325,7 +323,7 @@ class PortData {
 
     /**
      * Update the configuration with the received BPDU
-     * 
+     *
      * @param {BPDU} config Received BPDU
      */
     updateConfig(config: BPDU) {
@@ -355,7 +353,7 @@ class PortData {
 
     /**
      * Update the state and role of the port
-     * 
+     *
      * @param {PortState} state New state of the port
      * @param {PortRole} role New role of the port
      */
@@ -370,11 +368,9 @@ class PortData {
      * Make the port blocking
      */
     makeBlocking() {
-        if (this.disabled())
-            return;
+        if (this.disabled()) return;
 
-        if (this.state === PortState.Blocking && this.role === PortRole.Blocking)
-            return;
+        if (this.state === PortState.Blocking && this.role === PortRole.Blocking) return;
 
         this.updateState(PortState.Blocking, PortRole.Blocking);
     }
@@ -383,11 +379,9 @@ class PortData {
      * Make the port root
      */
     makeRoot() {
-        if (this.disabled())
-            return;
+        if (this.disabled()) return;
 
-        if (this.state !== PortState.Blocking && this.role === PortRole.Root)
-            return;
+        if (this.state !== PortState.Blocking && this.role === PortRole.Root) return;
 
         this.updateState(PortState.Listening, PortRole.Root);
     }
@@ -396,11 +390,9 @@ class PortData {
      * Make the port designated
      */
     makeDesignated() {
-        if (this.disabled())
-            return;
+        if (this.disabled()) return;
 
-        if (this.state !== PortState.Blocking && this.role === PortRole.Designated)
-            return;
+        if (this.state !== PortState.Blocking && this.role === PortRole.Designated) return;
 
         this.updateState(PortState.Listening, PortRole.Designated);
     }
@@ -408,7 +400,7 @@ class PortData {
 
 /**
  * Switch implementing the spanninf tree protocol
- * 
+ *
  * See IEEE 802.1D (1998) section 8 and 9
  */
 export class STPSwitch extends Switch {
@@ -418,13 +410,13 @@ export class STPSwitch extends Switch {
      */
     identifier: Identifier;
 
-    private hello_timer_expiry: number = 0;
+    private hello_timer_expiry = 0;
 
     /**
      * Ports informations
      * @internal
      */
-    private port_infos: { [intf: string]: PortData }
+    private port_infos: { [intf: string]: PortData };
 
     hold_time: number;
     message_age: number;
@@ -433,7 +425,7 @@ export class STPSwitch extends Switch {
 
     /**
      * Create a stp-capable switch
-     * 
+     *
      * @param {Network} network Network to put the switch in
      * @param {string} name Name of the switch
      * @param {string} mac MAC address of the switch
@@ -456,7 +448,7 @@ export class STPSwitch extends Switch {
      */
     private initialize() {
         let i = 0;
-        this.getInterfaces().forEach(intf => {
+        this.getInterfaces().forEach((intf) => {
             this.port_infos[intf.getName()] = new PortData(this, i, 1);
             this.port_infos[intf.getName()].initialize();
             i++;
@@ -467,13 +459,13 @@ export class STPSwitch extends Switch {
 
     /**
      * Get the best stored BPDU
-     * 
+     *
      * @returns {BPDU} Best stored BPDU
      * @internal
      */
     private getBestBPDU(): BPDU {
-        let best = this.port_infos[this.getInterfaces()[0].getName()].bpdu
-        this.getInterfaces().forEach(intf => {
+        let best = this.port_infos[this.getInterfaces()[0].getName()].bpdu;
+        this.getInterfaces().forEach((intf) => {
             best = best.winner(this.port_infos[intf.getName()].bpdu);
         });
         return best;
@@ -481,17 +473,16 @@ export class STPSwitch extends Switch {
 
     /**
      * Get the root port's data
-     * 
+     *
      * @returns {PortData | null} Root's port data, or null if the switch has no root port (ie. is a root switch)
      * @internal
      */
     private getRootPort(): PortData | null {
-        if (this.getBestBPDU().root_id.eq(this.identifier))
-            return null;
+        if (this.getBestBPDU().root_id.eq(this.identifier)) return null;
 
-        let best = this.port_infos[this.getInterfaces()[0].getName()]
+        let best = this.port_infos[this.getInterfaces()[0].getName()];
 
-        this.getInterfaces().forEach(intf => {
+        this.getInterfaces().forEach((intf) => {
             const tmp = best.bpdu.winner(this.port_infos[intf.getName()].bpdu);
             best = tmp === best.bpdu ? best : this.port_infos[intf.getName()];
         });
@@ -500,16 +491,20 @@ export class STPSwitch extends Switch {
 
     /**
      * Transmit a BPDU to an interface
-     * 
+     *
      * @param {Interface} intf Interface to tramit a BPDU to
      */
     private transmitConfig(intf: Interface): void {
         const port = this.port_infos[intf.getName()];
-        if (!port.canSend())
-            return;
+        if (!port.canSend()) return;
 
         const best = this.getBestBPDU();
-        const bpdu = new BPDU(best.root_id, best.bridge_id.eq(this.identifier) ? port.path_cost : best.root_cost + port.path_cost, this.identifier, port.id);
+        const bpdu = new BPDU(
+            best.root_id,
+            best.bridge_id.eq(this.identifier) ? port.path_cost : best.root_cost + port.path_cost,
+            this.identifier,
+            port.id
+        );
 
         intf.send(bpdu.toPacket(this.getMac()).raw());
     }
@@ -529,7 +524,7 @@ export class STPSwitch extends Switch {
 
     /**
      * Handle a received BPDU
-     * 
+     *
      * @param {BPDU} bpdu BPDU to handle
      * @param {Interface} intf Interface on which the BPDU was received
      * @internal
@@ -591,13 +586,15 @@ export class STPSwitch extends Switch {
         } else if (packet.dst in this.mac_address_table) {
             this.getInterface(this.mac_address_table[packet.dst]).send(data);
         } else {
-            this.getInterfaces().filter(intf => intf !== iface).forEach((intf) => intf.send(data))
+            this.getInterfaces()
+                .filter((intf) => intf !== iface)
+                .forEach((intf) => intf.send(data));
         }
     }
 
     /**
      * Draw an STP interface
-     * 
+     *
      * @param {CanvasRenderingContext2D} ctx Canvas context used to draw
      * @param {Interface} intf Interface to draw
      * @param {number} devRadius Radius of the device to draw the interface on
@@ -605,21 +602,27 @@ export class STPSwitch extends Switch {
      * @param {Vector2D} direction Direction at which to put the interface
      * @param {string} color Color of the interface
      */
-    private drawSTPInterface(ctx: CanvasRenderingContext2D, intf: Interface, devRadius: number, drawPos: Vector2D, direction: Vector2D) {
-        const intfPos = drawPos.add(direction.mul(devRadius + 5))
+    private drawSTPInterface(
+        ctx: CanvasRenderingContext2D,
+        intf: Interface,
+        devRadius: number,
+        drawPos: Vector2D,
+        direction: Vector2D
+    ) {
+        const intfPos = drawPos.add(direction.mul(devRadius + 5));
 
         switch (this.port_infos[intf.getName()].role) {
             case PortRole.Disabled:
-                ctx.fillStyle = "#DD0000";
+                ctx.fillStyle = '#DD0000';
                 break;
             case PortRole.Blocking:
-                ctx.fillStyle = "#DDDD00";
+                ctx.fillStyle = '#DDDD00';
                 break;
             case PortRole.Root:
-                ctx.fillStyle = "#0000DD";
+                ctx.fillStyle = '#0000DD';
                 break;
             case PortRole.Designated:
-                ctx.fillStyle = "#00DD00";
+                ctx.fillStyle = '#00DD00';
                 break;
         }
 
@@ -629,19 +632,19 @@ export class STPSwitch extends Switch {
 
         switch (this.port_infos[intf.getName()].state) {
             case PortState.Disabled:
-                ctx.fillStyle = "#DD0000";
+                ctx.fillStyle = '#DD0000';
                 break;
             case PortState.Blocking:
-                ctx.fillStyle = "#DDDD00";
+                ctx.fillStyle = '#DDDD00';
                 break;
             case PortState.Listening:
-                ctx.fillStyle = "#6666DD";
+                ctx.fillStyle = '#6666DD';
                 break;
             case PortState.Learning:
-                ctx.fillStyle = "#66DDDD";
+                ctx.fillStyle = '#66DDDD';
                 break;
             case PortState.Forwarding:
-                ctx.fillStyle = "#00DD00";
+                ctx.fillStyle = '#00DD00';
                 break;
         }
 
@@ -652,7 +655,14 @@ export class STPSwitch extends Switch {
 
     draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
         this.drawSquareImage(ctx, this.getPosition().add(offset), STPSwitchImage, 12);
-        this.drawInterfaces(ctx, this.getPosition().add(offset), 12, this.getInterfaces(), this.intfPositionSquare, this.drawSTPInterface.bind(this));
+        this.drawInterfaces(
+            ctx,
+            this.getPosition().add(offset),
+            12,
+            this.getInterfaces(),
+            this.intfPositionSquare,
+            this.drawSTPInterface.bind(this)
+        );
     }
 
     tick(): void {

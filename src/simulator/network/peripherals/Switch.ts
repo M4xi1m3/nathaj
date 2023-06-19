@@ -1,16 +1,16 @@
-import { Vector2D } from "../../drawing/Vector2D";
-import { Network } from "../Network";
-import { Ethernet } from "../packets/definitions/Ethernet";
-import { Hub } from "./Hub";
-import { Interface } from "./Interface";
+import { Vector2D } from '../../drawing/Vector2D';
+import { Network } from '../Network';
+import { Ethernet } from '../packets/definitions/Ethernet';
+import { Hub } from './Hub';
+import { Interface } from './Interface';
 import SwitchImg from '../../../assets/switch.png';
 
-const SwitchImage = new Image()
-SwitchImage.src = SwitchImg
+const SwitchImage = new Image();
+SwitchImage.src = SwitchImg;
 
 /**
  * Basic learning switch
- * 
+ *
  * A learning switch is a more evolved version of a hub
  * Instead of forwarding to all interfaces, it learns
  * the relation between mac address and interface to
@@ -29,7 +29,7 @@ export class Switch extends Hub {
 
     /**
      * Create a switch
-     * 
+     *
      * @param {Network} network Network to put the switch in
      * @param {string} name Name of the switch
      * @param {string} mac MAC address of the switch
@@ -57,7 +57,9 @@ export class Switch extends Hub {
         if (packet.dst in this.mac_address_table) {
             this.getInterface(this.mac_address_table[packet.dst]).send(data);
         } else {
-            this.getInterfaces().filter(intf => intf !== iface).forEach((intf) => intf.send(data))
+            this.getInterfaces()
+                .filter((intf) => intf !== iface)
+                .forEach((intf) => intf.send(data));
         }
     }
 
@@ -66,11 +68,8 @@ export class Switch extends Hub {
         this.drawInterfaces(ctx, this.getPosition().add(offset), 12, this.getInterfaces(), this.intfPositionSquare);
     }
 
-    tick(): void {
-    }
-
     reset(): void {
-        super.reset()
+        super.reset();
         this.mac_address_table = {};
     }
 }

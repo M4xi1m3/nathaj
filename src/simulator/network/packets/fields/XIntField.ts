@@ -1,4 +1,4 @@
-import { IntField } from "./IntField";
+import { IntField } from './IntField';
 
 /**
  * Unsigned 4 bytes integer hexadecimal field

@@ -1,4 +1,4 @@
-import { DataViewField } from "./DataViewField";
+import { DataViewField } from './DataViewField';
 
 /**
  * Single precision floating number field

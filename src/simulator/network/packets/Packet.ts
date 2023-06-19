@@ -1,4 +1,3 @@
-
 import { PacketDirection } from '../Network';
 import { Field } from './Field';
 import { Layer } from './Layer';
@@ -30,7 +29,7 @@ export class AnalysisItem {
 
     /**
      * Get the start and end position in the data
-     * 
+     *
      * @returns {[number, number]} Start and end positions
      */
     public bounds(): [number, number] {
@@ -51,7 +50,7 @@ export class AnalysisTree extends AnalysisItem {
 
     /**
      * Check if an item fits in that tree
-     * 
+     *
      * @param {number} start Start position to check
      * @param {number} length Length to check
      * @returns {boolean} True if it fits, false otherwise
@@ -59,20 +58,19 @@ export class AnalysisTree extends AnalysisItem {
     private fits(start: number, length: number) {
         const end = start + length - 1;
 
-        if (start < this.start || end > (this.start + this.length - 1)) {
+        if (start < this.start || end > this.start + this.length - 1) {
             return false;
         }
 
         for (const [other_start, other_end] of this.items.map((v) => v.bounds())) {
-            if (start <= other_end && end >= other_start)
-                return true;
+            if (start <= other_end && end >= other_start) return true;
         }
         return false;
     }
 
     /**
      * Add an item to the tree
-     * 
+     *
      * @param {string} label Label of the item
      * @param {number} start Start position of the item
      * @param {number} length Length of the item
@@ -90,7 +88,7 @@ export class AnalysisTree extends AnalysisItem {
 
     /**
      * Add a sub tree to the tree
-     * 
+     *
      * @param {string} label Label of the sub tree
      * @param {number} start Start position of the sub tree
      * @param {number} length Length of the sub tree
@@ -113,7 +111,7 @@ export class AnalysisTree extends AnalysisItem {
 export class RootTree extends AnalysisTree {
     /**
      * Get the next available spot
-     * 
+     *
      * @returns {number} The next available spot
      */
     private availableSpot() {
@@ -131,7 +129,6 @@ export class RootTree extends AnalysisTree {
     public addItem(label: string, start: number, length: number): AnalysisItem | undefined {
         return super.addItem(label, this.availableSpot(), length);
     }
-
 }
 
 /**
@@ -173,7 +170,6 @@ export class AnalyzedPacket {
      */
     public intf: string;
 
-
     /**
      * Source address
      */
@@ -189,12 +185,10 @@ export class AnalyzedPacket {
      */
     public protocol: string | null = null;
 
-
     /**
      * Complementary information
      */
     public info: string | null = null;
-
 
     /**
      * Analyzed packet tree
@@ -207,9 +201,9 @@ export class AnalyzedPacket {
         this.time = time;
         this.dev = dev;
         this.intf = intf;
-        this.origin = dev + "-" + intf;
+        this.origin = dev + '-' + intf;
         this.direction = direction;
-        this.tree = new RootTree("Packet", 0, this.data.byteLength);
+        this.tree = new RootTree('Packet', 0, this.data.byteLength);
     }
 }
 
@@ -241,7 +235,7 @@ export class _Packet<T> {
 
     /**
      * Create a packet
-     * 
+     *
      * @param {undefined | object | ArrayBuffer} data Data to create the packet from.
      */
     constructor(data?: { [key in keyof T]: any | ArrayBuffer }) {
@@ -262,7 +256,7 @@ export class _Packet<T> {
 
     /**
      * Get the fields list
-     * 
+     *
      * @returns {Field[]} Packet's field list
      */
     public getFields(): Field[] {
@@ -271,7 +265,7 @@ export class _Packet<T> {
 
     /**
      * Get the dissector
-     * 
+     *
      * @returns {Dissector} Packet's dissector
      */
     public getDissector(): Dissector<any> {
@@ -280,7 +274,7 @@ export class _Packet<T> {
 
     /**
      * Get the protocol's name
-     * 
+     *
      * @returns {string} Name of the protocol
      */
     public getProto(): string {
@@ -289,7 +283,7 @@ export class _Packet<T> {
 
     /**
      * Parse the packet from binary data
-     * 
+     *
      * @param {ArrayBuffer} data Data to parse
      * @returns {ArrayBuffer} Remaining data
      */
@@ -309,7 +303,7 @@ export class _Packet<T> {
 
     /**
      * Dissect the packet
-     * 
+     *
      * @param {AnalyzedPacket} analyzed Analyzed packet input
      * @returns {AnalyzedPacket} Dissected packet
      */
@@ -325,7 +319,7 @@ export class _Packet<T> {
 
     /**
      * Transforms the packet to raw binary data
-     * 
+     *
      * @param {ArrayBuffer} [buffer] Existing buffer to append to (creates if not provided)
      * @returns {ArrayBuffer} Raw data
      */
@@ -334,15 +328,14 @@ export class _Packet<T> {
             buffer = field.raw(buffer, this);
         }
 
-        if (this.next !== undefined)
-            buffer = this.next.raw(buffer);
+        if (this.next !== undefined) buffer = this.next.raw(buffer);
 
         return buffer;
     }
 
     /**
      * Sets the next packet in the packet
-     * 
+     *
      * @param {Packet} next Next packet
      * @returns {Packet} Next packet
      */
@@ -353,8 +346,8 @@ export class _Packet<T> {
 
     /**
      * Get the next packet
-     * 
-     * @returns {Packet} Next packet 
+     *
+     * @returns {Packet} Next packet
      */
     public getNext() {
         return this.next;
@@ -364,6 +357,6 @@ export class _Packet<T> {
 /**
  * Packet class
  */
-export const Packet = _Packet as ({
-    new <T>(data?: T | ArrayBuffer): _Packet<T> & T
-});
+export const Packet = _Packet as {
+    new <T>(data?: T | ArrayBuffer): _Packet<T> & T;
+};

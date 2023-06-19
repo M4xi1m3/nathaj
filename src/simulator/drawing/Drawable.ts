@@ -1,5 +1,5 @@
-import { Interface } from "../network/peripherals/Interface";
-import { Vector2D } from "./Vector2D";
+import { Interface } from '../network/peripherals/Interface';
+import { Vector2D } from './Vector2D';
 
 /**
  * Represents something that can be drawn
@@ -12,7 +12,7 @@ export abstract class Drawable {
 
     /**
      * Draw the object
-     * 
+     *
      * @param {CanvasRenderingContext2D} ctx Canvas context to draw the object
      * @param {Vector2D} offset Offset to apply to the position before drawing
      */
@@ -20,7 +20,7 @@ export abstract class Drawable {
 
     /**
      * Check for collision between the object and a point
-     * 
+     *
      * @param {Vector2D} position Point to check for collision with
      */
     public abstract collision(position: Vector2D): boolean;
@@ -32,11 +32,11 @@ export abstract class Drawable {
 
     /**
      * Get the position of the object
-     * 
-     * @returns {Vector2D} Position of the object 
+     *
+     * @returns {Vector2D} Position of the object
      */
     public getPosition(): Vector2D {
-        return new Vector2D(this.position.x, this.position.y)
+        return new Vector2D(this.position.x, this.position.y);
     }
 
     /**
@@ -76,7 +76,7 @@ export abstract class Drawable {
 
     /**
      * Draw a simple interface (a dot)
-     * 
+     *
      * @param {CanvasRenderingContext2D} ctx Canvas context used to draw
      * @param {Interface} intf Interface to draw
      * @param {number} devRadius Radius of the device to draw the interface on
@@ -84,8 +84,15 @@ export abstract class Drawable {
      * @param {Vector2D} direction Direction at which to put the interface
      * @param {string} color Color of the interface
      */
-    protected drawSimpleInterface(ctx: CanvasRenderingContext2D, intf: Interface, devRadius: number, drawPos: Vector2D, direction: Vector2D, color: string = "#00FF00") {
-        const intfPos = drawPos.add(direction.mul(devRadius + 5))
+    protected drawSimpleInterface(
+        ctx: CanvasRenderingContext2D,
+        intf: Interface,
+        devRadius: number,
+        drawPos: Vector2D,
+        direction: Vector2D,
+        color = '#00FF00'
+    ) {
+        const intfPos = drawPos.add(direction.mul(devRadius + 5));
 
         ctx.fillStyle = color;
         ctx.beginPath();
@@ -95,7 +102,7 @@ export abstract class Drawable {
 
     /**
      * Draw all of a device's interface
-     * 
+     *
      * @typedef {(direction: Vector2D) => Vector2D} DirectionFunction
      * @typedef {(ctx: CanvasRenderingContext2D, intf: Interface, devRadius: number, drawPos: Vector2D, direction: Vector2D) => void} DrawInterfaceFunction
      *
@@ -106,10 +113,25 @@ export abstract class Drawable {
      * @param {DirectionFunction} [intfPosition] Function used to determine the direction of the interfaces
      * @param {DrawInterfaceFunction} [drawIntferface] Function used to draw the interfaces
      */
-    protected drawInterfaces(ctx: CanvasRenderingContext2D, drawPos: Vector2D, devRadius: number, interfaces: Interface[], intfPosition: (direction: Vector2D) => Vector2D = this.intfPositionCircle, drawIntferface: (ctx: CanvasRenderingContext2D, intf: Interface, devRadius: number, drawPos: Vector2D, direction: Vector2D) => void = this.drawSimpleInterface) {
+    protected drawInterfaces(
+        ctx: CanvasRenderingContext2D,
+        drawPos: Vector2D,
+        devRadius: number,
+        interfaces: Interface[],
+        intfPosition: (direction: Vector2D) => Vector2D = this.intfPositionCircle,
+        drawIntferface: (
+            ctx: CanvasRenderingContext2D,
+            intf: Interface,
+            devRadius: number,
+            drawPos: Vector2D,
+            direction: Vector2D
+        ) => void = this.drawSimpleInterface
+    ) {
         for (const intf of interfaces) {
             if (intf.getConnection() !== null) {
-                const direction = intfPosition(this.position.direction(intf.getConnection()?.getOwner()?.position ?? new Vector2D()))
+                const direction = intfPosition(
+                    this.position.direction(intf.getConnection()?.getOwner()?.position ?? new Vector2D())
+                );
                 drawIntferface(ctx, intf, devRadius, drawPos, direction);
             }
         }
@@ -122,7 +144,7 @@ export abstract class Drawable {
      * @param {number} radius Radius of the circle
      * @param {string} color Color of the circle
      */
-    protected drawCircle(ctx: CanvasRenderingContext2D, drawPos: Vector2D, radius: number, color: string = "#000000") {
+    protected drawCircle(ctx: CanvasRenderingContext2D, drawPos: Vector2D, radius: number, color = '#000000') {
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.arc(drawPos.x, drawPos.y, radius, 0, 2 * Math.PI);
@@ -136,9 +158,14 @@ export abstract class Drawable {
      * @param {HTMLImageElement} img Image to draw
      * @param {number} devRadius Radius of the circle
      */
-    protected drawSquareImage(ctx: CanvasRenderingContext2D, drawPos: Vector2D, img: HTMLImageElement, devRadius: number) {
-        ctx.fillStyle = "#000000";
-        ctx.fillRect(drawPos.x - devRadius, drawPos.y - devRadius, devRadius * 2, devRadius * 2)
+    protected drawSquareImage(
+        ctx: CanvasRenderingContext2D,
+        drawPos: Vector2D,
+        img: HTMLImageElement,
+        devRadius: number
+    ) {
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(drawPos.x - devRadius, drawPos.y - devRadius, devRadius * 2, devRadius * 2);
         ctx.drawImage(img, drawPos.x - devRadius, drawPos.y - devRadius, 2 * devRadius, 2 * devRadius);
     }
 }

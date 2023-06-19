@@ -1,4 +1,4 @@
-import { ByteField } from "./ByteField";
+import { ByteField } from './ByteField';
 
 /**
  * Unsigned hexadecimal byte field
