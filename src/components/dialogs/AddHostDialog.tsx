@@ -1,10 +1,10 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import React, { useContext, useEffect, useState } from 'react';
 import { NetworkContext } from '../../NetworkContext';
 import { Host } from '../../simulator/network/peripherals/Host';
-
-const macRegexp = new RegExp('^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$');
+import { MacInput } from '../fields/MacInput';
+import { NameInput } from '../fields/NameInput';
 
 interface AddHostDialogProps {
     close: () => void;
@@ -17,12 +17,10 @@ export const AddHostDialog: React.FC<AddHostDialogProps> = ({ opened, close }) =
     const { enqueueSnackbar } = useSnackbar();
 
     const [name, setName] = useState<string>('');
-    const nameError = name === '' || network.hasDevice(name);
+    const [nameError, setNameError] = useState<boolean>(false);
+
     const [mac, setMac] = useState<string>('');
-    let macError = !macRegexp.test(mac);
-    if (!macError) {
-        macError = (parseInt(mac.split(':')[0], 16) & 1) !== 0;
-    }
+    const [macError, setMacError] = useState<boolean>(false);
 
     useEffect(() => {
         setName('');
@@ -33,30 +31,8 @@ export const AddHostDialog: React.FC<AddHostDialogProps> = ({ opened, close }) =
         <Dialog open={opened} onClose={() => close()}>
             <DialogTitle>Add Host</DialogTitle>
             <DialogContent>
-                <TextField
-                    variant='standard'
-                    type='text'
-                    label='Name'
-                    fullWidth
-                    margin='dense'
-                    value={name}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                        setName(event.target.value);
-                    }}
-                    error={nameError}
-                />
-                <TextField
-                    variant='standard'
-                    type='text'
-                    label='MAC address'
-                    fullWidth
-                    margin='dense'
-                    value={mac}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                        setMac(event.target.value);
-                    }}
-                    error={macError}
-                />
+                <NameInput name={name} setName={setName} setNameError={setNameError} />
+                <MacInput mac={mac} setMac={setMac} setMacError={setMacError} />
             </DialogContent>
             <DialogActions>
                 <Button onClick={() => close()}>Cancel</Button>
