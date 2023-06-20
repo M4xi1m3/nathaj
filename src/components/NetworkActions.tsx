@@ -3,6 +3,9 @@ import { IconButton } from '@mui/material';
 import React, { useContext, useState } from 'react';
 import { NetworkContext } from '../NetworkContext';
 
+/**
+ * Network actions component
+ */
 export const NetworkActions: React.FC = () => {
     const network = useContext(NetworkContext);
     const [playing, setPlaying] = useState(false);

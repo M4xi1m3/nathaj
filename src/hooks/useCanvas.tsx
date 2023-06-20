@@ -1,6 +1,16 @@
 import { useRef, useEffect } from 'react';
 
-export const useCanvas = (draw: (ctx: CanvasRenderingContext2D, frame: number) => void) => {
+/**
+ * Hook used to get an HTML canvas
+ *
+ * @typedef {(ctx: CanvasRenderingContext2D, frame: number) => void} DrawCallback
+ *
+ * @param {DrawCallback} draw Function used to draw
+ * @returns {React.RefObject<HTMLCanvasElement>} Reference to the canvas tag
+ */
+export const useCanvas = (
+    draw: (ctx: CanvasRenderingContext2D, frame: number) => void
+): React.RefObject<HTMLCanvasElement> => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {

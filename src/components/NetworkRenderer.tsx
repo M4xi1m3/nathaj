@@ -7,6 +7,9 @@ import { Vector2D } from '../simulator/drawing/Vector2D';
 import { Layout } from '../simulator/drawing/Layout';
 import React from 'react';
 
+/**
+ * Network renderer component
+ */
 export const NetworkRenderer: React.FC = () => {
     const network = useContext(NetworkContext);
 

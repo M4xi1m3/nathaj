@@ -147,6 +147,9 @@ const numberToPrintableChar = (num: number): string => {
     return '.';
 };
 
+/**
+ * Render an hex dump
+ */
 export const HexDumpRenderer: React.FC<{
     buffer: ArrayBuffer;
     space: number;
@@ -225,6 +228,9 @@ export const HexDumpRenderer: React.FC<{
     );
 };
 
+/**
+ * Network analyzer component
+ */
 export const NetworkAnalyzer: React.FC = () => {
     const network = useContext(NetworkContext);
 

@@ -13,6 +13,9 @@ const StyledDivider = styled((props: DividerProps) => <Divider {...props} />)(()
     },
 }));
 
+/**
+ * Vertical divider, to be used between Panels
+ */
 export const VerticalDivider: React.FC = () => (
     <PanelResizeHandle>
         <StyledDivider orientation='vertical'>
@@ -21,6 +24,9 @@ export const VerticalDivider: React.FC = () => (
     </PanelResizeHandle>
 );
 
+/**
+ * Horizontal divider, to be used between Panels
+ */
 export const HorizontalDivider: React.FC = () => (
     <PanelResizeHandle>
         <StyledDivider orientation='horizontal'>
