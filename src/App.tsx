@@ -8,6 +8,7 @@ import { AddStpSwitchDialog } from './components/dialogs/AddStpSwitchDialog';
 import { AddSwitchDialog } from './components/dialogs/AddSwitchDialog';
 import { HorizontalDivider, VerticalDivider } from './components/Dividers';
 import { AddMenu } from './components/menus/AddMenu';
+import { RemoveMenu } from './components/menus/RemoveMenu';
 import { ViewMenu } from './components/menus/ViewMenu';
 import { NetworkAnalyzer } from './components/panels/NetworkAnalyzer';
 import { NetworkRenderer } from './components/panels/NetworkRenderer';
@@ -69,6 +70,22 @@ const App: React.FC = () => {
                                 {
                                     name: 'Link',
                                     add: () => {
+                                        setAddLinkDialogOpened(true);
+                                    },
+                                },
+                            ]}
+                        />
+                        <RemoveMenu
+                            elements={[
+                                {
+                                    name: 'Device',
+                                    remove: () => {
+                                        setAddHostOpened(true);
+                                    },
+                                },
+                                {
+                                    name: 'Link',
+                                    remove: () => {
                                         setAddLinkDialogOpened(true);
                                     },
                                 },
