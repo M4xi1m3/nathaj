@@ -1,35 +1,36 @@
-import { Network } from './simulator/network/Network';
-import { NetworkContext } from './NetworkContext';
 import { NetworkRenderer } from './components/NetworkRenderer';
 import { Panel, PanelGroup } from 'react-resizable-panels';
 import { Box, Paper } from '@mui/material';
 import { NetworkAnalyzer } from './components/NetworkAnalyzer';
-import { Layout } from './simulator/drawing/Layout';
-import { STPSwitch } from './simulator/network/peripherals/STPSwitch';
 import { HorizontalDivider, VerticalDivider } from './components/Dividers';
 import React, { useState } from 'react';
-import { TopBar, ViewMenu } from './components/TopBar';
+import { AddMenu, TopBar, ViewMenu } from './components/TopBar';
 import { NetowrkProperties } from './components/NetworProperties';
-
-const net = new Network();
-
-new STPSwitch(net, 's1', '00:0b:00:00:00:01', 5);
-new STPSwitch(net, 's2', '00:0b:00:00:00:02', 5);
-
-net.addLink('s1', 's2');
-
-Layout.spring_layout(net);
+import { AddHostDialog } from './components/dialogs/AddHostDialog';
 
 const App: React.FC = () => {
     const [viewNetwork, setViewNetwork] = useState<boolean>(true);
     const [viewProperties, setViewProperties] = useState<boolean>(true);
     const [viewAnalyzer, setViewAnalyzer] = useState<boolean>(true);
 
+    const [addHostOpened, setAddHostOpened] = useState<boolean>(false);
+
     return (
-        <NetworkContext.Provider value={net}>
+        <>
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', wudth: '100%' }}>
                 <Box sx={{ flexGrow: 1 }}>
                     <TopBar>
+                        <AddHostDialog opened={addHostOpened} close={() => setAddHostOpened(false)} />
+                        <AddMenu
+                            elements={[
+                                {
+                                    name: 'Host',
+                                    add: () => {
+                                        setAddHostOpened(true);
+                                    },
+                                },
+                            ]}
+                        />
                         <ViewMenu
                             elements={[
                                 { name: 'Network', view: viewNetwork, setView: setViewNetwork },
@@ -79,7 +80,7 @@ const App: React.FC = () => {
                     )}
                 </PanelGroup>
             </Box>
-        </NetworkContext.Provider>
+        </>
     );
 };
 

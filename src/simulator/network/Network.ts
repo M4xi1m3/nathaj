@@ -134,6 +134,16 @@ export class Network extends EventTarget {
     }
 
     /**
+     * Check if a device name is taken
+     *
+     * @param {string} name Name to check for
+     * @returns {boolean} True if name is already used, false otherwise
+     */
+    public hasDevice(name: string): boolean {
+        return name in this.devices;
+    }
+
+    /**
      * Get all the devices in the network
      *
      * @returns {Device[]} List of the devices

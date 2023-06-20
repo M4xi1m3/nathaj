@@ -25,6 +25,15 @@ export class InterfaceNameTaken extends DeviceException {
 }
 
 /**
+ * Exception thrown when trying to add a device to a device which name is already used
+ */
+export class NoFreeInterfaces extends DeviceException {
+    constructor(device: Device) {
+        super('No free interfaces available on device ' + device.getName() + '.', device);
+    }
+}
+
+/**
  * A device in the network simulation
  */
 export abstract class Device extends Drawable {
@@ -116,6 +125,16 @@ export abstract class Device extends Drawable {
     }
 
     /**
+     * Check if the device has an interface
+     *
+     * @param {string} name Interface name to check for
+     * @returns {boolean} True if the device has an interface with that name, fals otherwise
+     */
+    public hasInterface(name: string): boolean {
+        return name in this.interfaces;
+    }
+
+    /**
      * Get all the interfaces of the device
      *
      * @returns {Interface[]} List of interfaces
@@ -127,10 +146,14 @@ export abstract class Device extends Drawable {
     /**
      * Get the first available interface
      *
-     * @returns {Interface | undefined} Available interface, or undefined if no interfaces available
+     * @returns {Interface} Available interface, or undefined if no interfaces available
      */
-    public getFreeInterface(): Interface | undefined {
-        return Object.values(this.interfaces).find((i) => i.getConnection() === null);
+    public getFreeInterface(): Interface {
+        const intf = Object.values(this.interfaces).find((i) => i.getConnection() === null);
+        if (intf === undefined) {
+            throw new NoFreeInterfaces(this);
+        }
+        return intf;
     }
 
     /**
