@@ -1,17 +1,17 @@
 import {
+    ArrowDownward,
     CallMade,
     CallReceived,
     ChevronRight,
     Clear,
     Delete,
     ExpandMore,
-    FileDownload,
-    FileDownloadOff,
     FilterList,
 } from '@mui/icons-material';
 import TreeView from '@mui/lab/TreeView';
 import {
     Divider,
+    Fab,
     FormControl,
     Grid,
     IconButton,
@@ -29,7 +29,7 @@ import {
 import { compileExpression } from 'filtrex';
 import React, { SyntheticEvent, useContext, useEffect, useRef, useState } from 'react';
 import { Panel, PanelGroup } from 'react-resizable-panels';
-import { ItemProps, TableComponents, TableVirtuoso } from 'react-virtuoso';
+import { ItemProps, TableComponents, TableVirtuoso, TableVirtuosoHandle } from 'react-virtuoso';
 import { NetworkContext } from '../../NetworkContext';
 import { PacketEventData } from '../../simulator/network/Network';
 import { Ethernet } from '../../simulator/network/packets/definitions/Ethernet';
@@ -269,15 +269,9 @@ export const NetworkAnalyzer: React.FC = () => {
         };
     });
 
-    const [autoScroll, setAutoScroll] = useState(true);
-    const tableEndRef = useRef<HTMLTableRowElement>(null);
-    useEffect(() => {
-        if (autoScroll) tableEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [packets, autoScroll]);
+    const [atBottom, setAtBottom] = useState<boolean>(true);
 
-    const handleAutoScroll = () => {
-        setAutoScroll(!autoScroll);
-    };
+    const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
     const handleDelete = () => {
         packetsTmp = [];
@@ -339,9 +333,6 @@ export const NetworkAnalyzer: React.FC = () => {
                                 </Typography>
                             </Stack>
                             <Stack direction='row'>
-                                <IconButton onClick={handleAutoScroll} size='small'>
-                                    {autoScroll ? <FileDownload /> : <FileDownloadOff />}
-                                </IconButton>
                                 <IconButton onClick={handleDelete} size='small' color='error'>
                                     <Delete />
                                 </IconButton>
@@ -371,8 +362,9 @@ export const NetworkAnalyzer: React.FC = () => {
                         </Stack>
                         <Divider />
                     </Grid>
-                    <Grid item sx={{ flexGrow: 1, width: '100%' }}>
+                    <Grid item sx={{ flexGrow: 1, width: '100%', position: 'relative' }}>
                         <TableVirtuoso
+                            ref={virtuosoRef}
                             data={displayPackets}
                             context={{
                                 selected: selectedPacket,
@@ -384,8 +376,32 @@ export const NetworkAnalyzer: React.FC = () => {
                             components={VirtuosoTableComponents}
                             fixedHeaderContent={FixedHeaderContent}
                             itemContent={RowContent}
-                            followOutput={() => (autoScroll ? 'smooth' : false)}
+                            atBottomStateChange={setAtBottom}
+                            followOutput='auto'
                         />
+                        {!atBottom ? (
+                            <Fab
+                                color='primary'
+                                aria-label='Scroll to bottom'
+                                sx={{
+                                    position: 'absolute',
+                                    bottom: '16px',
+                                    right: '16px',
+                                    zIndex: 9999,
+                                }}
+                                onClick={() => {
+                                    if (virtuosoRef !== null && virtuosoRef.current !== null)
+                                        virtuosoRef.current.scrollToIndex({
+                                            index: packets.length - 1,
+                                            behavior: 'smooth',
+                                        });
+                                }}
+                                size='small'>
+                                <ArrowDownward />
+                            </Fab>
+                        ) : (
+                            <></>
+                        )}
                     </Grid>
                 </Grid>
             </Panel>
