@@ -10,6 +10,7 @@ import {
 } from '@mui/icons-material';
 import TreeView from '@mui/lab/TreeView';
 import {
+    alpha,
     Divider,
     Fab,
     FormControl,
@@ -25,6 +26,7 @@ import {
     TableHead,
     TableRow,
     Typography,
+    useTheme,
 } from '@mui/material';
 import { compileExpression } from 'filtrex';
 import React, { SyntheticEvent, useContext, useEffect, useRef, useState } from 'react';
@@ -80,18 +82,28 @@ const monoSX = {
     whiteSpace: 'nowrap',
 };
 
-const FixedHeaderContent = () => (
-    <TableRow style={{ background: 'white' }}>
-        <TableCell sx={{ ...commonSX, width: '60px' }}>#</TableCell>
-        <TableCell sx={{ ...commonSX, width: '60px' }}>Time</TableCell>
-        <TableCell sx={{ ...commonSX, width: '60px' }}>Origin</TableCell>
-        <TableCell sx={{ ...commonSX, width: '80px' }}>Direction</TableCell>
-        <TableCell sx={{ ...commonSX, width: '100px' }}>Source</TableCell>
-        <TableCell sx={{ ...commonSX, width: '100px' }}>Destination</TableCell>
-        <TableCell sx={{ ...commonSX, width: '80px' }}>Protocol</TableCell>
-        <TableCell sx={{ ...commonSX, width: '320px' }}>Info</TableCell>
-    </TableRow>
-);
+const FixedHeaderContent = () => {
+    const theme = useTheme();
+
+    return (
+        <TableRow
+            style={{
+                background: theme.palette.background.paper,
+                ...(theme.palette.mode === 'dark' && {
+                    backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))',
+                }),
+            }}>
+            <TableCell sx={{ ...commonSX, width: '60px' }}>#</TableCell>
+            <TableCell sx={{ ...commonSX, width: '60px' }}>Time</TableCell>
+            <TableCell sx={{ ...commonSX, width: '60px' }}>Origin</TableCell>
+            <TableCell sx={{ ...commonSX, width: '80px' }}>Direction</TableCell>
+            <TableCell sx={{ ...commonSX, width: '100px' }}>Source</TableCell>
+            <TableCell sx={{ ...commonSX, width: '100px' }}>Destination</TableCell>
+            <TableCell sx={{ ...commonSX, width: '80px' }}>Protocol</TableCell>
+            <TableCell sx={{ ...commonSX, width: '320px' }}>Info</TableCell>
+        </TableRow>
+    );
+};
 
 const RowContent = (i: number, v: AnalyzedPacket) => (
     <React.Fragment>
@@ -156,6 +168,8 @@ export const HexDumpRenderer: React.FC<{
     newline: number;
     selection: null | [number, number];
 }> = ({ buffer, space, newline, selection }) => {
+    const theme = useTheme();
+
     const arr: number[] = Array.from(new Uint8Array(buffer).values());
 
     const data = divideInChunks(arr, newline).map((v: number[]) => divideInChunks(v, space));
@@ -184,7 +198,9 @@ export const HexDumpRenderer: React.FC<{
 
                                     if (index >= start && index <= end)
                                         return (
-                                            <span key={byte_no} style={{ backgroundColor: 'rgba(25, 118, 210, 0.2)' }}>
+                                            <span
+                                                key={byte_no}
+                                                style={{ backgroundColor: alpha(theme.palette.primary.main, 0.2) }}>
                                                 {v.toString(16).padStart(2, '0')}
                                             </span>
                                         );
@@ -212,7 +228,9 @@ export const HexDumpRenderer: React.FC<{
 
                                     if (index >= start && index <= end)
                                         return (
-                                            <span key={byte_no} style={{ backgroundColor: 'rgba(25, 118, 210, 0.2)' }}>
+                                            <span
+                                                key={byte_no}
+                                                style={{ backgroundColor: alpha(theme.palette.primary.main, 0.2) }}>
                                                 {numberToPrintableChar(v)}
                                             </span>
                                         );

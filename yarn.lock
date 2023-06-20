@@ -1430,6 +1430,11 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.43.0.tgz#559ca3d9ddbd6bf907ad524320a0d14b85586af0"
   integrity sha512-s2UHCoiXfxMvmfzqoN+vrQ84ahUSYde9qNO1MdxmoEhyHWsfmwOpFlwYV+ePJEVc7gFnATGUi376WowX1N7tFg==
 
+"@fontsource/righteous@^5.0.3":
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/@fontsource/righteous/-/righteous-5.0.3.tgz#430f8a2f5a30725b6c480d47c77a3f03c036523a"
+  integrity sha512-3ZOOVl20jSATUbkm3syDoCu9zIeRmzl9L9OqrHHIhossThYbeTZV6JZfvWa12O5e/6EXUlLk+9yHN/cZlkqCJg==
+
 "@fontsource/roboto-mono@^5.0.3":
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/@fontsource/roboto-mono/-/roboto-mono-5.0.3.tgz#83a1ce8a95590abd9797f2859f26325899989ca2"

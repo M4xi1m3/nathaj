@@ -1,10 +1,11 @@
 {
-  "name": "web-netsim",
+  "name": "nathaj",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@fontsource/righteous": "^5.0.3",
     "@fontsource/roboto": "^5.0.3",
     "@fontsource/roboto-mono": "^5.0.3",
     "@mui/icons-material": "^5.11.16",
@@ -61,12 +62,12 @@
     "@typescript-eslint/eslint-plugin": "^5.60.0",
     "@typescript-eslint/parser": "^5.60.0",
     "eslint": "^8.43.0",
+    "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-react": "^7.32.2",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.2",
     "prettier": "2.8.8",
-    "prettier-plugin-organize-imports": "^3.2.2",
-    "eslint-config-prettier": "^8.8.0"
+    "prettier-plugin-organize-imports": "^3.2.2"
   },
   "lint-staged": {
     "src/**/*": "prettier --write --ignore-unknown"

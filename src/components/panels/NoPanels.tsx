@@ -1,15 +1,20 @@
 import { Grid, Typography } from '@mui/material';
 import React from 'react';
 
-import { ReactComponent as Logo } from '../../assets/logo.svg';
+import { ReactComponent as LogoLight } from '../../assets/logo/light.svg';
+
+import packageJson from '../../../package.json';
 
 export const NoPanels: React.FC = () => {
     return (
         <Grid container sx={{ height: '100%', width: '100%' }} justifyContent='center' alignItems='center'>
-            <Grid item sx={{ width: '33%', height: '33%', maxWidth: '200px', textAlign: 'center' }}>
-                <Logo style={{ width: '100%', maxHeight: '50%' }} />
-                <Typography color='rgba(0,0,0,0.3)' variant='h4'>
-                    Web-NetSim
+            <Grid item sx={{ width: '50%', maxWidth: '200px', textAlign: 'center' }}>
+                <LogoLight style={{ width: '100%', filter: 'grayscale(100%) opacity(50%)' }} />
+                <Typography sx={{ fontFamily: 'Righteous', filter: 'opacity(40%)' }} variant='h3'>
+                    Näthaj
+                </Typography>
+                <Typography sx={{ fontFamily: 'Righteous', filter: 'opacity(40%)' }} variant='h5'>
+                    Version {packageJson.version}
                 </Typography>
             </Grid>
         </Grid>

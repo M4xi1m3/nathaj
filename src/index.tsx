@@ -1,9 +1,12 @@
+import '@fontsource/righteous';
 import '@fontsource/roboto-mono';
 import type {} from '@mui/lab/themeAugmentation';
+import { CssBaseline } from '@mui/material';
 import { SnackbarProvider } from 'notistack';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { Theme } from './components/Theme';
 import './index.css';
 import { NetworkContext } from './NetworkContext';
 import { Layout } from './simulator/drawing/Layout';
@@ -23,10 +26,13 @@ Layout.spring_layout(net);
 
 root.render(
     <React.StrictMode>
-        <SnackbarProvider maxSnack={3}>
-            <NetworkContext.Provider value={net}>
-                <App />
-            </NetworkContext.Provider>
-        </SnackbarProvider>
+        <Theme>
+            <CssBaseline />
+            <SnackbarProvider maxSnack={3}>
+                <NetworkContext.Provider value={net}>
+                    <App />
+                </NetworkContext.Provider>
+            </SnackbarProvider>
+        </Theme>
     </React.StrictMode>
 );
