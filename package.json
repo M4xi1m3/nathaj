@@ -17,7 +17,6 @@
     "@types/node": "^16.7.13",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
-    "eslint-config-prettier": "^8.8.0",
     "filtrex": "^3.0.0",
     "material-ui-popup-state": "^5.0.9",
     "notistack": "^3.0.1",
@@ -35,7 +34,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "pretty": "prettier -w src",
+    "lint": "eslint --fix src"
   },
   "eslintConfig": {
     "extends": [
@@ -63,7 +64,9 @@
     "eslint-plugin-react": "^7.32.2",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.2",
-    "prettier": "2.8.8"
+    "prettier": "2.8.8",
+    "prettier-plugin-organize-imports": "^3.2.2",
+    "eslint-config-prettier": "^8.8.0"
   },
   "lint-staged": {
     "src/**/*": "prettier --write --ignore-unknown"

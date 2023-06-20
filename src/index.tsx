@@ -1,11 +1,11 @@
+import '@fontsource/roboto-mono';
+import type {} from '@mui/lab/themeAugmentation';
+import { SnackbarProvider } from 'notistack';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
-import '@fontsource/roboto-mono';
-import type {} from '@mui/lab/themeAugmentation';
 import { NetworkContext } from './NetworkContext';
-import { SnackbarProvider } from 'notistack';
 import { Layout } from './simulator/drawing/Layout';
 import { Network } from './simulator/network/Network';
 import { STPSwitch } from './simulator/network/peripherals/STPSwitch';

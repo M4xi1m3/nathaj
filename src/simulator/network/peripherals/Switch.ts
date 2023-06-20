@@ -1,9 +1,9 @@
+import SwitchImg from '../../../assets/switch.png';
 import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
 import { Ethernet } from '../packets/definitions/Ethernet';
 import { Hub } from './Hub';
 import { Interface } from './Interface';
-import SwitchImg from '../../../assets/switch.png';
 
 const SwitchImage = new Image();
 SwitchImage.src = SwitchImg;

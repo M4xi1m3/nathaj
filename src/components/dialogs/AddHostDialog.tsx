@@ -1,8 +1,8 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import { useSnackbar } from 'notistack';
 import React, { useContext, useEffect, useState } from 'react';
 import { NetworkContext } from '../../NetworkContext';
 import { Host } from '../../simulator/network/peripherals/Host';
-import { useSnackbar } from 'notistack';
 
 const macRegexp = new RegExp('^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$');
 

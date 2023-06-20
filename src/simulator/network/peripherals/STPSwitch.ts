@@ -1,9 +1,9 @@
+import STPSwitchImg from '../../../assets/stp-switch.png';
 import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
+import { BPDU as BPDUPacket } from '../packets/definitions/BPDU';
 import { Ethernet } from '../packets/definitions/Ethernet';
 import { Interface } from './Interface';
-import STPSwitchImg from '../../../assets/stp-switch.png';
-import { BPDU as BPDUPacket } from '../packets/definitions/BPDU';
 import { Switch } from './Switch';
 
 const STPSwitchImage = new Image();

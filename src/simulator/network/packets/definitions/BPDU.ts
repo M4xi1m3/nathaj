@@ -1,9 +1,9 @@
 import { Field } from '../Field';
-import { Layer } from '../Layer';
-import { Dissector, Packet } from '../Packet';
 import { IntField } from '../fields/IntField';
 import { MacField } from '../fields/MacField';
 import { ShortField } from '../fields/ShortField';
+import { Layer } from '../Layer';
+import { Dissector, Packet } from '../Packet';
 import { Ethernet } from './Ethernet';
 
 /**

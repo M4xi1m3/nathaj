@@ -1,8 +1,15 @@
-import React, { SyntheticEvent, useContext, useEffect, useRef, useState } from 'react';
-import { NetworkContext } from '../NetworkContext';
-import { PacketEventData } from '../simulator/network/Network';
-import { AnalysisItem, AnalysisTree, AnalyzedPacket } from '../simulator/network/packets/Packet';
-import { Ethernet } from '../simulator/network/packets/definitions/Ethernet';
+import {
+    CallMade,
+    CallReceived,
+    ChevronRight,
+    Clear,
+    Delete,
+    ExpandMore,
+    FileDownload,
+    FileDownloadOff,
+    FilterList,
+} from '@mui/icons-material';
+import TreeView from '@mui/lab/TreeView';
 import {
     Divider,
     FormControl,
@@ -19,21 +26,14 @@ import {
     TableRow,
     Typography,
 } from '@mui/material';
-import {
-    CallMade,
-    CallReceived,
-    ChevronRight,
-    Clear,
-    Delete,
-    ExpandMore,
-    FileDownload,
-    FileDownloadOff,
-    FilterList,
-} from '@mui/icons-material';
 import { compileExpression } from 'filtrex';
-import { ItemProps, TableComponents, TableVirtuoso } from 'react-virtuoso';
+import React, { SyntheticEvent, useContext, useEffect, useRef, useState } from 'react';
 import { Panel, PanelGroup } from 'react-resizable-panels';
-import TreeView from '@mui/lab/TreeView';
+import { ItemProps, TableComponents, TableVirtuoso } from 'react-virtuoso';
+import { NetworkContext } from '../NetworkContext';
+import { PacketEventData } from '../simulator/network/Network';
+import { Ethernet } from '../simulator/network/packets/definitions/Ethernet';
+import { AnalysisItem, AnalysisTree, AnalyzedPacket } from '../simulator/network/packets/Packet';
 import { HorizontalDivider } from './Dividers';
 import { CustomTreeItem } from './IconExpansionTreeView';
 

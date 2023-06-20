@@ -248,6 +248,14 @@ export class Network extends EventTarget {
     }
 
     /**
+     * Reset and clear the network, removing all devices.
+     */
+    public clear(): void {
+        this.reset();
+        this.devices = {};
+    }
+
+    /**
      * Check if the network simulation is running
      *
      * @returns {boolean} True if the network simulation is running, false otherwise.

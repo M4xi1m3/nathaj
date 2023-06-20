@@ -1,7 +1,7 @@
 import { Field } from '../Field';
-import { Dissector, Packet } from '../Packet';
 import { MacField } from '../fields/MacField';
 import { XShortField } from '../fields/XShortField';
+import { Dissector, Packet } from '../Packet';
 
 /**
  * Fields used in an Ethernet packet

@@ -1,8 +1,8 @@
+import HubImg from '../../../assets/hub.png';
 import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
 import { Device } from './Device';
 import { Interface } from './Interface';
-import HubImg from '../../../assets/hub.png';
 
 const HubImage = new Image();
 HubImage.src = HubImg;

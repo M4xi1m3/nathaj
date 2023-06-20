@@ -1,12 +1,14 @@
-import { NetworkRenderer } from './components/NetworkRenderer';
-import { Panel, PanelGroup } from 'react-resizable-panels';
 import { Box, Paper } from '@mui/material';
-import { NetworkAnalyzer } from './components/NetworkAnalyzer';
-import { HorizontalDivider, VerticalDivider } from './components/Dividers';
 import React, { useState } from 'react';
-import { AddMenu, TopBar, ViewMenu } from './components/TopBar';
-import { NetowrkProperties } from './components/NetworProperties';
+import { Panel, PanelGroup } from 'react-resizable-panels';
 import { AddHostDialog } from './components/dialogs/AddHostDialog';
+import { HorizontalDivider, VerticalDivider } from './components/Dividers';
+import { AddMenu } from './components/menus/AddMenu';
+import { ViewMenu } from './components/menus/ViewMenu';
+import { NetworkAnalyzer } from './components/NetworkAnalyzer';
+import { NetworkRenderer } from './components/NetworkRenderer';
+import { NetowrkProperties } from './components/NetworProperties';
+import { TopBar } from './components/TopBar';
 
 const App: React.FC = () => {
     const [viewNetwork, setViewNetwork] = useState<boolean>(true);

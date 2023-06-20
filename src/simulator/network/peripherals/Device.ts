@@ -1,7 +1,7 @@
-import { Interface, ReceivedPacketEventData } from './Interface';
-import { Network } from '../Network';
 import { Drawable } from '../../drawing/Drawable';
 import { Vector2D } from '../../drawing/Vector2D';
+import { Network } from '../Network';
+import { Interface, ReceivedPacketEventData } from './Interface';
 
 /**
  * Excpetion thrown for an error related to a device

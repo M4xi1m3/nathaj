@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Height } from '@mui/icons-material';
-import { Divider, DividerProps, dividerClasses } from '@mui/material';
+import { Divider, dividerClasses, DividerProps } from '@mui/material';
 import React from 'react';
 import { PanelResizeHandle } from 'react-resizable-panels';
 
