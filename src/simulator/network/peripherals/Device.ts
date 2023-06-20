@@ -157,6 +157,16 @@ export abstract class Device extends Drawable {
     }
 
     /**
+     * Check if the device has a free interface
+     *
+     * @returns {boolean} True if the device has a free interface, false otherwise
+     */
+    public hasFreeInterface(): boolean {
+        const intf = Object.values(this.interfaces).find((i) => i.getConnection() === null);
+        return intf !== undefined;
+    }
+
+    /**
      * Get the name of the device
      *
      * @returns {string} Name of the device

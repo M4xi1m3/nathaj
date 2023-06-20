@@ -28,7 +28,7 @@ export const AddHostDialog: React.FC<AddHostDialogProps> = ({ opened, close }) =
     }, [opened, setName, setMac]);
 
     return (
-        <Dialog open={opened} onClose={() => close()}>
+        <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
             <DialogTitle>Add Host</DialogTitle>
             <DialogContent>
                 <NameInput name={name} setName={setName} setNameError={setNameError} />

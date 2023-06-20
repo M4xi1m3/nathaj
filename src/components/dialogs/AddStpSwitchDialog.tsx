@@ -33,7 +33,7 @@ export const AddStpSwitchDialog: React.FC<AddStpSwitchDialogProps> = ({ opened, 
     }, [opened, setName, setPorts, setMac]);
 
     return (
-        <Dialog open={opened} onClose={() => close()}>
+        <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
             <DialogTitle>Add STP Switch</DialogTitle>
             <DialogContent>
                 <NameInput name={name} setName={setName} setNameError={setNameError} />

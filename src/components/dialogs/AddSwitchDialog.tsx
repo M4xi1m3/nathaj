@@ -33,7 +33,7 @@ export const AddSwitchDialog: React.FC<AddSwitchDialogProps> = ({ opened, close 
     }, [opened, setName, setPorts, setMac]);
 
     return (
-        <Dialog open={opened} onClose={() => close()}>
+        <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
             <DialogTitle>Add Switch</DialogTitle>
             <DialogContent>
                 <NameInput name={name} setName={setName} setNameError={setNameError} />

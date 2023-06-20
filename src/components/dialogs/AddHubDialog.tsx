@@ -28,7 +28,7 @@ export const AddHubDialog: React.FC<AddHubDialogProps> = ({ opened, close }) => 
     }, [opened, setName, setPorts]);
 
     return (
-        <Dialog open={opened} onClose={() => close()}>
+        <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
             <DialogTitle>Add Hub</DialogTitle>
             <DialogContent>
                 <NameInput name={name} setName={setName} setNameError={setNameError} />

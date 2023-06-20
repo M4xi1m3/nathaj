@@ -14,7 +14,7 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 const net = new Network();
 
-new STPSwitch(net, 's1', '00:0b:00:00:00:01', 5);
+new STPSwitch(net, 's1', '00:0b:00:00:00:01', 4);
 new STPSwitch(net, 's2', '00:0b:00:00:00:02', 5);
 
 net.addLink('s1', 's2');

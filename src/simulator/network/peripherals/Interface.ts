@@ -120,8 +120,17 @@ export class Interface extends EventTarget {
      *
      * @returns {Interface | null} Interface to which the interface is connected to or null if not connected
      */
-    getConnection() {
+    getConnection(): Interface | null {
         return this.connected_to;
+    }
+
+    /**
+     * Check if the interface is connected
+     *
+     * @returns {boolean} True if the interface is connected, false otherwise
+     */
+    isConnected(): boolean {
+        return this.connected_to !== null;
     }
 
     /**

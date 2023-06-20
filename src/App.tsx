@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Panel, PanelGroup } from 'react-resizable-panels';
 import { AddHostDialog } from './components/dialogs/AddHostDialog';
 import { AddHubDialog } from './components/dialogs/AddHubDialog';
+import { AddLinkDialog } from './components/dialogs/AddLinkDialog';
 import { AddStpSwitchDialog } from './components/dialogs/AddStpSwitchDialog';
 import { AddSwitchDialog } from './components/dialogs/AddSwitchDialog';
 import { HorizontalDivider, VerticalDivider } from './components/Dividers';
@@ -25,6 +26,7 @@ const App: React.FC = () => {
     const [addHubOpened, setAddHubOpened] = useState<boolean>(false);
     const [addSwitchOpened, setAddSwitchOpened] = useState<boolean>(false);
     const [addStpSwitchOpened, setAddStpSwitchOpened] = useState<boolean>(false);
+    const [addLinkDialogOpened, setAddLinkDialogOpened] = useState<boolean>(false);
 
     return (
         <>
@@ -35,6 +37,8 @@ const App: React.FC = () => {
                         <AddHubDialog opened={addHubOpened} close={() => setAddHubOpened(false)} />
                         <AddSwitchDialog opened={addSwitchOpened} close={() => setAddSwitchOpened(false)} />
                         <AddStpSwitchDialog opened={addStpSwitchOpened} close={() => setAddStpSwitchOpened(false)} />
+                        <AddLinkDialog opened={addLinkDialogOpened} close={() => setAddLinkDialogOpened(false)} />
+
                         <AddMenu
                             elements={[
                                 {
@@ -59,6 +63,13 @@ const App: React.FC = () => {
                                     name: 'STP Switch',
                                     add: () => {
                                         setAddStpSwitchOpened(true);
+                                    },
+                                },
+                                'separator',
+                                {
+                                    name: 'Link',
+                                    add: () => {
+                                        setAddLinkDialogOpened(true);
                                     },
                                 },
                             ]}
