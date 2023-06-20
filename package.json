@@ -19,6 +19,7 @@
     "@types/react-dom": "^18.0.0",
     "eslint-config-prettier": "^8.8.0",
     "filtrex": "^3.0.0",
+    "material-ui-popup-state": "^5.0.9",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-resizable-panels": "^0.0.51",

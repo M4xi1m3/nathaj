@@ -24,7 +24,7 @@ export const NetworkRenderer: React.FC = () => {
     return (
         <Grid container direction='column' flexWrap='nowrap' sx={{ height: '100%' }}>
             <Grid item sx={{ width: '100%' }}>
-                <Stack sx={{ p: 1, height: '32px' }} direction='row'>
+                <Stack sx={{ padding: '0px 8px', height: '32px' }} direction='row'>
                     <Stack direction='row' flexGrow={1}>
                         <Typography component='h2' variant='h6'>
                             Network

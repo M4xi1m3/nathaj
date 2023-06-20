@@ -332,7 +332,7 @@ export const NetworkAnalyzer: React.FC = () => {
                     wrap='nowrap'
                     sx={{ height: '100%', width: '100%', overflowX: 'auto' }}>
                     <Grid item sx={{ width: '100%' }}>
-                        <Stack sx={{ p: 1, height: '32px' }} direction='row'>
+                        <Stack sx={{ padding: '0px 8px', height: '32px' }} direction='row'>
                             <Stack direction='row' flexGrow={1}>
                                 <Typography component='h2' variant='h6'>
                                     Packet analyzer
