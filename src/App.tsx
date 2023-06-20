@@ -5,15 +5,18 @@ import { AddHostDialog } from './components/dialogs/AddHostDialog';
 import { HorizontalDivider, VerticalDivider } from './components/Dividers';
 import { AddMenu } from './components/menus/AddMenu';
 import { ViewMenu } from './components/menus/ViewMenu';
-import { NetworkAnalyzer } from './components/NetworkAnalyzer';
-import { NetworkRenderer } from './components/NetworkRenderer';
-import { NetowrkProperties } from './components/NetworProperties';
+import { NetworkAnalyzer } from './components/panels/NetworkAnalyzer';
+import { NetworkRenderer } from './components/panels/NetworkRenderer';
+import { NetowrkProperties } from './components/panels/NetworProperties';
+import { NoPanels } from './components/panels/NoPanels';
 import { TopBar } from './components/TopBar';
 
 const App: React.FC = () => {
     const [viewNetwork, setViewNetwork] = useState<boolean>(true);
     const [viewProperties, setViewProperties] = useState<boolean>(true);
     const [viewAnalyzer, setViewAnalyzer] = useState<boolean>(true);
+
+    const noPanel = !(viewNetwork || viewProperties || viewAnalyzer);
 
     const [addHostOpened, setAddHostOpened] = useState<boolean>(false);
 
@@ -42,45 +45,49 @@ const App: React.FC = () => {
                         />
                     </TopBar>
                 </Box>
-                <PanelGroup direction='vertical'>
-                    {viewProperties || viewNetwork ? (
-                        <Panel defaultSize={50} style={{ display: 'flex' }}>
-                            <PanelGroup direction='horizontal'>
-                                {viewProperties ? (
-                                    <Panel style={{ display: 'flex' }}>
-                                        <Paper sx={{ flexGrow: 1, margin: 1 }}>
-                                            <NetowrkProperties />
-                                        </Paper>
-                                    </Panel>
-                                ) : (
-                                    <></>
-                                )}
-                                {viewProperties && viewNetwork ? <VerticalDivider /> : <></>}
-                                {viewNetwork ? (
-                                    <Panel defaultSize={75} style={{ display: 'flex' }}>
-                                        <Paper sx={{ flexGrow: 1, margin: 1 }}>
-                                            <NetworkRenderer />
-                                        </Paper>
-                                    </Panel>
-                                ) : (
-                                    <></>
-                                )}
-                            </PanelGroup>
-                        </Panel>
-                    ) : (
-                        <></>
-                    )}
-                    {(viewProperties || viewNetwork) && viewAnalyzer ? <HorizontalDivider /> : <></>}
-                    {viewAnalyzer ? (
-                        <Panel style={{ display: 'flex' }}>
-                            <Paper sx={{ flexGrow: 1, maxWidth: '100%', overflowX: 'auto', margin: 1 }}>
-                                <NetworkAnalyzer />
-                            </Paper>
-                        </Panel>
-                    ) : (
-                        <></>
-                    )}
-                </PanelGroup>
+                {!noPanel ? (
+                    <PanelGroup direction='vertical'>
+                        {viewProperties || viewNetwork ? (
+                            <Panel defaultSize={50} style={{ display: 'flex' }}>
+                                <PanelGroup direction='horizontal'>
+                                    {viewProperties ? (
+                                        <Panel style={{ display: 'flex' }}>
+                                            <Paper sx={{ flexGrow: 1, margin: 1 }}>
+                                                <NetowrkProperties />
+                                            </Paper>
+                                        </Panel>
+                                    ) : (
+                                        <></>
+                                    )}
+                                    {viewProperties && viewNetwork ? <VerticalDivider /> : <></>}
+                                    {viewNetwork ? (
+                                        <Panel defaultSize={75} style={{ display: 'flex' }}>
+                                            <Paper sx={{ flexGrow: 1, margin: 1 }}>
+                                                <NetworkRenderer />
+                                            </Paper>
+                                        </Panel>
+                                    ) : (
+                                        <></>
+                                    )}
+                                </PanelGroup>
+                            </Panel>
+                        ) : (
+                            <></>
+                        )}
+                        {(viewProperties || viewNetwork) && viewAnalyzer ? <HorizontalDivider /> : <></>}
+                        {viewAnalyzer ? (
+                            <Panel style={{ display: 'flex' }}>
+                                <Paper sx={{ flexGrow: 1, maxWidth: '100%', overflowX: 'auto', margin: 1 }}>
+                                    <NetworkAnalyzer />
+                                </Paper>
+                            </Panel>
+                        ) : (
+                            <></>
+                        )}
+                    </PanelGroup>
+                ) : (
+                    <NoPanels />
+                )}
             </Box>
         </>
     );

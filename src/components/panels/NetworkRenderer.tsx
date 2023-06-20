@@ -1,10 +1,10 @@
 import { CenterFocusStrong, Hub, Label, LabelOff } from '@mui/icons-material';
 import { Divider, Grid, IconButton, Stack, Typography } from '@mui/material';
 import React, { useContext, useState } from 'react';
-import { NetworkContext } from '../NetworkContext';
-import { Layout } from '../simulator/drawing/Layout';
-import { Vector2D } from '../simulator/drawing/Vector2D';
-import { Canvas } from './Canvas';
+import { NetworkContext } from '../../NetworkContext';
+import { Layout } from '../../simulator/drawing/Layout';
+import { Vector2D } from '../../simulator/drawing/Vector2D';
+import { Canvas } from '../Canvas';
 
 /**
  * Network renderer component

@@ -30,12 +30,12 @@ import { compileExpression } from 'filtrex';
 import React, { SyntheticEvent, useContext, useEffect, useRef, useState } from 'react';
 import { Panel, PanelGroup } from 'react-resizable-panels';
 import { ItemProps, TableComponents, TableVirtuoso } from 'react-virtuoso';
-import { NetworkContext } from '../NetworkContext';
-import { PacketEventData } from '../simulator/network/Network';
-import { Ethernet } from '../simulator/network/packets/definitions/Ethernet';
-import { AnalysisItem, AnalysisTree, AnalyzedPacket } from '../simulator/network/packets/Packet';
-import { HorizontalDivider } from './Dividers';
-import { CustomTreeItem } from './IconExpansionTreeView';
+import { NetworkContext } from '../../NetworkContext';
+import { PacketEventData } from '../../simulator/network/Network';
+import { Ethernet } from '../../simulator/network/packets/definitions/Ethernet';
+import { AnalysisItem, AnalysisTree, AnalyzedPacket } from '../../simulator/network/packets/Packet';
+import { HorizontalDivider } from '../Dividers';
+import { CustomTreeItem } from '../IconExpansionTreeView';
 
 interface RowContext {
     selected: null | number;
