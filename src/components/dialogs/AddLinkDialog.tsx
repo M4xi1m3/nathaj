@@ -51,8 +51,10 @@ export const AddLinkDialog: React.FC<AddLinkDialogProps> = ({ opened, close }) =
                 <Button
                     onClick={() => {
                         try {
-                            if (device1 !== null && device2 !== null && intf1 !== null && intf2 !== null)
+                            if (device1 !== null && device2 !== null && intf1 !== null && intf2 !== null) {
                                 network.addLink(device1, intf1, device2, intf2);
+                                enqueueSnackbar('Link added');
+                            }
                         } catch (e: any) {
                             enqueueSnackbar((e as Error).message, { variant: 'error' });
                         }

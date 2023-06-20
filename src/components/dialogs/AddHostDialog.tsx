@@ -40,6 +40,7 @@ export const AddHostDialog: React.FC<AddHostDialogProps> = ({ opened, close }) =
                     onClick={() => {
                         try {
                             new Host(network, name, mac);
+                            enqueueSnackbar('Host ' + name + ' added');
                         } catch (e: any) {
                             enqueueSnackbar((e as Error).message, { variant: 'error' });
                         }

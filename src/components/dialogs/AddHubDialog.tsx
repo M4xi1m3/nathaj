@@ -40,6 +40,7 @@ export const AddHubDialog: React.FC<AddHubDialogProps> = ({ opened, close }) => 
                     onClick={() => {
                         try {
                             new Hub(network, name, ports);
+                            enqueueSnackbar('Hub ' + name + ' added');
                         } catch (e: any) {
                             enqueueSnackbar((e as Error).message, { variant: 'error' });
                         }
