@@ -2,16 +2,16 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/
 import { useSnackbar } from 'notistack';
 import React, { useContext, useEffect, useState } from 'react';
 import { NetworkContext } from '../../NetworkContext';
-import { Host } from '../../simulator/network/peripherals/Host';
-import { MacInput } from '../fields/MacInput';
+import { Hub } from '../../simulator/network/peripherals/Hub';
 import { NameInput } from '../fields/NameInput';
+import { PortsInput } from '../fields/PortsInput';
 
-interface AddHostDialogProps {
+interface AddHubDialogProps {
     close: () => void;
     opened: boolean;
 }
 
-export const AddHostDialog: React.FC<AddHostDialogProps> = ({ opened, close }) => {
+export const AddHubDialog: React.FC<AddHubDialogProps> = ({ opened, close }) => {
     const network = useContext(NetworkContext);
 
     const { enqueueSnackbar } = useSnackbar();
@@ -19,33 +19,33 @@ export const AddHostDialog: React.FC<AddHostDialogProps> = ({ opened, close }) =
     const [name, setName] = useState<string>('');
     const [nameError, setNameError] = useState<boolean>(false);
 
-    const [mac, setMac] = useState<string>('');
-    const [macError, setMacError] = useState<boolean>(false);
+    const [ports, setPorts] = useState<number>(1);
+    const [portsError, setPortsError] = useState<boolean>(false);
 
     useEffect(() => {
         setName('');
-        setMac('');
-    }, [opened, setName, setMac]);
+        setPorts(4);
+    }, [opened, setName, setPorts]);
 
     return (
         <Dialog open={opened} onClose={() => close()}>
-            <DialogTitle>Add Host</DialogTitle>
+            <DialogTitle>Add Hub</DialogTitle>
             <DialogContent>
                 <NameInput name={name} setName={setName} setNameError={setNameError} />
-                <MacInput mac={mac} setMac={setMac} setMacError={setMacError} />
+                <PortsInput ports={ports} setPorts={setPorts} setPortsError={setPortsError} />
             </DialogContent>
             <DialogActions>
                 <Button onClick={() => close()}>Cancel</Button>
                 <Button
                     onClick={() => {
                         try {
-                            new Host(network, name, mac);
+                            new Hub(network, name, ports);
                         } catch (e: any) {
                             enqueueSnackbar((e as Error).message, { variant: 'error' });
                         }
                         close();
                     }}
-                    disabled={nameError || macError}>
+                    disabled={nameError || portsError}>
                     Add
                 </Button>
             </DialogActions>

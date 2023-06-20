@@ -21,7 +21,7 @@ export class Host extends Device {
     constructor(network: Network, name: string, mac: string) {
         super(network, name);
         this.addInterface('eth0');
-        this.mac = mac;
+        this.mac = mac.toLowerCase();
     }
 
     public onPacketReceived(iface: Interface, data: ArrayBuffer): void {

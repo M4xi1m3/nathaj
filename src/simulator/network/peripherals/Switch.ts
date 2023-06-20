@@ -38,7 +38,7 @@ export class Switch extends Hub {
     constructor(network: Network, name: string, mac: string, ports: number) {
         super(network, name, ports);
         this.mac_address_table = {};
-        this.mac = mac;
+        this.mac = mac.toLowerCase();
     }
 
     /**

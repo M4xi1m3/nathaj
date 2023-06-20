@@ -2,6 +2,9 @@ import { Box, Paper } from '@mui/material';
 import React, { useState } from 'react';
 import { Panel, PanelGroup } from 'react-resizable-panels';
 import { AddHostDialog } from './components/dialogs/AddHostDialog';
+import { AddHubDialog } from './components/dialogs/AddHubDialog';
+import { AddStpSwitchDialog } from './components/dialogs/AddStpSwitchDialog';
+import { AddSwitchDialog } from './components/dialogs/AddSwitchDialog';
 import { HorizontalDivider, VerticalDivider } from './components/Dividers';
 import { AddMenu } from './components/menus/AddMenu';
 import { ViewMenu } from './components/menus/ViewMenu';
@@ -19,6 +22,9 @@ const App: React.FC = () => {
     const noPanel = !(viewNetwork || viewProperties || viewAnalyzer);
 
     const [addHostOpened, setAddHostOpened] = useState<boolean>(false);
+    const [addHubOpened, setAddHubOpened] = useState<boolean>(false);
+    const [addSwitchOpened, setAddSwitchOpened] = useState<boolean>(false);
+    const [addStpSwitchOpened, setAddStpSwitchOpened] = useState<boolean>(false);
 
     return (
         <>
@@ -26,12 +32,33 @@ const App: React.FC = () => {
                 <Box sx={{ flexGrow: 1 }}>
                     <TopBar>
                         <AddHostDialog opened={addHostOpened} close={() => setAddHostOpened(false)} />
+                        <AddHubDialog opened={addHubOpened} close={() => setAddHubOpened(false)} />
+                        <AddSwitchDialog opened={addSwitchOpened} close={() => setAddSwitchOpened(false)} />
+                        <AddStpSwitchDialog opened={addStpSwitchOpened} close={() => setAddStpSwitchOpened(false)} />
                         <AddMenu
                             elements={[
                                 {
                                     name: 'Host',
                                     add: () => {
                                         setAddHostOpened(true);
+                                    },
+                                },
+                                {
+                                    name: 'Hub',
+                                    add: () => {
+                                        setAddHubOpened(true);
+                                    },
+                                },
+                                {
+                                    name: 'Switch',
+                                    add: () => {
+                                        setAddSwitchOpened(true);
+                                    },
+                                },
+                                {
+                                    name: 'STP Switch',
+                                    add: () => {
+                                        setAddStpSwitchOpened(true);
                                     },
                                 },
                             ]}

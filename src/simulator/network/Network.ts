@@ -153,6 +153,24 @@ export class Network extends EventTarget {
     }
 
     /**
+     * Check if a device in the network is using a MAC address
+     *
+     * @param {string} mac MAC address to check for
+     * @returns {boolean} True if the MAC address is used, false otherwise
+     */
+    public isMACUsed(mac: string) {
+        mac = mac.toLowerCase();
+
+        for (const dev of this.getDevices()) {
+            if ('mac' in dev) {
+                if (mac === dev['mac']) return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Utility method to add a link wetween two interfaces.
      * If dev2 and intf2 are not provided, dev1 is unsed as first device
      * and intf1 as second device, and the first available interface of
