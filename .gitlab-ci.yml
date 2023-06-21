@@ -1,20 +1,35 @@
 stages:
   - build
+  - test
   - deploy
+
+cache:
+  key:
+    files:
+      - yarn.lock
+  paths:
+    - node_modules/
 
 build:
   image: node:latest
   stage: build
   variables:
     PUBLIC_URL: https://maxime.friess.pages.unistra.fr/nathaj/
+  before_script:
+    - yarn install --frozen-lockfile
   script:
-    - yarn install
     - yarn build
     - yarn typedoc
   artifacts:
     paths:
       - build/
       - docs/
+
+test:
+  image: node:latest
+  stage: test
+  script:
+    - yarn test --ci --coverage --detectOpenHandles --forceExit --watchAll=false --all
 
 pages:
   image: alpine:latest

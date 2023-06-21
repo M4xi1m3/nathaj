@@ -21,6 +21,15 @@ export class InterfaceException extends Error {
 }
 
 /**
+ * Eception thrown when tyring to connect an interface to itself
+ */
+export class ConnectionToItselfException extends InterfaceException {
+    constructor(iface: Interface) {
+        super('Tying to connect interface ' + iface.getFullName() + ' to itself.', iface);
+    }
+}
+
+/**
  * Eception thrown when tyring to connect an interface that is already connected
  */
 export class AlreadyConnectedException extends InterfaceException {
@@ -139,6 +148,7 @@ export class Interface extends EventTarget {
      * @param {Interface} other Interface to connect to
      */
     connect(other: Interface): void {
+        if (this === other) throw new ConnectionToItselfException(this);
         if (this.connected_to !== null) throw new AlreadyConnectedException(this);
         if (other.connected_to !== null) throw new AlreadyConnectedException(other);
 

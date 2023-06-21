@@ -148,8 +148,13 @@ export abstract class Device extends Drawable {
      *
      * @returns {Interface} Available interface, or undefined if no interfaces available
      */
-    public getFreeInterface(): Interface {
-        const intf = Object.values(this.interfaces).find((i) => i.getConnection() === null);
+    public getFreeInterface(ignore?: string[]): Interface {
+        let intfs = this.getInterfaces();
+        if (ignore !== undefined) {
+            intfs = intfs.filter((intf) => ignore.indexOf(intf.getName()) === -1);
+        }
+
+        const intf = intfs.find((i) => i.getConnection() === null);
         if (intf === undefined) {
             throw new NoFreeInterfaces(this);
         }
