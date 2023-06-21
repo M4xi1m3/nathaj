@@ -7,6 +7,7 @@ import { AddLinkDialog } from './components/dialogs/AddLinkDialog';
 import { AddStpSwitchDialog } from './components/dialogs/AddStpSwitchDialog';
 import { AddSwitchDialog } from './components/dialogs/AddSwitchDialog';
 import { RemoveDeviceDialog } from './components/dialogs/RemoveDeviceDialog';
+import { RemoveLinkDialog } from './components/dialogs/RemoveLinkDialog';
 import { HorizontalDivider, VerticalDivider } from './components/Dividers';
 import { AddMenu } from './components/menus/AddMenu';
 import { RemoveMenu } from './components/menus/RemoveMenu';
@@ -81,6 +82,7 @@ const App: React.FC = () => {
                         />
 
                         <RemoveDeviceDialog opened={removeDeviceOpened} close={() => setRemoveDeviceOpened(false)} />
+                        <RemoveLinkDialog opened={removeLinkOpened} close={() => setRemoveLinkOpened(false)} />
 
                         <RemoveMenu
                             elements={[
