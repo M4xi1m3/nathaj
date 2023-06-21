@@ -186,7 +186,13 @@ export class Network extends EventTarget {
             this.devices[dev1].getInterface(intf1).connect(this.devices[dev2].getInterface(intf2));
         } else {
             const inf1 = this.devices[dev1].getFreeInterface();
-            const inf2 = this.devices[intf1].getFreeInterface();
+
+            let ignore = undefined;
+            if (dev1 === intf1) {
+                ignore = [inf1.getName()];
+            }
+
+            const inf2 = this.devices[intf1].getFreeInterface(ignore);
 
             if (inf1 !== undefined && inf2 !== undefined) {
                 inf1.connect(inf2);
@@ -231,7 +237,7 @@ export class Network extends EventTarget {
         this.time_offset = performance.now();
         this.interval = window.setInterval(() => {
             // TODO: Measure performance to run multiple calls to tick
-            // allowing to don't be blocked by the 4 ms lower limit imposed
+            // allowing to not be blocked by the 4 ms lower limit imposed
             // by setInterval
             this.tick();
         }, 0);
