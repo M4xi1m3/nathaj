@@ -6,6 +6,7 @@ import { AddHubDialog } from './components/dialogs/AddHubDialog';
 import { AddLinkDialog } from './components/dialogs/AddLinkDialog';
 import { AddStpSwitchDialog } from './components/dialogs/AddStpSwitchDialog';
 import { AddSwitchDialog } from './components/dialogs/AddSwitchDialog';
+import { RemoveDeviceDialog } from './components/dialogs/RemoveDeviceDialog';
 import { HorizontalDivider, VerticalDivider } from './components/Dividers';
 import { AddMenu } from './components/menus/AddMenu';
 import { RemoveMenu } from './components/menus/RemoveMenu';
@@ -28,6 +29,9 @@ const App: React.FC = () => {
     const [addSwitchOpened, setAddSwitchOpened] = useState<boolean>(false);
     const [addStpSwitchOpened, setAddStpSwitchOpened] = useState<boolean>(false);
     const [addLinkDialogOpened, setAddLinkDialogOpened] = useState<boolean>(false);
+
+    const [removeDeviceOpened, setRemoveDeviceOpened] = useState<boolean>(false);
+    const [removeLinkOpened, setRemoveLinkOpened] = useState<boolean>(false);
 
     return (
         <>
@@ -75,18 +79,21 @@ const App: React.FC = () => {
                                 },
                             ]}
                         />
+
+                        <RemoveDeviceDialog opened={removeDeviceOpened} close={() => setRemoveDeviceOpened(false)} />
+
                         <RemoveMenu
                             elements={[
                                 {
                                     name: 'Device',
                                     remove: () => {
-                                        setAddHostOpened(true);
+                                        setRemoveDeviceOpened(true);
                                     },
                                 },
                                 {
                                     name: 'Link',
                                     remove: () => {
-                                        setAddLinkDialogOpened(true);
+                                        setRemoveLinkOpened(true);
                                     },
                                 },
                             ]}
