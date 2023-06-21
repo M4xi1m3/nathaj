@@ -2,6 +2,7 @@ import { AddLink, CenterFocusStrong, Hub, Label, LabelOff } from '@mui/icons-mat
 import { Divider, Grid, IconButton, Stack, Typography } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import React, { useContext, useState } from 'react';
+import { CloseNetwork } from '../../icons/CloseNetwork';
 import { NetworkContext } from '../../NetworkContext';
 import { Layout } from '../../simulator/drawing/Layout';
 import { Vector2D } from '../../simulator/drawing/Vector2D';
@@ -20,10 +21,19 @@ export const NetworkRenderer: React.FC = () => {
     const [offset, setOffset] = useState(new Vector2D());
     const [mousePos, setMousePos] = useState(new Vector2D());
     const [dragged, setDragged] = useState<string | null>(null);
+
     const [addingLink, setAddingLink] = useState<boolean>(false);
     const [linkDev1, setLinkDev1] = useState<string | null>(null);
 
+    const [removingDevice, setRemovingDevice] = useState<boolean>(false);
+
     const [showLabel, setShowLabel] = useState(false);
+
+    const allActionsOff = () => {
+        setRemovingDevice(false);
+        setAddingLink(false);
+        setLinkDev1(null);
+    };
 
     return (
         <Grid container direction='column' flexWrap='nowrap' sx={{ height: '100%' }}>
@@ -38,15 +48,22 @@ export const NetworkRenderer: React.FC = () => {
                         <IconButton
                             size='small'
                             onClick={() => {
-                                if (addingLink) {
-                                    setAddingLink(false);
-                                    setLinkDev1(null);
-                                } else {
+                                allActionsOff();
+                                setRemovingDevice(!removingDevice);
+                            }}>
+                            <CloseNetwork color={removingDevice ? 'error' : 'action'} />
+                        </IconButton>
+                        <IconButton
+                            size='small'
+                            onClick={() => {
+                                allActionsOff();
+                                if (!addingLink) {
                                     setAddingLink(true);
                                 }
                             }}>
                             <AddLink color={addingLink ? 'primary' : 'action'} />
                         </IconButton>
+                        <Divider orientation='vertical' />
                         <IconButton onClick={() => Layout.spring_layout(network)} size='small'>
                             <Hub />
                         </IconButton>
@@ -86,6 +103,20 @@ export const NetworkRenderer: React.FC = () => {
                                         setLinkDev1(null);
                                         setAddingLink(false);
                                     }
+                                    return;
+                                }
+                            }
+                        }
+
+                        if (removingDevice) {
+                            for (const dev of network.getDevices()) {
+                                if (dev.collision(mousePos.sub(offset).add(centerOffset))) {
+                                    try {
+                                        network.removeDevice(dev.getName());
+                                    } catch (e: any) {
+                                        enqueueSnackbar((e as Error).message, { variant: 'error' });
+                                    }
+                                    setRemovingDevice(false);
                                     return;
                                 }
                             }
