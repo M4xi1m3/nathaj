@@ -1,5 +1,5 @@
 import { Network } from '../Network';
-import { Device, InterfaceNameTaken, NoFreeInterfaces } from './Device';
+import { Device, InterfaceNameTaken, NoFreeInterfaces, SavedDevice } from './Device';
 import { Interface } from './Interface';
 
 /**
@@ -15,6 +15,15 @@ class StubDevice extends Device {
     }
     public reset(): void {
         //
+    }
+    public save(): SavedDevice {
+        return {
+            type: 'stub',
+            name: this.getName(),
+            interfaces: this.getInterfaces().map((intf) => intf.save()),
+            x: 0,
+            y: 0,
+        };
     }
 }
 

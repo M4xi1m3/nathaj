@@ -91,3 +91,30 @@ it('mac', () => {
 
     expect(sw1.getMac()).toEqual('00:00:00:00:00:01');
 });
+
+it('save', () => {
+    const net = new Network();
+    const h1 = new STPSwitch(net, 'sw1', '00:00:00:00:00:01', 4);
+
+    expect(h1.save()).toStrictEqual({
+        type: 'stp-switch',
+        mac: '00:00:00:00:00:01',
+        name: 'sw1',
+        interfaces: [
+            {
+                name: 'eth0',
+            },
+            {
+                name: 'eth1',
+            },
+            {
+                name: 'eth2',
+            },
+            {
+                name: 'eth3',
+            },
+        ],
+        x: 0,
+        y: 0,
+    });
+});

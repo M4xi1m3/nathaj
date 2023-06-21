@@ -277,7 +277,6 @@ export const NetworkAnalyzer: React.FC = () => {
         setPackets([...packets, ...packetsTmp]);
         lastIdTmp++;
         setLastId(lastIdTmp);
-        console.log(packet);
     };
 
     useEffect(() => {

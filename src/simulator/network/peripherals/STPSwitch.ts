@@ -3,11 +3,16 @@ import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
 import { BPDU as BPDUPacket } from '../packets/definitions/BPDU';
 import { Ethernet } from '../packets/definitions/Ethernet';
+import { isSavedDevice } from './Device';
 import { Interface } from './Interface';
-import { Switch } from './Switch';
+import { SavedSwitch, Switch } from './Switch';
 
 const STPSwitchImage = new Image();
 STPSwitchImage.src = STPSwitchImg;
+
+export function isSavedSTPSwitch(arg: any): arg is SavedSwitch {
+    return arg && arg.mac && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'stp-switch';
+}
 
 /**
  * State of the ports
@@ -443,6 +448,23 @@ export class STPSwitch extends Switch {
         this.initialize();
     }
 
+    public addInterface(name: string): Interface {
+        const intf = super.addInterface(name);
+
+        if (this.port_infos !== undefined) {
+            const i = Math.max(0, ...Object.values(this.port_infos).map((v) => v.id));
+            this.port_infos[intf.getName()] = new PortData(this, i, 1);
+            this.port_infos[intf.getName()].initialize();
+        }
+
+        return intf;
+    }
+
+    public removeInterface(name: string): void {
+        super.removeInterface(name);
+        delete this.port_infos[name];
+    }
+
     /**
      * Initialize the states
      */
@@ -698,5 +720,31 @@ export class STPSwitch extends Switch {
 
     reset(): void {
         this.initialize();
+    }
+
+    public save(): SavedSwitch {
+        return {
+            type: 'stp-switch',
+            mac: this.getMac(),
+            name: this.getName(),
+            interfaces: this.getInterfaces().map((intf) => intf.save()),
+            x: this.getPosition().x,
+            y: this.getPosition().y,
+        };
+    }
+
+    /**
+     * Load a STP switch from an object
+     *
+     * @param {Network} net Network to load into
+     * @param {SavedSwitch} data Data to load from
+     */
+    public static load(net: Network, data: SavedSwitch) {
+        const host = new STPSwitch(net, data.name, data.mac, 0);
+        host.removeAllInterfaces();
+        host.setPosition(new Vector2D(data.x, data.y));
+        data.interfaces.forEach((intf) => {
+            host.addInterface(intf.name);
+        });
     }
 }

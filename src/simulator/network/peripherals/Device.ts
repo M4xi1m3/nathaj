@@ -1,7 +1,7 @@
 import { Drawable } from '../../drawing/Drawable';
 import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
-import { Interface, ReceivedPacketEventData } from './Interface';
+import { Interface, isSavedInterface, ReceivedPacketEventData, SavedInterface } from './Interface';
 
 /**
  * Excpetion thrown for an error related to a device
@@ -16,11 +16,20 @@ export class DeviceException extends Error {
 }
 
 /**
- * Exception thrown when trying to add a device to a device which name is already used
+ * Exception thrown when trying to add an interface to a device which name is already used
  */
 export class InterfaceNameTaken extends DeviceException {
     constructor(device: Device, name: string) {
         super('Device ' + device.getName() + ' already has an interface named ' + name + '.', device);
+    }
+}
+
+/**
+ * Exception thrown when trying to remove an interface that doesn't existe on a device
+ */
+export class InterfaceNotFound extends DeviceException {
+    constructor(device: Device, name: string) {
+        super('Device ' + device.getName() + ' has no interface named ' + name + '.', device);
     }
 }
 
@@ -40,6 +49,32 @@ export class DeviceRemoved extends DeviceException {
     constructor(device: Device) {
         super('Device ' + device.getName() + ' has been removed.', device);
     }
+}
+
+export interface SavedDevice {
+    type: string;
+    name: string;
+    interfaces: SavedInterface[];
+    x: number;
+    y: number;
+}
+
+export function isSavedDevice(arg: any): arg is SavedDevice {
+    return (
+        arg &&
+        arg.type &&
+        typeof arg.type === 'string' &&
+        arg.name &&
+        typeof arg.name === 'string' &&
+        arg.x &&
+        typeof arg.x === 'number' &&
+        arg.y &&
+        typeof arg.y === 'number' &&
+        arg.interfaces &&
+        typeof arg.interfaces === 'object' &&
+        Array.isArray(arg.interfaces) &&
+        (arg.interfaces as any[]).map(isSavedInterface).reduce((prev, curr) => prev && curr)
+    );
 }
 
 /**
@@ -121,6 +156,27 @@ export abstract class Device extends Drawable {
         }) as EventListenerOrEventListenerObject);
         this.interfaces[intf.getName()] = intf;
         return intf;
+    }
+
+    public removeAllInterfaces(): void {
+        this.getInterfaces().forEach((intf) => {
+            this.removeInterface(intf.getName());
+        });
+    }
+
+    /**
+     * Remove an interface from a device
+     *
+     * @param {string} name Name of the interface
+     */
+    public removeInterface(name: string): void {
+        if (!(name in this.interfaces)) throw new InterfaceNotFound(this, name);
+
+        const intf = this.getInterface(name);
+        if (intf.isConnected()) intf.disconnect();
+
+        delete intf['owner'];
+        delete this.interfaces[name];
     }
 
     /**
@@ -227,4 +283,11 @@ export abstract class Device extends Drawable {
     public time(): number {
         return this.getNetwork().time();
     }
+
+    /**
+     * Serialize a device
+     *
+     * @return {SavedDevice} The serialized device
+     */
+    abstract save(): SavedDevice;
 }

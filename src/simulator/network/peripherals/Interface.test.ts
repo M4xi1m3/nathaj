@@ -1,5 +1,5 @@
 import { Network, PacketEventData } from '../Network';
-import { Device } from './Device';
+import { Device, SavedDevice } from './Device';
 import {
     AlreadyConnectedException,
     ConnectionToItselfException,
@@ -21,6 +21,15 @@ class StubDevice extends Device {
     }
     public reset(): void {
         //
+    }
+    public save(): SavedDevice {
+        return {
+            type: 'stub',
+            name: this.getName(),
+            interfaces: this.getInterfaces().map((intf) => intf.save()),
+            x: 0,
+            y: 0,
+        };
     }
 }
 
@@ -158,4 +167,25 @@ it('tick', () => {
 
     expect(packetEventSpy).toHaveBeenCalledWith(expect.any(CustomEvent<PacketEventData>));
     expect(receivedataEventSpy).toHaveBeenCalledWith(expect.any(CustomEvent<PacketEventData>));
+});
+
+it('save', () => {
+    const net0 = new Network();
+    const dev0 = new StubDevice(net0, 'd1');
+    const eth0 = dev0.addInterface('eth0');
+    const eth1 = dev0.addInterface('eth1');
+
+    expect(eth0.save()).toStrictEqual({
+        name: 'eth0',
+    });
+
+    eth0.connect(eth1);
+
+    expect(eth0.save()).toStrictEqual({
+        name: 'eth0',
+        connected_to: {
+            device: 'd1',
+            interface: 'eth1',
+        },
+    });
 });

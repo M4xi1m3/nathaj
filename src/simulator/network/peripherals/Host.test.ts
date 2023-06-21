@@ -7,3 +7,41 @@ it('mac', () => {
 
     expect(h1.getMac()).toEqual('00:00:00:00:00:01');
 });
+
+it('save', () => {
+    const net = new Network();
+    const h1 = new Host(net, 'h1', '00:00:00:00:00:01');
+
+    expect(h1.save()).toStrictEqual({
+        type: 'host',
+        mac: '00:00:00:00:00:01',
+        name: 'h1',
+        interfaces: [
+            {
+                name: 'eth0',
+            },
+        ],
+        x: 0,
+        y: 0,
+    });
+
+    const h2 = new Host(net, 'h2', '00:00:00:00:00:02');
+    net.addLink('h1', 'h2');
+
+    expect(h1.save()).toStrictEqual({
+        type: 'host',
+        mac: '00:00:00:00:00:01',
+        name: 'h1',
+        interfaces: [
+            {
+                name: 'eth0',
+                connected_to: {
+                    device: 'h2',
+                    interface: 'eth0',
+                },
+            },
+        ],
+        x: 0,
+        y: 0,
+    });
+});

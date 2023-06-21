@@ -5,7 +5,7 @@ import {
     NetworkAlreadyRunningException,
     NetworkNotRunningException,
 } from './Network';
-import { Device, DeviceRemoved } from './peripherals/Device';
+import { Device, DeviceRemoved, SavedDevice } from './peripherals/Device';
 import { Host } from './peripherals/Host';
 import { Interface } from './peripherals/Interface';
 
@@ -22,6 +22,15 @@ class StubDevice extends Device {
     }
     public reset(): void {
         //
+    }
+    public save(): SavedDevice {
+        return {
+            type: 'stub',
+            name: this.getName(),
+            interfaces: this.getInterfaces().map((intf) => intf.save()),
+            x: 0,
+            y: 0,
+        };
     }
 }
 
@@ -192,4 +201,11 @@ it('clear', () => {
     net.clear();
     expect(net.getDevices().length).toEqual(0);
     expect(net.isRunning()).toEqual(false);
+});
+
+it('save', () => {
+    const net = new Network();
+    const h1 = new Host(net, 'h1', '00:00:00:00:00:01');
+
+    expect(net.save().devices.length).toEqual(1);
 });

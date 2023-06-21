@@ -60,6 +60,38 @@ export class NotConnectedException extends InterfaceException {
 }
 
 /**
+ * Exception thrown when the interface isn't connected to a device
+ */
+export class DisconnectedException extends InterfaceException {
+    constructor(iface: Interface) {
+        super('Interface is disconnected.', iface);
+    }
+}
+
+export interface SavedInterface {
+    name: string;
+    connected_to?: {
+        device: string;
+        interface: string;
+    };
+}
+
+export function isSavedInterface(arg: any): arg is SavedInterface {
+    return (
+        arg &&
+        arg.name &&
+        typeof arg.name === 'string' &&
+        (arg.connected_to
+            ? typeof arg.connected_to === 'object' &&
+              arg.connected_to.device &&
+              typeof arg.connected_to.device === 'string' &&
+              arg.connected_to.interface &&
+              typeof arg.connected_to.interface === 'string'
+            : true)
+    );
+}
+
+/**
  * Network interface, which can send and receive packets
  */
 export class Interface extends EventTarget {
@@ -71,7 +103,7 @@ export class Interface extends EventTarget {
     /**
      * Device that owns the interface
      */
-    private owner: Device;
+    private owner?: Device;
 
     /**
      * Interface to which the interface is connected
@@ -103,6 +135,8 @@ export class Interface extends EventTarget {
      * @returns {Device} owner of the interface
      */
     getOwner(): Device {
+        if (this.owner === undefined) throw new DisconnectedException(this);
+
         return this.owner;
     }
 
@@ -232,6 +266,20 @@ export class Interface extends EventTarget {
      * @returns {string} String representation of the interface
      */
     toString(): string {
-        return '<Interface ' + this.owner.getName() + '-' + this.getName() + '>';
+        return '<Interface ' + this.getOwner().getName() + '-' + this.getName() + '>';
+    }
+
+    public save(): SavedInterface {
+        return {
+            name: this.getName(),
+            ...(this.isConnected()
+                ? {
+                      connected_to: {
+                          device: this.getConnection()?.getOwner().getName() ?? '',
+                          interface: this.getConnection()?.getName() ?? '',
+                      },
+                  }
+                : {}),
+        };
     }
 }

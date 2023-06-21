@@ -28,3 +28,22 @@ it('hub', () => {
     expect(h2PacketReveivedSpy).toHaveBeenCalled();
     expect(h3PacketReveivedSpy).toHaveBeenCalled();
 });
+it('save', () => {
+    const net = new Network();
+    const h1 = new Hub(net, 'h1', 2);
+
+    expect(h1.save()).toStrictEqual({
+        type: 'hub',
+        name: 'h1',
+        interfaces: [
+            {
+                name: 'eth0',
+            },
+            {
+                name: 'eth1',
+            },
+        ],
+        x: 0,
+        y: 0,
+    });
+});
