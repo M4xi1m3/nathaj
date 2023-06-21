@@ -37,6 +37,7 @@ test:
         - yarn.lock
     paths:
       - node_modules/
+  coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
 
 pages:
   image: alpine:latest
