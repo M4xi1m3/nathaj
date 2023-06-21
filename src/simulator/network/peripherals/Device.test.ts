@@ -77,3 +77,17 @@ it('get free interfaces', () => {
     expect(dev.hasFreeInterface()).toEqual(false);
     expect(() => dev.getFreeInterface()).toThrowError(NoFreeInterfaces);
 });
+
+/**
+ * Test checking if the device has a connected interface
+ */
+it('get free interfaces', () => {
+    const net = new Network();
+    const dev = new StubDevice(net, 'd1');
+    const eth0 = dev.addInterface('eth0');
+    const eth1 = dev.addInterface('eth1');
+
+    expect(dev.hasConnectedInterface()).toEqual(false);
+    eth0.connect(eth1);
+    expect(dev.hasConnectedInterface()).toEqual(true);
+});
