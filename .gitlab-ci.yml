@@ -3,13 +3,6 @@ stages:
   - test
   - deploy
 
-cache:
-  key:
-    files:
-      - yarn.lock
-  paths:
-    - node_modules/
-
 build:
   image: node:latest
   stage: build
@@ -24,12 +17,26 @@ build:
     paths:
       - build/
       - docs/
+  cache:
+    key:
+      files:
+        - yarn.lock
+    paths:
+      - node_modules/
 
 test:
   image: node:latest
   stage: test
+  before_script:
+    - yarn install --frozen-lockfile
   script:
     - yarn test --ci --coverage --detectOpenHandles --forceExit --watchAll=false --all
+  cache:
+    key:
+      files:
+        - yarn.lock
+    paths:
+      - node_modules/
 
 pages:
   image: alpine:latest
