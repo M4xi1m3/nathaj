@@ -13,9 +13,26 @@ interface PortsInputProps {
             intf: string | null;
         }
     ];
+    connectedTo?: [
+        {
+            device: string | null;
+            intf: string | null;
+        }
+    ];
+    free?: boolean;
+    connected?: boolean;
 }
 
-export const InterfaceInput: React.FC<PortsInputProps> = ({ device, setDevice, intf, setIntf, exclude }) => {
+export const InterfaceInput: React.FC<PortsInputProps> = ({
+    device,
+    setDevice,
+    intf,
+    setIntf,
+    exclude,
+    connectedTo,
+    free,
+    connected,
+}) => {
     const network = useContext(NetworkContext);
 
     const handleDeviceChange = (event: SelectChangeEvent) => {
@@ -41,7 +58,13 @@ export const InterfaceInput: React.FC<PortsInputProps> = ({ device, setDevice, i
                     <InputLabel>Device</InputLabel>
                     <Select label='Device' onChange={handleDeviceChange} value={device === null ? '' : device}>
                         {network.getDevices().map((dev, key) => (
-                            <MenuItem value={dev.getName()} disabled={!dev.hasFreeInterface()} key={key}>
+                            <MenuItem
+                                value={dev.getName()}
+                                disabled={
+                                    (free === true ? !dev.hasFreeInterface() : false) ||
+                                    (connected === true ? !dev.hasConnectedInterface() : false)
+                                }
+                                key={key}>
                                 {dev.getName()}
                             </MenuItem>
                         ))}
@@ -64,12 +87,23 @@ export const InterfaceInput: React.FC<PortsInputProps> = ({ device, setDevice, i
                                       <MenuItem
                                           value={intf.getName()}
                                           disabled={
-                                              intf.isConnected() ||
+                                              (free === true ? intf.isConnected() : false) ||
+                                              (connected === true ? !intf.isConnected() : false) ||
                                               (exclude !== undefined
                                                   ? exclude.find(
                                                         (value) =>
                                                             value.device === device && value.intf === intf.getName()
                                                     ) !== undefined
+                                                  : false) ||
+                                              (connectedTo !== undefined
+                                                  ? intf.isConnected()
+                                                      ? connectedTo.find(
+                                                            (value) =>
+                                                                value.device ===
+                                                                    intf.getConnection()?.getOwner().getName() &&
+                                                                value.intf === intf.getConnection()?.getName()
+                                                        ) === undefined
+                                                      : true
                                                   : false)
                                           }
                                           key={key}>

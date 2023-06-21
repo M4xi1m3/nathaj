@@ -1,5 +1,11 @@
-import { DeviceNameTaken, Network, NetworkAlreadyRunningException, NetworkNotRunningException } from './Network';
-import { Device } from './peripherals/Device';
+import {
+    DeviceNameTaken,
+    DeviceNotFound,
+    Network,
+    NetworkAlreadyRunningException,
+    NetworkNotRunningException,
+} from './Network';
+import { Device, DeviceRemoved } from './peripherals/Device';
 import { Host } from './peripherals/Host';
 import { Interface } from './peripherals/Interface';
 
@@ -29,6 +35,25 @@ it('add device', () => {
     expect(net.getDevices().length).toEqual(1);
     expect(() => new StubDevice(net, 'dev0')).toThrowError(DeviceNameTaken);
     expect(net.getDevices().length).toEqual(1);
+});
+
+/**
+ * Test removing devices
+ */
+it('remove device', () => {
+    const net = new Network();
+    const h1 = new Host(net, 'h1', '00:0a:00:00:00:01');
+    new Host(net, 'h2', '00:0a:00:00:02');
+
+    net.addLink('h1', 'h2');
+
+    expect(net.getDevices().length).toEqual(2);
+    net.removeDevice('h1');
+    expect(net.getDevices().length).toEqual(1);
+    expect(net.getDevice('h2').getInterface('eth0').isConnected()).toEqual(false);
+    expect(() => net.removeDevice('h1')).toThrowError(DeviceNotFound);
+
+    expect(() => h1.getNetwork()).toThrowError(DeviceRemoved);
 });
 
 /**

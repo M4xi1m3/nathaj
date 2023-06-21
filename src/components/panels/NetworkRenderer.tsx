@@ -1,7 +1,8 @@
-import { AddLink, CenterFocusStrong, Hub, Label, LabelOff } from '@mui/icons-material';
+import { AddLink, CenterFocusStrong, Hub, Label, LabelOff, LinkOff } from '@mui/icons-material';
 import { Divider, Grid, IconButton, Stack, Typography } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import React, { useContext, useState } from 'react';
+import { CloseNetwork } from '../../icons/CloseNetwork';
 import { NetworkContext } from '../../NetworkContext';
 import { Layout } from '../../simulator/drawing/Layout';
 import { Vector2D } from '../../simulator/drawing/Vector2D';
@@ -20,10 +21,21 @@ export const NetworkRenderer: React.FC = () => {
     const [offset, setOffset] = useState(new Vector2D());
     const [mousePos, setMousePos] = useState(new Vector2D());
     const [dragged, setDragged] = useState<string | null>(null);
+
     const [addingLink, setAddingLink] = useState<boolean>(false);
-    const [linkDev1, setLinkDev1] = useState<string | null>(null);
+    const [removingLink, setRemovingLink] = useState<boolean>(false);
+    const [selectedDev1, setSelectedDev1] = useState<string | null>(null);
+
+    const [removingDevice, setRemovingDevice] = useState<boolean>(false);
 
     const [showLabel, setShowLabel] = useState(false);
+
+    const allActionsOff = () => {
+        setRemovingDevice(false);
+        setAddingLink(false);
+        setRemovingLink(false);
+        setSelectedDev1(null);
+    };
 
     return (
         <Grid container direction='column' flexWrap='nowrap' sx={{ height: '100%' }}>
@@ -38,15 +50,28 @@ export const NetworkRenderer: React.FC = () => {
                         <IconButton
                             size='small'
                             onClick={() => {
-                                if (addingLink) {
-                                    setAddingLink(false);
-                                    setLinkDev1(null);
-                                } else {
-                                    setAddingLink(true);
-                                }
+                                allActionsOff();
+                                if (!removingDevice) setRemovingDevice(true);
+                            }}>
+                            <CloseNetwork color={removingDevice ? 'error' : 'action'} />
+                        </IconButton>
+                        <IconButton
+                            size='small'
+                            onClick={() => {
+                                allActionsOff();
+                                if (!addingLink) setAddingLink(true);
                             }}>
                             <AddLink color={addingLink ? 'primary' : 'action'} />
                         </IconButton>
+                        <IconButton
+                            size='small'
+                            onClick={() => {
+                                allActionsOff();
+                                if (!removingLink) setRemovingLink(true);
+                            }}>
+                            <LinkOff color={removingLink ? 'error' : 'action'} />
+                        </IconButton>
+                        <Divider orientation='vertical' />
                         <IconButton onClick={() => Layout.spring_layout(network)} size='small'>
                             <Hub />
                         </IconButton>
@@ -72,20 +97,34 @@ export const NetworkRenderer: React.FC = () => {
                             )
                         );
 
-                        if (addingLink) {
+                        if (addingLink || removingLink) {
                             for (const dev of network.getDevices()) {
                                 if (dev.collision(mousePos.sub(offset).add(centerOffset))) {
-                                    if (linkDev1 === null) {
-                                        setLinkDev1(dev.getName());
+                                    if (selectedDev1 === null) {
+                                        setSelectedDev1(dev.getName());
                                     } else {
                                         try {
-                                            network.addLink(linkDev1, dev.getName());
+                                            if (addingLink) network.addLink(selectedDev1, dev.getName());
+                                            else if (removingLink) network.removeLink(selectedDev1, dev.getName());
                                         } catch (e: any) {
                                             enqueueSnackbar((e as Error).message, { variant: 'error' });
                                         }
-                                        setLinkDev1(null);
-                                        setAddingLink(false);
+                                        allActionsOff();
                                     }
+                                    return;
+                                }
+                            }
+                        }
+
+                        if (removingDevice) {
+                            for (const dev of network.getDevices()) {
+                                if (dev.collision(mousePos.sub(offset).add(centerOffset))) {
+                                    try {
+                                        network.removeDevice(dev.getName());
+                                    } catch (e: any) {
+                                        enqueueSnackbar((e as Error).message, { variant: 'error' });
+                                    }
+                                    allActionsOff();
                                     return;
                                 }
                             }
@@ -181,6 +220,18 @@ export const NetworkRenderer: React.FC = () => {
                                     ctx.stroke();
                                 }
                             }
+                        }
+
+                        if (addingLink && selectedDev1 !== null) {
+                            const dev = network.getDevice(selectedDev1);
+
+                            ctx.lineWidth = 2;
+                            ctx.setLineDash([5, 5]);
+                            ctx.beginPath();
+                            ctx.moveTo(...dev.getPosition().add(offset.add(centerOffset)).array());
+                            ctx.lineTo(...mousePos.array());
+                            ctx.stroke();
+                            ctx.setLineDash([]);
                         }
 
                         for (const dev of network.getDevices()) {
