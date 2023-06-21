@@ -12,7 +12,7 @@ STPSwitchImage.src = STPSwitchImg;
 /**
  * State of the ports
  */
-enum PortState {
+export enum PortState {
     Blocking = 0,
     Listening = 1,
     Learning = 2,
@@ -23,7 +23,7 @@ enum PortState {
 /**
  * Roles of the ports
  */
-enum PortRole {
+export enum PortRole {
     Root = 0,
     Designated = 1,
     Blocking = 2,

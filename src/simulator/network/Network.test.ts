@@ -8,7 +8,8 @@ import { Interface } from './peripherals/Interface';
  */
 class StubDevice extends Device {
     public onPacketReceived(iface: Interface, data: ArrayBuffer): void {
-        //
+        iface;
+        data;
     }
     public tick(): void {
         //
@@ -48,7 +49,7 @@ it('get device', () => {
  */
 it('mac used', () => {
     const net = new Network();
-    const h0 = new Host(net, 'h0', '00:00:00:00:00:01');
+    new Host(net, 'h0', '00:00:00:00:00:01');
 
     expect(net.isMACUsed('00:00:00:00:00:02')).toEqual(false);
     expect(net.isMACUsed('00:00:00:00:00:01')).toEqual(true);
@@ -75,6 +76,46 @@ it('add link', () => {
 
     net.addLink('h1', 'eth2', 'h2', 'eth0');
     expect(h1.getInterface('eth2').getConnection()).toBe(h2.getInterface('eth0'));
+});
+
+/**
+ * Test the removeLink method
+ */
+it('remove link', () => {
+    const net = new Network();
+    const h1 = new Host(net, 'h1', '00:00:00:00:00:01');
+    h1.addInterface('eth1');
+    const h2 = new Host(net, 'h2', '00:00:00:00:00:02');
+    h2.addInterface('eth1');
+    h2.addInterface('eth2');
+    const h3 = new Host(net, 'h3', '00:00:00:00:00:03');
+
+    net.addLink('h1', 'eth0', 'h2', 'eth1');
+    net.addLink('h1', 'eth1', 'h2', 'eth0');
+    net.addLink('h2', 'eth2', 'h3', 'eth0');
+
+    expect(h1.getInterface('eth0').isConnected()).toEqual(true);
+    expect(h1.getInterface('eth1').isConnected()).toEqual(true);
+    expect(h2.getInterface('eth0').isConnected()).toEqual(true);
+    expect(h2.getInterface('eth1').isConnected()).toEqual(true);
+    expect(h2.getInterface('eth2').isConnected()).toEqual(true);
+    expect(h3.getInterface('eth0').isConnected()).toEqual(true);
+
+    net.removeLink('h1', 'h2');
+
+    expect(h1.getInterface('eth0').isConnected()).toEqual(false);
+    expect(h1.getInterface('eth1').isConnected()).toEqual(false);
+    expect(h2.getInterface('eth0').isConnected()).toEqual(false);
+    expect(h2.getInterface('eth1').isConnected()).toEqual(false);
+    expect(h2.getInterface('eth2').isConnected()).toEqual(true);
+    expect(h3.getInterface('eth0').isConnected()).toEqual(true);
+
+    net.addLink('h1', 'eth0', 'h2', 'eth1');
+    expect(h1.getInterface('eth0').isConnected()).toEqual(true);
+    expect(h2.getInterface('eth1').isConnected()).toEqual(true);
+    net.removeLink('h1', 'eth0', 'h2', 'eth1');
+    expect(h1.getInterface('eth0').isConnected()).toEqual(false);
+    expect(h2.getInterface('eth1').isConnected()).toEqual(false);
 });
 
 /**
@@ -118,7 +159,7 @@ it('start stop reset time', () => {
  */
 it('clear', () => {
     const net = new Network();
-    const h1 = new Host(net, 'h1', '00:00:00:00:00:01');
+    new Host(net, 'h1', '00:00:00:00:00:01');
 
     net.start();
     expect(net.getDevices().length).toEqual(1);

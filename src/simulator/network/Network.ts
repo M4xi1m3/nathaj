@@ -201,6 +201,33 @@ export class Network extends EventTarget {
     }
 
     /**
+     * Utility method to remove a link wetween two interfaces.
+     * If dev2 and intf2 are not provided, dev1 is unsed as first device
+     * and intf1 as second device, and all connections between them
+     * are removed.
+     *
+     * @param {string} dev1 Name of the device
+     * @param {string} intf1 Name of the interface in the device
+     * @param {string} [dev2] Name of the other device
+     * @param {string} [intf2] Name of the interface ibn the other device
+     */
+    public removeLink(dev1: string, intf1: string, dev2?: string, intf2?: string) {
+        if (dev2 !== undefined && intf2 !== undefined) {
+            if (this.devices[dev1].getInterface(intf1).getConnection() === this.devices[dev2].getInterface(intf2))
+                this.devices[dev1].getInterface(intf1).disconnect();
+        } else {
+            const dev2 = this.getDevice(intf1);
+            for (const intf of this.getDevice(dev1).getInterfaces()) {
+                if (intf.isConnected()) {
+                    if (intf.getConnection()?.getOwner() === dev2) {
+                        intf.disconnect();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Run a network simulation tick
      *
      * This goes over all the devices and make thein interfaces

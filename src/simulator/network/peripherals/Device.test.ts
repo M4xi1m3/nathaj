@@ -7,7 +7,8 @@ import { Interface } from './Interface';
  */
 class StubDevice extends Device {
     public onPacketReceived(iface: Interface, data: ArrayBuffer): void {
-        //
+        iface;
+        data;
     }
     public tick(): void {
         //
