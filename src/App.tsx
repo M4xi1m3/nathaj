@@ -1,5 +1,5 @@
 import { Box, Paper } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Panel, PanelGroup } from 'react-resizable-panels';
 import { AddHostDialog } from './components/dialogs/AddHostDialog';
 import { AddHubDialog } from './components/dialogs/AddHubDialog';
@@ -9,14 +9,15 @@ import { AddSwitchDialog } from './components/dialogs/AddSwitchDialog';
 import { RemoveDeviceDialog } from './components/dialogs/RemoveDeviceDialog';
 import { RemoveLinkDialog } from './components/dialogs/RemoveLinkDialog';
 import { HorizontalDivider, VerticalDivider } from './components/Dividers';
-import { AddMenu } from './components/menus/AddMenu';
-import { RemoveMenu } from './components/menus/RemoveMenu';
+import { ActionMenu } from './components/menus/ActionMenu';
 import { ViewMenu } from './components/menus/ViewMenu';
 import { NetworkAnalyzer } from './components/panels/NetworkAnalyzer';
 import { NetworkRenderer } from './components/panels/NetworkRenderer';
 import { NetowrkProperties } from './components/panels/NetworProperties';
 import { NoPanels } from './components/panels/NoPanels';
 import { TopBar } from './components/TopBar';
+import { saveJson } from './hooks/saveJson';
+import { NetworkContext } from './NetworkContext';
 
 const App: React.FC = () => {
     const [viewNetwork, setViewNetwork] = useState<boolean>(true);
@@ -24,6 +25,8 @@ const App: React.FC = () => {
     const [viewAnalyzer, setViewAnalyzer] = useState<boolean>(true);
 
     const noPanel = !(viewNetwork || viewProperties || viewAnalyzer);
+
+    const net = useContext(NetworkContext);
 
     const [addHostOpened, setAddHostOpened] = useState<boolean>(false);
     const [addHubOpened, setAddHubOpened] = useState<boolean>(false);
@@ -39,42 +42,55 @@ const App: React.FC = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', wudth: '100%' }}>
                 <Box sx={{ flexGrow: 1 }}>
                     <TopBar>
+                        <ActionMenu
+                            title='File'
+                            elements={[
+                                {
+                                    name: 'Save',
+                                    action: () => {
+                                        saveJson(net.save(), 'network.json');
+                                    },
+                                },
+                            ]}
+                        />
+
                         <AddHostDialog opened={addHostOpened} close={() => setAddHostOpened(false)} />
                         <AddHubDialog opened={addHubOpened} close={() => setAddHubOpened(false)} />
                         <AddSwitchDialog opened={addSwitchOpened} close={() => setAddSwitchOpened(false)} />
                         <AddStpSwitchDialog opened={addStpSwitchOpened} close={() => setAddStpSwitchOpened(false)} />
                         <AddLinkDialog opened={addLinkDialogOpened} close={() => setAddLinkDialogOpened(false)} />
 
-                        <AddMenu
+                        <ActionMenu
+                            title='Add'
                             elements={[
                                 {
                                     name: 'Host',
-                                    add: () => {
+                                    action: () => {
                                         setAddHostOpened(true);
                                     },
                                 },
                                 {
                                     name: 'Hub',
-                                    add: () => {
+                                    action: () => {
                                         setAddHubOpened(true);
                                     },
                                 },
                                 {
                                     name: 'Switch',
-                                    add: () => {
+                                    action: () => {
                                         setAddSwitchOpened(true);
                                     },
                                 },
                                 {
                                     name: 'STP Switch',
-                                    add: () => {
+                                    action: () => {
                                         setAddStpSwitchOpened(true);
                                     },
                                 },
                                 'separator',
                                 {
                                     name: 'Link',
-                                    add: () => {
+                                    action: () => {
                                         setAddLinkDialogOpened(true);
                                     },
                                 },
@@ -84,17 +100,18 @@ const App: React.FC = () => {
                         <RemoveDeviceDialog opened={removeDeviceOpened} close={() => setRemoveDeviceOpened(false)} />
                         <RemoveLinkDialog opened={removeLinkOpened} close={() => setRemoveLinkOpened(false)} />
 
-                        <RemoveMenu
+                        <ActionMenu
+                            title='Remove'
                             elements={[
                                 {
                                     name: 'Device',
-                                    remove: () => {
+                                    action: () => {
                                         setRemoveDeviceOpened(true);
                                     },
                                 },
                                 {
                                     name: 'Link',
-                                    remove: () => {
+                                    action: () => {
                                         setRemoveLinkOpened(true);
                                     },
                                 },

@@ -2,20 +2,20 @@ import { Button, Divider, ListItemText, Menu, MenuItem } from '@mui/material';
 import { bindMenu, bindTrigger, usePopupState } from 'material-ui-popup-state/hooks';
 import React from 'react';
 
-type AddElement =
+type ActionElement =
     | {
           name: string;
-          add: () => void;
+          action: () => void;
       }
     | 'separator';
 
-export const AddMenu: React.FC<{ elements: AddElement[] }> = ({ elements }) => {
+export const ActionMenu: React.FC<{ elements: ActionElement[]; title: string }> = ({ elements, title }) => {
     const popupState = usePopupState({ variant: 'popover' });
 
     return (
         <>
             <Button sx={{ color: 'white', display: 'block' }} {...bindTrigger(popupState)}>
-                Add
+                {title}
             </Button>
             <Menu MenuListProps={{ dense: true }} {...bindMenu(popupState)}>
                 {elements.map((element, key) => {
@@ -26,7 +26,7 @@ export const AddMenu: React.FC<{ elements: AddElement[] }> = ({ elements }) => {
                             <MenuItem
                                 key={key}
                                 onClick={() => {
-                                    element.add();
+                                    element.action();
                                     popupState.close();
                                 }}>
                                 <ListItemText>{element.name}</ListItemText>
