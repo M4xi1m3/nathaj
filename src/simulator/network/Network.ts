@@ -23,6 +23,15 @@ export class DeviceNameTaken extends NetworkException {
 }
 
 /**
+ * Exception thrown when trying to remove a device that doesn't exist in the network
+ */
+export class DeviceNotFound extends NetworkException {
+    constructor(network: Network, name: string) {
+        super('Device ' + name + ' does net exist!', network);
+    }
+}
+
+/**
  * Exception thrown when trying to start the network while it's running
  */
 export class NetworkAlreadyRunningException extends NetworkException {
@@ -122,6 +131,22 @@ export class Network extends EventTarget {
         if (device.getName() in this.devices) throw new DeviceNameTaken(this, device.getName());
 
         this.devices[device.getName()] = device;
+    }
+
+    /**
+     * Remove a device in the network
+     *
+     * @param {string} device Device to remove
+     */
+    public removeDevice(device: string): void {
+        if (!(device in this.devices)) throw new DeviceNotFound(this, device);
+
+        for (const intf of this.devices[device].getInterfaces()) {
+            if (intf.isConnected()) intf.disconnect();
+        }
+
+        delete this.devices[device]['network'];
+        delete this.devices[device];
     }
 
     /**

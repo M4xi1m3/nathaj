@@ -34,6 +34,15 @@ export class NoFreeInterfaces extends DeviceException {
 }
 
 /**
+ * Exception thrown when trying get the network of a device that has been removed
+ */
+export class DeviceRemoved extends DeviceException {
+    constructor(device: Device) {
+        super('Device ' + device.getName() + ' has been removed.', device);
+    }
+}
+
+/**
  * A device in the network simulation
  */
 export abstract class Device extends Drawable {
@@ -45,7 +54,7 @@ export abstract class Device extends Drawable {
     /**
      * Network the device is associated with
      */
-    private network: Network;
+    private network?: Network;
 
     /**
      * Name of the device
@@ -186,6 +195,8 @@ export abstract class Device extends Drawable {
      * @returns {Network} The network the device belongs to
      */
     public getNetwork(): Network {
+        if (this.network === undefined) throw new DeviceRemoved(this);
+
         return this.network;
     }
 
@@ -204,6 +215,6 @@ export abstract class Device extends Drawable {
      * @returns {number} Network time
      */
     public time(): number {
-        return this.network.time();
+        return this.getNetwork().time();
     }
 }
