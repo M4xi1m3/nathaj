@@ -2,7 +2,7 @@ import SwitchImg from '../../../assets/switch.png';
 import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
 import { Ethernet } from '../packets/definitions/Ethernet';
-import { SavedDevice } from './Device';
+import { isSavedDevice, SavedDevice } from './Device';
 import { Hub } from './Hub';
 import { Interface } from './Interface';
 
@@ -11,6 +11,10 @@ SwitchImage.src = SwitchImg;
 
 export interface SavedSwitch extends SavedDevice {
     mac: string;
+}
+
+export function isSavedSwitch(arg: any): arg is SavedSwitch {
+    return arg && arg.mac && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'switch';
 }
 
 /**
@@ -87,5 +91,20 @@ export class Switch extends Hub {
             x: this.getPosition().x,
             y: this.getPosition().y,
         };
+    }
+
+    /**
+     * Load a switch from an object
+     *
+     * @param {Network} net Network to load into
+     * @param {SavedSwitch} data Data to load from
+     */
+    public static load(net: Network, data: SavedSwitch) {
+        const host = new Switch(net, data.name, data.mac, 0);
+        host.removeAllInterfaces();
+        host.setPosition(new Vector2D(data.x, data.y));
+        data.interfaces.forEach((intf) => {
+            host.addInterface(intf.name);
+        });
     }
 }

@@ -1,5 +1,9 @@
-import { Device, SavedDevice } from './peripherals/Device';
-import { Interface } from './peripherals/Interface';
+import { Device, isSavedDevice, SavedDevice } from './peripherals/Device';
+import { Host, isSavedHost } from './peripherals/Host';
+import { Hub, isSavedHub } from './peripherals/Hub';
+import { Interface, SavedInterface } from './peripherals/Interface';
+import { isSavedSTPSwitch, STPSwitch } from './peripherals/STPSwitch';
+import { isSavedSwitch, Switch } from './peripherals/Switch';
 
 /**
  * Excpetion thrown for an error related to the network
@@ -49,6 +53,12 @@ export class NetworkNotRunningException extends NetworkException {
     }
 }
 
+export class InvalidNetwork extends Error {
+    constructor() {
+        super('Invalid network');
+    }
+}
+
 /**
  * Direction of the packet, relative to the interface
  */
@@ -81,6 +91,19 @@ export type PacketEventData = {
 
 export interface SavedNetwork {
     devices: SavedDevice[];
+}
+
+export function isSavedNetwork(arg: any): arg is SavedNetwork {
+    return (
+        arg &&
+        arg.devices &&
+        typeof arg.devices === 'object' &&
+        Array.isArray(arg.devices) &&
+        (arg.devices as any[]).map(isSavedDevice).reduce((prev, curr) => prev && curr) &&
+        (arg.devices as any[])
+            .map((d) => isSavedHost(d) || isSavedHub(d) || isSavedSwitch(d) || isSavedSTPSwitch(d))
+            .reduce((prev, curr) => prev && curr)
+    );
 }
 
 /**
@@ -200,7 +223,7 @@ export class Network extends EventTarget {
     }
 
     /**
-     * Utility method to add a link wetween two interfaces.
+     * Utility method to add a link between two interfaces.
      * If dev2 and intf2 are not provided, dev1 is unsed as first device
      * and intf1 as second device, and the first available interface of
      * each are connected together.
@@ -227,6 +250,23 @@ export class Network extends EventTarget {
                 inf1.connect(inf2);
             }
         }
+    }
+
+    /**
+     * Utility method to add a link between two interfaces.
+     * If dev2 and intf2 are not provided, dev1 is unsed as first device
+     * and intf1 as second device, and the first available interface of
+     * each are connected together.
+     *
+     * @param {string} dev1 Name of the device
+     * @param {string} intf1 Name of the interface in the device
+     * @param {string} dev2 Name of the other device
+     * @param {string} intf2 Name of the interface ibn the other device
+     */
+    public addLinkIfDoesntExist(dev1: string, intf1: string, dev2: string, intf2: string) {
+        if (this.devices[dev1].getInterface(intf1).isConnected()) return;
+        if (this.devices[dev2].getInterface(intf2).isConnected()) return;
+        this.devices[dev1].getInterface(intf1).connect(this.devices[dev2].getInterface(intf2));
     }
 
     /**
@@ -353,5 +393,40 @@ export class Network extends EventTarget {
         return {
             devices: this.getDevices().map((dev) => dev.save()),
         };
+    }
+
+    /**
+     * Reset and load the network from json
+     *
+     * @param {NetworkData} data Data to load from
+     */
+    public load(data: any) {
+        if (!isSavedNetwork(data)) throw new InvalidNetwork();
+
+        this.clear();
+
+        data.devices.forEach((dev: SavedDevice) => {
+            if (isSavedHost(dev)) {
+                Host.load(this, dev);
+            } else if (isSavedHub(dev)) {
+                Hub.load(this, dev);
+            } else if (isSavedSwitch(dev)) {
+                Switch.load(this, dev);
+            } else if (isSavedSTPSwitch(dev)) {
+                STPSwitch.load(this, dev);
+            }
+        });
+
+        data.devices.forEach((dev: SavedDevice) => {
+            dev.interfaces.forEach((intf: SavedInterface) => {
+                if (intf.connected_to !== undefined)
+                    this.addLinkIfDoesntExist(
+                        dev.name,
+                        intf.name,
+                        intf.connected_to.device,
+                        intf.connected_to.interface
+                    );
+            });
+        });
     }
 }

@@ -1,11 +1,15 @@
 import HubImg from '../../../assets/hub.png';
 import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
-import { Device, SavedDevice } from './Device';
+import { Device, isSavedDevice, SavedDevice } from './Device';
 import { Interface } from './Interface';
 
 const HubImage = new Image();
 HubImage.src = HubImg;
+
+export function isSavedHub(arg: any): arg is SavedDevice {
+    return arg && isSavedDevice(arg) && arg.type === 'hub';
+}
 
 /**
  * Simple ethernet hub
@@ -42,6 +46,11 @@ export class Hub extends Device {
         //
     }
 
+    /**
+     * Save a hub to an object
+     *
+     * @returns {SavedDevice} Saved hub
+     */
     public save(): SavedDevice {
         return {
             type: 'hub',
@@ -50,5 +59,20 @@ export class Hub extends Device {
             x: this.getPosition().x,
             y: this.getPosition().y,
         };
+    }
+
+    /**
+     * Load a hub from an object
+     *
+     * @param {Network} net Network to load into
+     * @param {SavedDevice} data Data to load from
+     */
+    public static load(net: Network, data: SavedDevice) {
+        const host = new Hub(net, data.name, 0);
+        host.removeAllInterfaces();
+        host.setPosition(new Vector2D(data.x, data.y));
+        data.interfaces.forEach((intf) => {
+            host.addInterface(intf.name);
+        });
     }
 }

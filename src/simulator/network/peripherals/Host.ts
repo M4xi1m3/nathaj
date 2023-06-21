@@ -1,9 +1,14 @@
+import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
-import { Device, SavedDevice } from './Device';
+import { Device, isSavedDevice, SavedDevice } from './Device';
 import { Interface } from './Interface';
 
-export interface savedHost extends SavedDevice {
+export interface SavedHost extends SavedDevice {
     mac: string;
+}
+
+export function isSavedHost(arg: any): arg is SavedHost {
+    return arg && arg.mac && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'host';
 }
 
 /**
@@ -50,7 +55,12 @@ export class Host extends Device {
         //
     }
 
-    public save(): savedHost {
+    /**
+     * Save a host to an object
+     *
+     * @returns {SavedHost} Saved host
+     */
+    public save(): SavedHost {
         return {
             type: 'host',
             mac: this.getMac(),
@@ -59,5 +69,20 @@ export class Host extends Device {
             x: this.getPosition().x,
             y: this.getPosition().y,
         };
+    }
+
+    /**
+     * Load an host from an object
+     *
+     * @param {Network} net Network to load into
+     * @param {SavedHost} data Data to load from
+     */
+    public static load(net: Network, data: SavedHost) {
+        const host = new Host(net, data.name, data.mac);
+        host.removeAllInterfaces();
+        host.setPosition(new Vector2D(data.x, data.y));
+        data.interfaces.forEach((intf) => {
+            host.addInterface(intf.name);
+        });
     }
 }
