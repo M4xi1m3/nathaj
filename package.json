@@ -71,5 +71,13 @@
   },
   "lint-staged": {
     "src/**/*": "prettier --write --ignore-unknown"
+  },
+  "jest": {
+    "testMatch": [
+      "<rootDir>/src/simulator/network/**/*.test.{ts,tsx}"
+    ],
+    "collectCoverageFrom": [
+      "<rootDir>/src/simulator/network/**/*.{ts,tsx}"
+    ]
   }
 }
