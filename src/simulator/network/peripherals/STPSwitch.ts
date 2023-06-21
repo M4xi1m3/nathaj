@@ -576,19 +576,32 @@ export class STPSwitch extends Switch {
     onPacketReceived(iface: Interface, data: ArrayBuffer): void {
         const packet = new Ethernet(data);
 
-        this.mac_address_table[packet.src] = iface.getName();
         if (packet.dst === '01:81:c2:00:00:00') {
             if (packet.getNext() instanceof BPDUPacket) {
                 const bpdu_packet = packet.getNext() as BPDUPacket;
                 const bpdu = BPDU.fromPacket(bpdu_packet);
                 this.handleBPDU(bpdu, iface);
             }
-        } else if (packet.dst in this.mac_address_table) {
-            this.getInterface(this.mac_address_table[packet.dst]).send(data);
-        } else {
-            this.getInterfaces()
-                .filter((intf) => intf !== iface)
-                .forEach((intf) => intf.send(data));
+        }
+
+        if (
+            this.port_infos[iface.getName()].state === PortState.Learning ||
+            this.port_infos[iface.getName()].state === PortState.Forwarding
+        ) {
+            this.mac_address_table[packet.src] = iface.getName();
+        }
+
+        if (this.port_infos[iface.getName()].state === PortState.Forwarding) {
+            if (packet.dst in this.mac_address_table) {
+                if (this.port_infos[this.mac_address_table[packet.dst]].state === PortState.Forwarding) {
+                    this.getInterface(this.mac_address_table[packet.dst]).send(data);
+                }
+            } else {
+                this.getInterfaces()
+                    .filter((intf) => intf !== iface)
+                    .filter((intf) => this.port_infos[intf.getName()].state === PortState.Forwarding)
+                    .forEach((intf) => intf.send(data));
+            }
         }
     }
 
