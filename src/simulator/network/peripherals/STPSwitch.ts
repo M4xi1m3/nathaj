@@ -4,7 +4,7 @@ import { Network } from '../Network';
 import { BPDU as BPDUPacket } from '../packets/definitions/BPDU';
 import { Ethernet } from '../packets/definitions/Ethernet';
 import { Interface } from './Interface';
-import { Switch } from './Switch';
+import { SavedSwitch, Switch } from './Switch';
 
 const STPSwitchImage = new Image();
 STPSwitchImage.src = STPSwitchImg;
@@ -698,5 +698,16 @@ export class STPSwitch extends Switch {
 
     reset(): void {
         this.initialize();
+    }
+
+    public save(): SavedSwitch {
+        return {
+            type: 'stp-switch',
+            mac: this.getMac(),
+            name: this.getName(),
+            interfaces: this.getInterfaces().map((intf) => intf.save()),
+            x: this.getPosition().x,
+            y: this.getPosition().y,
+        };
     }
 }

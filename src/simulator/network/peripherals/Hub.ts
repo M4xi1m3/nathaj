@@ -1,7 +1,7 @@
 import HubImg from '../../../assets/hub.png';
 import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
-import { Device } from './Device';
+import { Device, SavedDevice } from './Device';
 import { Interface } from './Interface';
 
 const HubImage = new Image();
@@ -40,5 +40,15 @@ export class Hub extends Device {
 
     reset(): void {
         //
+    }
+
+    public save(): SavedDevice {
+        return {
+            type: 'hub',
+            name: this.getName(),
+            interfaces: this.getInterfaces().map((intf) => intf.save()),
+            x: this.getPosition().x,
+            y: this.getPosition().y,
+        };
     }
 }

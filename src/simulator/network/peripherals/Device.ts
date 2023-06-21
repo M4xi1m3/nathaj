@@ -1,7 +1,7 @@
 import { Drawable } from '../../drawing/Drawable';
 import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
-import { Interface, ReceivedPacketEventData } from './Interface';
+import { Interface, ReceivedPacketEventData, SavedInterface } from './Interface';
 
 /**
  * Excpetion thrown for an error related to a device
@@ -40,6 +40,14 @@ export class DeviceRemoved extends DeviceException {
     constructor(device: Device) {
         super('Device ' + device.getName() + ' has been removed.', device);
     }
+}
+
+export interface SavedDevice {
+    type: string;
+    name: string;
+    interfaces: SavedInterface[];
+    x: number;
+    y: number;
 }
 
 /**
@@ -227,4 +235,11 @@ export abstract class Device extends Drawable {
     public time(): number {
         return this.getNetwork().time();
     }
+
+    /**
+     * Serialize a device
+     *
+     * @return {SavedDevice} The serialized device
+     */
+    abstract save(): SavedDevice;
 }

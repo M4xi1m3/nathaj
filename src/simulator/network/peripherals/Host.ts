@@ -1,6 +1,10 @@
 import { Network } from '../Network';
-import { Device } from './Device';
+import { Device, SavedDevice } from './Device';
 import { Interface } from './Interface';
+
+export interface savedHost extends SavedDevice {
+    mac: string;
+}
 
 /**
  * Represents an host with a single interface in the network
@@ -44,5 +48,16 @@ export class Host extends Device {
 
     public reset(): void {
         //
+    }
+
+    public save(): savedHost {
+        return {
+            type: 'host',
+            mac: this.getMac(),
+            name: this.getName(),
+            interfaces: this.getInterfaces().map((intf) => intf.save()),
+            x: this.getPosition().x,
+            y: this.getPosition().y,
+        };
     }
 }

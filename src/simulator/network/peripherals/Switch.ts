@@ -2,11 +2,16 @@ import SwitchImg from '../../../assets/switch.png';
 import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
 import { Ethernet } from '../packets/definitions/Ethernet';
+import { SavedDevice } from './Device';
 import { Hub } from './Hub';
 import { Interface } from './Interface';
 
 const SwitchImage = new Image();
 SwitchImage.src = SwitchImg;
+
+export interface SavedSwitch extends SavedDevice {
+    mac: string;
+}
 
 /**
  * Basic learning switch
@@ -71,5 +76,16 @@ export class Switch extends Hub {
     reset(): void {
         super.reset();
         this.mac_address_table = {};
+    }
+
+    public save(): SavedSwitch {
+        return {
+            type: 'switch',
+            mac: this.getMac(),
+            name: this.getName(),
+            interfaces: this.getInterfaces().map((intf) => intf.save()),
+            x: this.getPosition().x,
+            y: this.getPosition().y,
+        };
     }
 }

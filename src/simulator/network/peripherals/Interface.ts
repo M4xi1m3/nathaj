@@ -59,6 +59,14 @@ export class NotConnectedException extends InterfaceException {
     }
 }
 
+export interface SavedInterface {
+    name: string;
+    connected_to?: {
+        device: string;
+        interface: string;
+    };
+}
+
 /**
  * Network interface, which can send and receive packets
  */
@@ -233,5 +241,19 @@ export class Interface extends EventTarget {
      */
     toString(): string {
         return '<Interface ' + this.owner.getName() + '-' + this.getName() + '>';
+    }
+
+    public save(): SavedInterface {
+        return {
+            name: this.getName(),
+            ...(this.isConnected()
+                ? {
+                      connected_to: {
+                          device: this.getConnection()?.getOwner().getName() ?? '',
+                          interface: this.getConnection()?.getName() ?? '',
+                      },
+                  }
+                : {}),
+        };
     }
 }

@@ -1,4 +1,4 @@
-import { Device } from './peripherals/Device';
+import { Device, SavedDevice } from './peripherals/Device';
 import { Interface } from './peripherals/Interface';
 
 /**
@@ -78,6 +78,10 @@ export type PacketEventData = {
      */
     direction: PacketDirection;
 };
+
+export interface SavedNetwork {
+    devices: SavedDevice[];
+}
 
 /**
  * Main network class, storing all of the devices
@@ -338,5 +342,16 @@ export class Network extends EventTarget {
      */
     public isRunning(): boolean {
         return this.interval !== null;
+    }
+
+    /**
+     * Serialize the network to a json-ifyable object
+     *
+     * @returns {SavedNetwork} the network
+     */
+    public save(): SavedNetwork {
+        return {
+            devices: this.getDevices().map((dev) => dev.save()),
+        };
     }
 }
