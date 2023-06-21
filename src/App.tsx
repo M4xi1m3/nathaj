@@ -1,4 +1,5 @@
 import { Box, Paper } from '@mui/material';
+import { useSnackbar } from 'notistack';
 import React, { useContext, useState } from 'react';
 import { Panel, PanelGroup } from 'react-resizable-panels';
 import { AddHostDialog } from './components/dialogs/AddHostDialog';
@@ -17,6 +18,7 @@ import { NetowrkProperties } from './components/panels/NetworProperties';
 import { NoPanels } from './components/panels/NoPanels';
 import { TopBar } from './components/TopBar';
 import { saveJson } from './hooks/saveJson';
+import { selectFile } from './hooks/selectFile';
 import { NetworkContext } from './NetworkContext';
 
 const App: React.FC = () => {
@@ -37,6 +39,8 @@ const App: React.FC = () => {
     const [removeDeviceOpened, setRemoveDeviceOpened] = useState<boolean>(false);
     const [removeLinkOpened, setRemoveLinkOpened] = useState<boolean>(false);
 
+    const { enqueueSnackbar } = useSnackbar();
+
     return (
         <>
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', wudth: '100%' }}>
@@ -49,6 +53,25 @@ const App: React.FC = () => {
                                     name: 'Save',
                                     action: () => {
                                         saveJson(net.save(), 'network.json');
+                                    },
+                                },
+                                {
+                                    name: 'Load',
+                                    action: () => {
+                                        selectFile('application/json', false).then((file: File | File[]) => {
+                                            if (file instanceof File) {
+                                                file.arrayBuffer().then((buffer) => {
+                                                    const dec = new TextDecoder('utf-8');
+                                                    try {
+                                                        net.load(JSON.parse(dec.decode(buffer)));
+                                                    } catch (e: any) {
+                                                        enqueueSnackbar((e as Error).message, {
+                                                            variant: 'error',
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        });
                                     },
                                 },
                             ]}
