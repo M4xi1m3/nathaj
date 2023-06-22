@@ -26,6 +26,8 @@ const App: React.FC = () => {
     const [viewProperties, setViewProperties] = useState<boolean>(true);
     const [viewAnalyzer, setViewAnalyzer] = useState<boolean>(true);
 
+    const [selected, setSelected] = useState<string | null>(null);
+
     const noPanel = !(viewNetwork || viewProperties || viewAnalyzer);
 
     const net = useContext(NetworkContext);
@@ -130,7 +132,12 @@ const App: React.FC = () => {
                             ]}
                         />
 
-                        <RemoveDeviceDialog opened={removeDeviceOpened} close={() => setRemoveDeviceOpened(false)} />
+                        <RemoveDeviceDialog
+                            opened={removeDeviceOpened}
+                            close={() => setRemoveDeviceOpened(false)}
+                            selected={selected}
+                            setSelected={setSelected}
+                        />
                         <RemoveLinkDialog opened={removeLinkOpened} close={() => setRemoveLinkOpened(false)} />
 
                         <ActionMenu
@@ -167,7 +174,7 @@ const App: React.FC = () => {
                                     {viewProperties ? (
                                         <Panel style={{ display: 'flex' }}>
                                             <Paper sx={{ flexGrow: 1, margin: 1 }}>
-                                                <NetowrkProperties />
+                                                <NetowrkProperties selected={selected} />
                                             </Paper>
                                         </Panel>
                                     ) : (
@@ -177,7 +184,7 @@ const App: React.FC = () => {
                                     {viewNetwork ? (
                                         <Panel defaultSize={75} style={{ display: 'flex' }}>
                                             <Paper sx={{ flexGrow: 1, margin: 1 }}>
-                                                <NetworkRenderer />
+                                                <NetworkRenderer setSelected={setSelected} selected={selected} />
                                             </Paper>
                                         </Panel>
                                     ) : (
