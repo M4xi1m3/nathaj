@@ -169,10 +169,10 @@ const App: React.FC = () => {
                 {!noPanel ? (
                     <PanelGroup direction='vertical'>
                         {viewProperties || viewNetwork ? (
-                            <Panel defaultSize={50} style={{ display: 'flex' }}>
+                            <Panel defaultSize={50} style={{ display: 'flex' }} order={1}>
                                 <PanelGroup direction='horizontal'>
                                     {viewProperties ? (
-                                        <Panel style={{ display: 'flex' }}>
+                                        <Panel style={{ display: 'flex' }} order={1}>
                                             <Paper sx={{ flexGrow: 1, margin: 1 }}>
                                                 <NetowrkProperties selected={selected} />
                                             </Paper>
@@ -182,7 +182,7 @@ const App: React.FC = () => {
                                     )}
                                     {viewProperties && viewNetwork ? <VerticalDivider /> : <></>}
                                     {viewNetwork ? (
-                                        <Panel defaultSize={75} style={{ display: 'flex' }}>
+                                        <Panel defaultSize={75} style={{ display: 'flex' }} order={2}>
                                             <Paper sx={{ flexGrow: 1, margin: 1 }}>
                                                 <NetworkRenderer setSelected={setSelected} selected={selected} />
                                             </Paper>
@@ -197,7 +197,7 @@ const App: React.FC = () => {
                         )}
                         {(viewProperties || viewNetwork) && viewAnalyzer ? <HorizontalDivider /> : <></>}
                         {viewAnalyzer ? (
-                            <Panel style={{ display: 'flex' }}>
+                            <Panel style={{ display: 'flex' }} order={2}>
                                 <Paper sx={{ flexGrow: 1, maxWidth: '100%', overflowX: 'auto', margin: 1 }}>
                                     <NetworkAnalyzer />
                                 </Paper>
