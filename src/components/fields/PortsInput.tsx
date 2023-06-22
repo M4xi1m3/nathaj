@@ -4,14 +4,9 @@ import React from 'react';
 interface PortsInputProps {
     ports: number;
     setPorts: (ports: number) => void;
-    setPortsError?: (portsError: boolean) => void;
 }
 
-export const PortsInput: React.FC<PortsInputProps> = ({ ports, setPorts, setPortsError }) => {
-    const portsError = ports < 0;
-
-    if (setPortsError !== undefined) setPortsError(portsError);
-
+export const PortsInput: React.FC<PortsInputProps> = ({ ports, setPorts }) => {
     return (
         <TextField
             variant='standard'
@@ -21,9 +16,8 @@ export const PortsInput: React.FC<PortsInputProps> = ({ ports, setPorts, setPort
             margin='dense'
             value={ports}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                setPorts(parseInt(event.target.value));
+                setPorts(parseInt(event.target.value) < 0 ? 0 : parseInt(event.target.value));
             }}
-            error={portsError}
         />
     );
 };

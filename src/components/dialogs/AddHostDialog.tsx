@@ -25,14 +25,16 @@ export const AddHostDialog: React.FC<AddHostDialogProps> = ({ opened, close }) =
     useEffect(() => {
         setName('');
         setMac('');
-    }, [opened, setName, setMac]);
+        setNameError(true);
+        setMacError(true);
+    }, [opened, setName, setMac, setNameError, setMacError]);
 
     return (
         <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
             <DialogTitle>Add Host</DialogTitle>
             <DialogContent>
-                <NameInput name={name} setName={setName} setNameError={setNameError} />
-                <MacInput mac={mac} setMac={setMac} setMacError={setMacError} />
+                <NameInput name={name} setName={setName} setNameError={setNameError} nameError={nameError} />
+                <MacInput mac={mac} setMac={setMac} setMacError={setMacError} macError={macError} />
             </DialogContent>
             <DialogActions>
                 <Button onClick={() => close()}>Cancel</Button>

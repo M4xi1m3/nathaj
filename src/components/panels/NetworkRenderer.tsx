@@ -225,7 +225,6 @@ export const NetworkRenderer: React.FC = () => {
                                 setScale(scale + 0.1);
                             }
                         }
-                        e.preventDefault();
                     }}
                     draw={(ctx) => {
                         const centerOffset = new Vector2D(ctx.canvas.width, ctx.canvas.height).div(2).div(scale);

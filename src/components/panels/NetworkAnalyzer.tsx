@@ -67,11 +67,13 @@ const CustomTableRow: React.FC<
 const CustomEmptyPlaceholder: React.FC<{
     context?: RowContext;
 }> = () => (
-    <TableRow>
-        <TableCell colSpan={8} sx={{ border: 'none', textAlign: 'center' }}>
-            <Typography sx={{ fontStyle: 'italic', color: 'text.secondary' }}>No packets to display</Typography>
-        </TableCell>
-    </TableRow>
+    <TableBody>
+        <TableRow>
+            <TableCell colSpan={8} sx={{ border: 'none', textAlign: 'center' }}>
+                <Typography sx={{ fontStyle: 'italic', color: 'text.secondary' }}>No packets to display</Typography>
+            </TableCell>
+        </TableRow>
+    </TableBody>
 );
 
 const VirtuosoTableComponents: TableComponents<AnalyzedPacket, RowContext> = {

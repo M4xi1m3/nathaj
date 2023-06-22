@@ -5,15 +5,12 @@ import { NetworkContext } from '../../NetworkContext';
 interface NameInputProps {
     name: string;
     setName: (name: string) => void;
-    setNameError?: (nameError: boolean) => void;
+    setNameError: (nameError: boolean) => void;
+    nameError: boolean;
 }
 
-export const NameInput: React.FC<NameInputProps> = ({ name, setName, setNameError }) => {
+export const NameInput: React.FC<NameInputProps> = ({ name, setName, setNameError, nameError }) => {
     const network = useContext(NetworkContext);
-
-    const nameError = name === '' || network.hasDevice(name);
-
-    if (setNameError !== undefined) setNameError(nameError);
 
     return (
         <TextField
@@ -25,6 +22,7 @@ export const NameInput: React.FC<NameInputProps> = ({ name, setName, setNameErro
             value={name}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setName(event.target.value);
+                setNameError(event.target.value === '' || network.hasDevice(event.target.value));
             }}
             error={nameError}
         />

@@ -21,24 +21,25 @@ export const AddSwitchDialog: React.FC<AddSwitchDialogProps> = ({ opened, close 
     const [nameError, setNameError] = useState<boolean>(false);
 
     const [ports, setPorts] = useState<number>(1);
-    const [portsError, setPortsError] = useState<boolean>(false);
 
     const [mac, setMac] = useState<string>('');
     const [macError, setMacError] = useState<boolean>(false);
 
     useEffect(() => {
         setName('');
+        setNameError(true);
         setPorts(4);
         setMac('');
-    }, [opened, setName, setPorts, setMac]);
+        setMacError(true);
+    }, [opened, setName, setNameError, setPorts, setMac, setMacError]);
 
     return (
         <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
             <DialogTitle>Add Switch</DialogTitle>
             <DialogContent>
-                <NameInput name={name} setName={setName} setNameError={setNameError} />
-                <MacInput mac={mac} setMac={setMac} setMacError={setMacError} />
-                <PortsInput ports={ports} setPorts={setPorts} setPortsError={setPortsError} />
+                <NameInput name={name} setName={setName} setNameError={setNameError} nameError={nameError} />
+                <MacInput mac={mac} setMac={setMac} setMacError={setMacError} macError={macError} />
+                <PortsInput ports={ports} setPorts={setPorts} />
             </DialogContent>
             <DialogActions>
                 <Button onClick={() => close()}>Cancel</Button>
@@ -52,7 +53,7 @@ export const AddSwitchDialog: React.FC<AddSwitchDialogProps> = ({ opened, close 
                         }
                         close();
                     }}
-                    disabled={nameError || portsError || macError}>
+                    disabled={nameError || macError}>
                     Add
                 </Button>
             </DialogActions>

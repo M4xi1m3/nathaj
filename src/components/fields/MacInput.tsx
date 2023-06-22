@@ -8,18 +8,12 @@ const macRegexp = new RegExp('^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$');
 interface MacInputProps {
     mac: string;
     setMac: (mac: string) => void;
-    setMacError?: (macError: boolean) => void;
+    setMacError: (macError: boolean) => void;
+    macError: boolean;
 }
 
-export const MacInput: React.FC<MacInputProps> = ({ mac, setMac, setMacError }) => {
+export const MacInput: React.FC<MacInputProps> = ({ mac, setMac, setMacError, macError }) => {
     const network = useContext(NetworkContext);
-
-    let macError = !macRegexp.test(mac);
-    if (!macError) {
-        macError = (parseInt(mac.split(':')[0], 16) & 1) !== 0;
-    }
-
-    if (setMacError !== undefined) setMacError(macError);
 
     const randomize = () => {
         const addr = [];
@@ -41,6 +35,11 @@ export const MacInput: React.FC<MacInputProps> = ({ mac, setMac, setMacError }) 
                 value={mac}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     setMac(event.target.value);
+                    let macError = !macRegexp.test(mac);
+                    if (!macError) {
+                        macError = (parseInt(mac.split(':')[0], 16) & 1) !== 0;
+                    }
+                    setMacError(macError);
                 }}
                 endAdornment={
                     <InputAdornment position='end'>

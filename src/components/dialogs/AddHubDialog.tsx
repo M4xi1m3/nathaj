@@ -20,19 +20,19 @@ export const AddHubDialog: React.FC<AddHubDialogProps> = ({ opened, close }) => 
     const [nameError, setNameError] = useState<boolean>(false);
 
     const [ports, setPorts] = useState<number>(1);
-    const [portsError, setPortsError] = useState<boolean>(false);
 
     useEffect(() => {
         setName('');
+        setNameError(true);
         setPorts(4);
-    }, [opened, setName, setPorts]);
+    }, [opened, setName, setNameError, setPorts]);
 
     return (
         <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
             <DialogTitle>Add Hub</DialogTitle>
             <DialogContent>
-                <NameInput name={name} setName={setName} setNameError={setNameError} />
-                <PortsInput ports={ports} setPorts={setPorts} setPortsError={setPortsError} />
+                <NameInput name={name} setName={setName} setNameError={setNameError} nameError={nameError} />
+                <PortsInput ports={ports} setPorts={setPorts} />
             </DialogContent>
             <DialogActions>
                 <Button onClick={() => close()}>Cancel</Button>
@@ -46,7 +46,7 @@ export const AddHubDialog: React.FC<AddHubDialogProps> = ({ opened, close }) => 
                         }
                         close();
                     }}
-                    disabled={nameError || portsError}>
+                    disabled={nameError}>
                     Add
                 </Button>
             </DialogActions>
