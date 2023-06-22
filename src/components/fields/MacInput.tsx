@@ -25,6 +25,7 @@ export const MacInput: React.FC<MacInputProps> = ({ mac, setMac, setMacError, ma
         addr.push(Math.floor(Math.random() * 256) & 0xff);
 
         setMac(addr.map((n) => n.toString(16).padStart(2, '0')).join(':'));
+        setMacError(false);
     };
 
     return (
@@ -35,9 +36,9 @@ export const MacInput: React.FC<MacInputProps> = ({ mac, setMac, setMacError, ma
                 value={mac}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     setMac(event.target.value);
-                    let macError = !macRegexp.test(mac);
+                    let macError = !macRegexp.test(event.target.value);
                     if (!macError) {
-                        macError = (parseInt(mac.split(':')[0], 16) & 1) !== 0;
+                        macError = (parseInt(event.target.value.split(':')[0], 16) & 1) !== 0;
                     }
                     setMacError(macError);
                 }}
