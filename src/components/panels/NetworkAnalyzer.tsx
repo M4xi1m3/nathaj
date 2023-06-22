@@ -64,12 +64,23 @@ const CustomTableRow: React.FC<
     />
 );
 
+const CustomEmptyPlaceholder: React.FC<{
+    context?: RowContext;
+}> = () => (
+    <TableRow>
+        <TableCell colSpan={8} sx={{ border: 'none', textAlign: 'center' }}>
+            <Typography sx={{ fontStyle: 'italic', color: 'text.secondary' }}>No packets to display</Typography>
+        </TableCell>
+    </TableRow>
+);
+
 const VirtuosoTableComponents: TableComponents<AnalyzedPacket, RowContext> = {
     Scroller: CustomScroller,
     Table: (props) => <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />,
     TableHead,
     TableRow: CustomTableRow,
     TableBody: CustomTableBody,
+    EmptyPlaceholder: CustomEmptyPlaceholder,
 };
 
 const commonSX = {

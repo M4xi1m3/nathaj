@@ -205,7 +205,7 @@ it('clear', () => {
 
 it('save', () => {
     const net = new Network();
-    const h1 = new Host(net, 'h1', '00:00:00:00:00:01');
+    new Host(net, 'h1', '00:00:00:00:00:01');
 
     expect(net.save().devices.length).toEqual(1);
 });

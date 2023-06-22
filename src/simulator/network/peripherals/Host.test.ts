@@ -25,7 +25,7 @@ it('save', () => {
         y: 0,
     });
 
-    const h2 = new Host(net, 'h2', '00:00:00:00:00:02');
+    new Host(net, 'h2', '00:00:00:00:00:02');
     net.addLink('h1', 'h2');
 
     expect(h1.save()).toStrictEqual({
