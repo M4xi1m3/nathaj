@@ -25,6 +25,7 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    Tooltip,
     Typography,
     useTheme,
 } from '@mui/material';
@@ -350,9 +351,11 @@ export const NetworkAnalyzer: React.FC = () => {
                                 </Typography>
                             </Stack>
                             <Stack direction='row'>
-                                <IconButton onClick={handleDelete} size='small' color='error'>
-                                    <Delete />
-                                </IconButton>
+                                <Tooltip title='Clear history'>
+                                    <IconButton onClick={handleDelete} size='small' color='error'>
+                                        <Delete />
+                                    </IconButton>
+                                </Tooltip>
                             </Stack>
                         </Stack>
                         <Divider />

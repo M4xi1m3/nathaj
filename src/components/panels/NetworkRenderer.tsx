@@ -1,5 +1,5 @@
 import { AddLink, CenterFocusStrong, Hub, Label, LabelOff, LinkOff } from '@mui/icons-material';
-import { Divider, Grid, IconButton, Stack, Typography } from '@mui/material';
+import { Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import React, { useContext, useState } from 'react';
 import { CloseNetwork } from '../../icons/CloseNetwork';
@@ -49,45 +49,58 @@ export const NetworkRenderer: React.FC = () => {
                         </Typography>
                     </Stack>
                     <Stack direction='row'>
-                        <IconButton
-                            size='small'
-                            onClick={() => {
-                                allActionsOff();
-                                if (!removingDevice) setRemovingDevice(true);
-                            }}>
-                            <CloseNetwork color={removingDevice ? 'error' : 'action'} />
-                        </IconButton>
-                        <IconButton
-                            size='small'
-                            onClick={() => {
-                                allActionsOff();
-                                if (!addingLink) setAddingLink(true);
-                            }}>
-                            <AddLink color={addingLink ? 'primary' : 'action'} />
-                        </IconButton>
-                        <IconButton
-                            size='small'
-                            onClick={() => {
-                                allActionsOff();
-                                if (!removingLink) setRemovingLink(true);
-                            }}>
-                            <LinkOff color={removingLink ? 'error' : 'action'} />
-                        </IconButton>
+                        <Tooltip title='Remove device'>
+                            <IconButton
+                                size='small'
+                                onClick={() => {
+                                    allActionsOff();
+                                    if (!removingDevice) setRemovingDevice(true);
+                                }}>
+                                <CloseNetwork color={removingDevice ? 'error' : 'action'} />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title='Add link'>
+                            <IconButton
+                                size='small'
+                                onClick={() => {
+                                    allActionsOff();
+                                    if (!addingLink) setAddingLink(true);
+                                }}>
+                                <AddLink color={addingLink ? 'primary' : 'action'} />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title='Remove link'>
+                            <IconButton
+                                size='small'
+                                onClick={() => {
+                                    allActionsOff();
+                                    if (!removingLink) setRemovingLink(true);
+                                }}>
+                                <LinkOff color={removingLink ? 'error' : 'action'} />
+                            </IconButton>
+                        </Tooltip>
                         <Divider orientation='vertical' />
-                        <IconButton onClick={() => Layout.spring_layout(network)} size='small'>
-                            <Hub />
-                        </IconButton>
-                        <IconButton onClick={() => setOffset(new Vector2D(0, 0))} size='small'>
-                            <CenterFocusStrong />
-                        </IconButton>
-                        <IconButton onClick={() => setShowLabel(!showLabel)} size='small'>
-                            {showLabel ? <Label /> : <LabelOff />}
-                        </IconButton>
+                        <Tooltip title='Automatic layout'>
+                            <IconButton onClick={() => Layout.spring_layout(network)} size='small'>
+                                <Hub />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title='Re-center view'>
+                            <IconButton onClick={() => setOffset(new Vector2D(0, 0))} size='small'>
+                                <CenterFocusStrong />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={showLabel ? 'Hide labels' : 'Show labels'}>
+                            <IconButton onClick={() => setShowLabel(!showLabel)} size='small'>
+                                {showLabel ? <Label /> : <LabelOff />}
+                            </IconButton>
+                        </Tooltip>
                     </Stack>
                 </Stack>
                 <Divider />
             </Grid>
-            <Grid item sx={{ height: 'calc(100% - 50px)' }}>
+            {/* TODO: Find a way to do that without using calc with a fixed height */}
+            <Grid item sx={{ height: 'calc(100% - 33px)' }}>
                 <Canvas
                     onMouseDown={(e) => {
                         const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height)
@@ -101,6 +114,7 @@ export const NetworkRenderer: React.FC = () => {
                             ).div(scale)
                         );
 
+                        // Handle adding or removing links
                         if (addingLink || removingLink) {
                             for (const dev of network.getDevices()) {
                                 if (dev.collision(mousePos.sub(offset).add(centerOffset))) {
@@ -120,6 +134,7 @@ export const NetworkRenderer: React.FC = () => {
                             }
                         }
 
+                        // Handle removing devices
                         if (removingDevice) {
                             for (const dev of network.getDevices()) {
                                 if (dev.collision(mousePos.sub(offset).add(centerOffset))) {
@@ -134,6 +149,7 @@ export const NetworkRenderer: React.FC = () => {
                             }
                         }
 
+                        // Handle dragging devices
                         for (const dev of network.getDevices()) {
                             if (dev.collision(mousePos.sub(offset).add(centerOffset))) {
                                 e.currentTarget.style.cursor = 'grab';
@@ -143,6 +159,7 @@ export const NetworkRenderer: React.FC = () => {
                             }
                         }
 
+                        // Handle panning the view
                         setPanning(true);
                     }}
                     onMouseUp={(e) => {
@@ -180,9 +197,11 @@ export const NetworkRenderer: React.FC = () => {
                         );
 
                         if (dragging && dragged !== null) {
+                            // Drag a device
                             e.currentTarget.style.cursor = 'grab';
                             network.getDevice(dragged).setPosition(mousePos.sub(offset.add(centerOffset)));
                         } else if (panning) {
+                            // Pan the view
                             e.currentTarget.style.cursor = 'grab';
                             setOffset(offset.add(new Vector2D(e.movementX, e.movementY).div(scale)));
                         } else {
@@ -196,6 +215,7 @@ export const NetworkRenderer: React.FC = () => {
                         }
                     }}
                     onWheel={(e) => {
+                        // Handle zooming using the scroll wheel
                         if (e.deltaY > 0) {
                             if (scale > 0.2) {
                                 setScale(scale - 0.1);
@@ -208,8 +228,14 @@ export const NetworkRenderer: React.FC = () => {
                         e.preventDefault();
                     }}
                     draw={(ctx) => {
-                        ctx.scale(scale, scale);
                         const centerOffset = new Vector2D(ctx.canvas.width, ctx.canvas.height).div(2).div(scale);
+                        /**
+                         * Utility method to draw text on a gray background
+                         *
+                         * @param {string} text Test to draw
+                         * @param {Vector2D} pos Screen-position
+                         * @param {boolean} center Wether or not the text is centered arround the position
+                         */
                         const showText = (text: string, pos: Vector2D, center = false) => {
                             const HEIGHT = 18;
                             ctx.font = HEIGHT + 'px monospace';
@@ -222,8 +248,12 @@ export const NetworkRenderer: React.FC = () => {
                             ctx.fillText(text, textPos.x, textPos.y);
                         };
 
-                        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
+                        ctx.scale(scale, scale);
+
+                        // Draw the links between devices
                         for (const dev of network.getDevices()) {
                             for (const intf of dev.getInterfaces()) {
                                 if (intf.getConnection() !== null) {
@@ -243,6 +273,7 @@ export const NetworkRenderer: React.FC = () => {
                             }
                         }
 
+                        // Draw the dotted line shown when adding a link
                         if (addingLink && selectedDev1 !== null) {
                             const dev = network.getDevice(selectedDev1);
 
@@ -256,8 +287,10 @@ export const NetworkRenderer: React.FC = () => {
                         }
 
                         for (const dev of network.getDevices()) {
+                            // Draw the devices
                             dev.draw(ctx, offset.add(centerOffset));
 
+                            // And their labels
                             ctx.setTransform(1, 0, 0, 1, 0, 0);
                             if (showLabel) {
                                 const text = dev.getText();
@@ -279,11 +312,11 @@ export const NetworkRenderer: React.FC = () => {
                             ctx.scale(scale, scale);
                         }
 
+                        // Draw the top-left info text
                         ctx.setTransform(1, 0, 0, 1, 0, 0);
                         showText('Offset: ' + offset.x.toFixed(2) + ';' + offset.y.toFixed(2), new Vector2D(0, 0));
                         showText('Scale: ' + scale.toFixed(2), new Vector2D(0, 21));
                         showText('Time: ' + network.time().toFixed(4), new Vector2D(0, 42));
-                        ctx.scale(scale, scale);
                     }}
                     style={{ width: '100%', height: '100%', borderRadius: '0 0 4px 4px' }}></Canvas>
             </Grid>
