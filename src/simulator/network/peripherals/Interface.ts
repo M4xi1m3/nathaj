@@ -191,6 +191,9 @@ export class Interface extends EventTarget {
 
         this.connected_to = other;
         other.connected_to = this;
+
+        this.getOwner().dispatchEvent(new Event('changed'));
+        other.getOwner().dispatchEvent(new Event('changed'));
     }
 
     /**
@@ -199,8 +202,13 @@ export class Interface extends EventTarget {
     disconnect(): void {
         if (this.connected_to === null) throw new NotConnectedException(this);
 
+        const other = this.connected_to;
+
         this.connected_to.connected_to = null;
         this.connected_to = null;
+
+        this.getOwner().dispatchEvent(new Event('changed'));
+        other.getOwner().dispatchEvent(new Event('changed'));
     }
 
     /**

@@ -604,6 +604,7 @@ export class STPSwitch extends Switch {
                 const bpdu = BPDU.fromPacket(bpdu_packet);
                 this.handleBPDU(bpdu, iface);
             }
+            return;
         }
 
         if (

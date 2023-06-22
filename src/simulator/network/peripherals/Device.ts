@@ -80,7 +80,7 @@ export function isSavedDevice(arg: any): arg is SavedDevice {
 /**
  * A device in the network simulation
  */
-export abstract class Device extends Drawable {
+export abstract class Device extends Drawable implements EventTarget {
     /**
      * Ijnterfaces of the device, indexed by name
      */
@@ -97,13 +97,19 @@ export abstract class Device extends Drawable {
     private name: string;
 
     /**
+     * Event target of the device
+     */
+    event_target: EventTarget;
+
+    /**
      * Initialize a device
      *
      * @param {Network} network Network to which the device belongs
-     * @param [string="unknown"] name Name of the device in the network
+     * @param {string} [name='unknown'] Name of the device in the network
      */
     public constructor(network: Network, name = 'unknown') {
         super();
+        this.event_target = new EventTarget();
         this.interfaces = {};
         this.name = name;
         this.network = network;
@@ -155,6 +161,9 @@ export abstract class Device extends Drawable {
             this.onPacketReceived(intf, e.detail.packet);
         }) as EventListenerOrEventListenerObject);
         this.interfaces[intf.getName()] = intf;
+
+        this.dispatchEvent(new Event('changed'));
+
         return intf;
     }
 
@@ -177,6 +186,8 @@ export abstract class Device extends Drawable {
 
         delete intf['owner'];
         delete this.interfaces[name];
+
+        this.dispatchEvent(new Event('changed'));
     }
 
     /**
@@ -290,4 +301,27 @@ export abstract class Device extends Drawable {
      * @return {SavedDevice} The serialized device
      */
     abstract save(): SavedDevice;
+
+    // TODO: Find a better way to make the class extend Drawable and also
+    // be an EventEmitter. This works but it is ugly.
+
+    addEventListener(
+        type: string,
+        callback: EventListenerOrEventListenerObject | null,
+        options?: boolean | AddEventListenerOptions | undefined
+    ): void {
+        this.event_target.addEventListener(type, callback, options);
+    }
+
+    dispatchEvent(event: Event): boolean {
+        return this.event_target.dispatchEvent(event);
+    }
+
+    removeEventListener(
+        type: string,
+        callback: EventListenerOrEventListenerObject | null,
+        options?: boolean | EventListenerOptions | undefined
+    ): void {
+        this.event_target.removeEventListener(type, callback, options);
+    }
 }

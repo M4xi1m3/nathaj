@@ -47,6 +47,18 @@ export class Host extends Device {
         return this.mac;
     }
 
+    /**
+     * Set the MAC address of the host
+     *
+     * @param {string} mac New mac address
+     */
+    public setMac(mac: string) {
+        if (this.mac !== mac) {
+            this.mac = mac;
+            this.dispatchEvent(new Event('changed'));
+        }
+    }
+
     public tick(): void {
         //
     }

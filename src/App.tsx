@@ -70,6 +70,7 @@ const App: React.FC = () => {
                                                     const dec = new TextDecoder('utf-8');
                                                     try {
                                                         net.load(JSON.parse(dec.decode(buffer)));
+                                                        setSelected(null);
                                                     } catch (e: any) {
                                                         enqueueSnackbar((e as Error).message, {
                                                             variant: 'error',
