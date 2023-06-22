@@ -25,7 +25,7 @@ export const SaveDialog: React.FC<SaveDialogProps> = ({ opened, close }) => {
     const { enqueueSnackbar } = useSnackbar();
 
     const [name, setName] = useState<string>('');
-    const [nameError, setNameError] = useState<boolean>(false);
+    const nameError = name === '';
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
