@@ -108,7 +108,7 @@ const FixedHeaderContent = () => {
 const RowContent = (i: number, v: AnalyzedPacket) => (
     <React.Fragment>
         <TableCell sx={{ ...monoSX }}>{v.id}</TableCell>
-        <TableCell sx={{ ...monoSX }}>{v.time}</TableCell>
+        <TableCell sx={{ ...monoSX }}>{v.time.toFixed(4)}</TableCell>
         <TableCell sx={{ ...monoSX }}>{v.origin}</TableCell>
         <TableCell sx={{ ...{ ...monoSX }, display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
             {v.direction === 'ingoing' ? (
