@@ -22,6 +22,8 @@ export const NetworkRenderer: React.FC = () => {
     const [mousePos, setMousePos] = useState(new Vector2D());
     const [dragged, setDragged] = useState<string | null>(null);
 
+    const [scale, setScale] = useState<number>(1);
+
     const [addingLink, setAddingLink] = useState<boolean>(false);
     const [removingLink, setRemovingLink] = useState<boolean>(false);
     const [selectedDev1, setSelectedDev1] = useState<string | null>(null);
@@ -88,13 +90,15 @@ export const NetworkRenderer: React.FC = () => {
             <Grid item sx={{ height: 'calc(100% - 50px)' }}>
                 <Canvas
                     onMouseDown={(e) => {
-                        const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height).mul(-0.5);
+                        const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height)
+                            .mul(-0.5)
+                            .div(scale);
 
                         setMousePos(
                             new Vector2D(
                                 e.pageX - e.currentTarget.getBoundingClientRect().left,
                                 e.pageY - e.currentTarget.getBoundingClientRect().top
-                            )
+                            ).div(scale)
                         );
 
                         if (addingLink || removingLink) {
@@ -142,13 +146,15 @@ export const NetworkRenderer: React.FC = () => {
                         setPanning(true);
                     }}
                     onMouseUp={(e) => {
-                        const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height).div(2);
+                        const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height)
+                            .div(2)
+                            .div(scale);
 
                         setMousePos(
                             new Vector2D(
                                 e.pageX - e.currentTarget.getBoundingClientRect().left,
                                 e.pageY - e.currentTarget.getBoundingClientRect().top
-                            )
+                            ).div(scale)
                         );
 
                         if (dragging && dragged !== null) {
@@ -163,12 +169,14 @@ export const NetworkRenderer: React.FC = () => {
                         setDragged(null);
                     }}
                     onMouseMove={(e) => {
-                        const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height).div(2);
+                        const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height)
+                            .div(2)
+                            .div(scale);
                         setMousePos(
                             new Vector2D(
                                 e.pageX - e.currentTarget.getBoundingClientRect().left,
                                 e.pageY - e.currentTarget.getBoundingClientRect().top
-                            )
+                            ).div(scale)
                         );
 
                         if (dragging && dragged !== null) {
@@ -176,7 +184,7 @@ export const NetworkRenderer: React.FC = () => {
                             network.getDevice(dragged).setPosition(mousePos.sub(offset.add(centerOffset)));
                         } else if (panning) {
                             e.currentTarget.style.cursor = 'grab';
-                            setOffset(offset.add(new Vector2D(e.movementX, e.movementY)));
+                            setOffset(offset.add(new Vector2D(e.movementX, e.movementY).div(scale)));
                         } else {
                             for (const dev of network.getDevices()) {
                                 if (dev.collision(mousePos.sub(offset.add(centerOffset)))) {
@@ -187,8 +195,21 @@ export const NetworkRenderer: React.FC = () => {
                             e.currentTarget.style.cursor = 'default';
                         }
                     }}
+                    onWheel={(e) => {
+                        if (e.deltaY > 0) {
+                            if (scale > 0.2) {
+                                setScale(scale - 0.1);
+                            }
+                        } else if (e.deltaY < 0) {
+                            if (scale < 4) {
+                                setScale(scale + 0.1);
+                            }
+                        }
+                        e.preventDefault();
+                    }}
                     draw={(ctx) => {
-                        const centerOffset = new Vector2D(ctx.canvas.width, ctx.canvas.height).div(2);
+                        ctx.scale(scale, scale);
+                        const centerOffset = new Vector2D(ctx.canvas.width, ctx.canvas.height).div(2).div(scale);
                         const showText = (text: string, pos: Vector2D, center = false) => {
                             const HEIGHT = 18;
                             ctx.font = HEIGHT + 'px monospace';
@@ -237,23 +258,32 @@ export const NetworkRenderer: React.FC = () => {
                         for (const dev of network.getDevices()) {
                             dev.draw(ctx, offset.add(centerOffset));
 
+                            ctx.setTransform(1, 0, 0, 1, 0, 0);
                             if (showLabel) {
                                 const text = dev.getText();
                                 showText(
                                     text,
-                                    dev.getPosition().add(offset.add(centerOffset)).add(new Vector2D(0, -40)),
+                                    dev
+                                        .getPosition()
+                                        .add(offset.add(centerOffset))
+                                        .mul(scale)
+                                        .add(new Vector2D(0, -40)),
                                     true
                                 );
                             } else {
                                 if (dev.collision(mousePos.sub(offset.add(centerOffset)))) {
                                     const text = dev.getText();
-                                    showText(text, mousePos.add(new Vector2D(0, -20)));
+                                    showText(text, mousePos.mul(scale).add(new Vector2D(0, -20)));
                                 }
                             }
+                            ctx.scale(scale, scale);
                         }
 
-                        showText('Offset: ' + offset.x + ';' + offset.y, new Vector2D(0, 0));
-                        showText('Time: ' + network.time(), new Vector2D(0, 21));
+                        ctx.setTransform(1, 0, 0, 1, 0, 0);
+                        showText('Offset: ' + offset.x.toFixed(2) + ';' + offset.y.toFixed(2), new Vector2D(0, 0));
+                        showText('Scale: ' + scale.toFixed(2), new Vector2D(0, 21));
+                        showText('Time: ' + network.time().toFixed(4), new Vector2D(0, 42));
+                        ctx.scale(scale, scale);
                     }}
                     style={{ width: '100%', height: '100%', borderRadius: '0 0 4px 4px' }}></Canvas>
             </Grid>
