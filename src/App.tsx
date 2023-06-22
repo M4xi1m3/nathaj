@@ -9,6 +9,7 @@ import { AddStpSwitchDialog } from './components/dialogs/AddStpSwitchDialog';
 import { AddSwitchDialog } from './components/dialogs/AddSwitchDialog';
 import { RemoveDeviceDialog } from './components/dialogs/RemoveDeviceDialog';
 import { RemoveLinkDialog } from './components/dialogs/RemoveLinkDialog';
+import { SaveDialog } from './components/dialogs/SaveDialog';
 import { HorizontalDivider, VerticalDivider } from './components/Dividers';
 import { ActionMenu } from './components/menus/ActionMenu';
 import { ViewMenu } from './components/menus/ViewMenu';
@@ -17,7 +18,6 @@ import { NetworkRenderer } from './components/panels/NetworkRenderer';
 import { NetowrkProperties } from './components/panels/NetworProperties';
 import { NoPanels } from './components/panels/NoPanels';
 import { TopBar } from './components/TopBar';
-import { saveJson } from './hooks/saveJson';
 import { selectFile } from './hooks/selectFile';
 import { NetworkContext } from './NetworkContext';
 
@@ -29,6 +29,8 @@ const App: React.FC = () => {
     const noPanel = !(viewNetwork || viewProperties || viewAnalyzer);
 
     const net = useContext(NetworkContext);
+
+    const [saveOpened, setSaveOpened] = useState<boolean>(false);
 
     const [addHostOpened, setAddHostOpened] = useState<boolean>(false);
     const [addHubOpened, setAddHubOpened] = useState<boolean>(false);
@@ -46,13 +48,15 @@ const App: React.FC = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', wudth: '100%' }}>
                 <Box sx={{ flexGrow: 1 }}>
                     <TopBar>
+                        <SaveDialog opened={saveOpened} close={() => setSaveOpened(false)} />
+
                         <ActionMenu
                             title='File'
                             elements={[
                                 {
                                     name: 'Save',
                                     action: () => {
-                                        saveJson(net.save(), 'network.json');
+                                        setSaveOpened(true);
                                     },
                                 },
                                 {
@@ -72,6 +76,12 @@ const App: React.FC = () => {
                                                 });
                                             }
                                         });
+                                    },
+                                },
+                                {
+                                    name: 'Clear',
+                                    action: () => {
+                                        net.clear();
                                     },
                                 },
                             ]}
