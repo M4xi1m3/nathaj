@@ -69,8 +69,15 @@ const CustomEmptyPlaceholder: React.FC<{
 }> = () => (
     <TableBody>
         <TableRow>
-            <TableCell colSpan={8} sx={{ border: 'none', textAlign: 'center' }}>
-                <Typography sx={{ fontStyle: 'italic', color: 'text.secondary' }}>No packets to display</Typography>
+            <TableCell colSpan={8} sx={{ border: 'none', textAlign: 'center', padding: '8px' }}>
+                <Typography
+                    sx={{
+                        fontStyle: 'italic',
+                        color: 'text.secondary',
+                    }}
+                    variant='caption'>
+                    No packets to display
+                </Typography>
             </TableCell>
         </TableRow>
     </TableBody>

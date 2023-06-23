@@ -1,5 +1,7 @@
 import SwitchImg from '../../../assets/switch.png';
 import { Vector2D } from '../../drawing/Vector2D';
+import { MACable } from '../mixins/MACable';
+import { applyMixins } from '../mixins/Mixins';
 import { Network } from '../Network';
 import { Ethernet } from '../packets/definitions/Ethernet';
 import { isSavedDevice, SavedDevice } from './Device';
@@ -17,6 +19,8 @@ export function isSavedSwitch(arg: any): arg is SavedSwitch {
     return arg && arg.mac && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'switch';
 }
 
+export interface Switch extends Hub, MACable {}
+
 /**
  * Basic learning switch
  *
@@ -32,11 +36,6 @@ export class Switch extends Hub {
     protected mac_address_table: { [mac: string]: string };
 
     /**
-     * Mac address of the switch
-     */
-    private mac: string;
-
-    /**
      * Create a switch
      *
      * @param {Network} network Network to put the switch in
@@ -47,16 +46,7 @@ export class Switch extends Hub {
     constructor(network: Network, name: string, mac: string, ports: number) {
         super(network, name, ports);
         this.mac_address_table = {};
-        this.mac = mac.toLowerCase();
-    }
-
-    /**
-     * Get the MAC address of the switch
-     *
-     * @returns {string} MAC address of the switch
-     */
-    public getMac(): string {
-        return this.mac;
+        this.setMac(mac.toLowerCase());
     }
 
     onPacketReceived(iface: Interface, data: ArrayBuffer): void {
@@ -108,3 +98,5 @@ export class Switch extends Hub {
         });
     }
 }
+
+applyMixins(Switch, [MACable]);

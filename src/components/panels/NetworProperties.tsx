@@ -1,84 +1,14 @@
-import {
-    Divider,
-    Grid,
-    Stack,
-    styled,
-    Table,
-    TableBody,
-    TableCell,
-    TableCellProps,
-    TableRow,
-    Typography,
-} from '@mui/material';
+import { Divider, Grid, Stack, Typography } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { NetworkContext } from '../../NetworkContext';
 import { Device } from '../../simulator/network/peripherals/Device';
 import { Host } from '../../simulator/network/peripherals/Host';
-
-const PropCell = styled(TableCell)<TableCellProps>(() => ({
-    '&.MuiTableCell-root': {
-        padding: '0 8px',
-        fontSize: '0.75em',
-        whiteSpace: 'nowrap',
-    },
-}));
-
-const PropValue = styled(TableCell)<TableCellProps>(() => ({
-    '&.MuiTableCell-root': {
-        padding: '0 8px',
-        fontFamily: 'Roboto Mono',
-        fontSize: '0.75em',
-        whiteSpace: 'nowrap',
-    },
-}));
-
-const HostProperties: React.FC<{
-    dev: Host;
-}> = ({ dev }) => {
-    return (
-        <>
-            <Table>
-                <TableBody>
-                    <TableRow>
-                        <PropCell>Type</PropCell>
-                        <PropValue>Host</PropValue>
-                    </TableRow>
-                    <TableRow>
-                        <PropCell>Name</PropCell>
-                        <PropValue>{dev.getName()}</PropValue>
-                    </TableRow>
-                    <TableRow>
-                        <PropCell>MAC Address</PropCell>
-                        <PropValue>{dev.getMac()}</PropValue>
-                    </TableRow>
-                </TableBody>
-            </Table>
-            {dev.getInterfaces().map((intf, key) => (
-                <React.Fragment key={key}>
-                    <Typography variant='h6' sx={{ padding: '0 8px' }}>
-                        Interface {intf.getName()}
-                    </Typography>
-                    <Table>
-                        <TableBody>
-                            <TableRow>
-                                <PropCell>Name</PropCell>
-                                <PropValue>{intf.getFullName()}</PropValue>
-                            </TableRow>
-                            <TableRow>
-                                <PropCell>Connected to</PropCell>
-                                {intf.isConnected() ? (
-                                    <PropValue>{intf.getConnection()?.getFullName()}</PropValue>
-                                ) : (
-                                    <PropCell sx={{ fontStyle: 'italic' }}>Not connected</PropCell>
-                                )}
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </React.Fragment>
-            ))}
-        </>
-    );
-};
+import { Hub } from '../../simulator/network/peripherals/Hub';
+import { STPSwitch } from '../../simulator/network/peripherals/STPSwitch';
+import { Switch } from '../../simulator/network/peripherals/Switch';
+import { MACProperty } from '../properties/MACProperty';
+import { InterfaceProperties, Properties } from '../properties/Properties';
+import { Property } from '../properties/Property';
 
 export const NetowrkProperties: React.FC<{
     selected: string | null;
@@ -110,11 +40,11 @@ export const NetowrkProperties: React.FC<{
     }, [dev, setChg, chg]);
 
     return (
-        <Grid container direction='column' flexWrap='nowrap' sx={{ height: '100%' }}>
+        <Grid container direction='column' flexWrap='nowrap' sx={{ height: '100%', width: '100%' }}>
             <Grid item sx={{ width: '100%' }}>
                 <Stack sx={{ padding: '0px 8px', height: '32px' }} direction='row'>
                     <Stack direction='row' flexGrow={1}>
-                        <Typography component='h2' variant='h6'>
+                        <Typography component='h2' variant='h6' sx={{ whiteSpace: 'nowrap' }}>
                             {dev === null ? 'Properties' : 'Properties of ' + dev.getName()}
                         </Typography>
                     </Stack>
@@ -122,8 +52,71 @@ export const NetowrkProperties: React.FC<{
                 </Stack>
                 <Divider />
             </Grid>
-            <Grid item sx={{ flexGrow: 1, width: '100%', position: 'relative' }}>
-                {dev === null ? 'no selection' : dev instanceof Host ? <HostProperties dev={dev} /> : <></>}
+            <Grid item sx={{ height: '100%', overflowY: 'auto' }}>
+                {dev === null ? (
+                    <Typography
+                        paragraph
+                        sx={{
+                            fontStyle: 'italic',
+                            color: 'text.secondary',
+                            textAlign: 'center',
+                            marginTop: '8px',
+                        }}
+                        variant='caption'>
+                        No device selected
+                    </Typography>
+                ) : dev instanceof Host ? (
+                    <>
+                        <Properties>
+                            <Property label='Type' value='Host' />
+                            <Property label='Name' value={dev.getName()} />
+                            <MACProperty dev={dev} />
+                        </Properties>
+                        <InterfaceProperties dev={dev} />
+                    </>
+                ) : dev instanceof STPSwitch ? (
+                    <>
+                        <Properties>
+                            <Property label='Type' value='STP Switch' />
+                            <Property label='Name' value={dev.getName()} />
+                            <MACProperty dev={dev} />
+                        </Properties>
+                        <InterfaceProperties
+                            dev={dev}
+                            properties={(intf) => (
+                                <>
+                                    <Property label='Role' value='' />
+                                    <Property label='State' value='' />
+                                </>
+                            )}
+                        />
+                    </>
+                ) : dev instanceof Switch ? (
+                    <>
+                        <Properties>
+                            <Property label='Type' value='Switch' />
+                            <Property label='Name' value={dev.getName()} />
+                            <MACProperty dev={dev} />
+                        </Properties>
+                        <InterfaceProperties dev={dev} />
+                    </>
+                ) : dev instanceof Hub ? (
+                    <>
+                        <Properties>
+                            <Property label='Type' value='Hub' />
+                            <Property label='Name' value={dev.getName()} />
+                        </Properties>
+                        <InterfaceProperties dev={dev} />
+                    </>
+                ) : (
+                    <>
+                        <Properties>
+                            <Property label='Type' value='Device' />
+                            <Property label='Name' value={dev.getName()} />
+                        </Properties>
+                        <InterfaceProperties dev={dev} />
+                    </>
+                )}
             </Grid>
         </Grid>
     );

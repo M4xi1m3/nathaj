@@ -174,7 +174,7 @@ const App: React.FC = () => {
                                 <PanelGroup direction='horizontal'>
                                     {viewProperties ? (
                                         <Panel style={{ display: 'flex' }} order={1}>
-                                            <Paper sx={{ flexGrow: 1, margin: 1 }}>
+                                            <Paper sx={{ flexGrow: 1, margin: 1, width: '100%', overflowX: 'auto' }}>
                                                 <NetowrkProperties selected={selected} />
                                             </Paper>
                                         </Panel>
