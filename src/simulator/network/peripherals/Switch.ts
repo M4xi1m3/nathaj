@@ -52,7 +52,11 @@ export class Switch<T extends Interface = Interface> extends Hub<T> {
     onPacketReceived(iface: Interface, data: ArrayBuffer): void {
         const packet = new Ethernet(data);
 
-        this.mac_address_table[packet.src] = iface.getName();
+        if (this.mac_address_table[packet.src] !== iface.getName()) {
+            this.mac_address_table[packet.src] = iface.getName();
+            this.changed();
+        }
+
         if (packet.dst in this.mac_address_table) {
             this.getInterface(this.mac_address_table[packet.dst]).send(data);
         } else {
@@ -70,6 +74,23 @@ export class Switch<T extends Interface = Interface> extends Hub<T> {
     reset(): void {
         super.reset();
         this.mac_address_table = {};
+    }
+
+    /**
+     * Get the mac address table as an array of mac <> interface association
+     *
+     * @returns Mac address table
+     */
+    getMacAddressTable(): [string, string][] {
+        return Object.entries(this.mac_address_table);
+    }
+
+    /**
+     * Clear the mac address table
+     */
+    clearMacAddressTable() {
+        this.mac_address_table = {};
+        this.changed();
     }
 
     public save(): SavedSwitch {

@@ -1,4 +1,5 @@
-import { Table, TableBody, TableHead, TableRow, Typography } from '@mui/material';
+import { Delete } from '@mui/icons-material';
+import { IconButton, Table, TableBody, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
 import React from 'react';
 import { Switch } from '../../simulator/network/peripherals/Switch';
 import { PropAccordion, PropAccordionDetails, PropAccordionSummary } from './PropAccordion';
@@ -11,6 +12,11 @@ export const MACAddressTableProperty: React.FC<{ dev: Switch }> = ({ dev }) => {
                 <Typography variant='h6' sx={{ padding: '0 8px', flexGrow: 1 }}>
                     MAC Address Table
                 </Typography>
+                <Tooltip title='Clear'>
+                    <IconButton onClick={() => dev.clearMacAddressTable()}>
+                        <Delete color='error' sx={{ fontSize: '0.75em' }} />
+                    </IconButton>
+                </Tooltip>
             </PropAccordionSummary>
             <PropAccordionDetails>
                 {Object.values(dev['mac_address_table']).length === 0 ? (
@@ -34,7 +40,7 @@ export const MACAddressTableProperty: React.FC<{ dev: Switch }> = ({ dev }) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {Object.entries(dev['mac_address_table']).map(([k, v], key) => (
+                            {dev.getMacAddressTable().map(([k, v], key) => (
                                 <TableRow key={key}>
                                     <PropValue sx={{ width: '40% !important' }}>{k}</PropValue>
                                     <PropValue>{v}</PropValue>
