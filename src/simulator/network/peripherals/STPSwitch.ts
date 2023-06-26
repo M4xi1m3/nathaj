@@ -624,10 +624,20 @@ export class STPSwitch extends Switch<STPInterface> {
         }
     }
 
+    /**
+     * Get the priority of the switch
+     *
+     * @returns Priority of the switch
+     */
     getPriority() {
         return this.identifier.priority;
     }
 
+    /**
+     * Set the priority of the switch
+     *
+     * @param {number} priority New priority
+     */
     setPriority(priority: number) {
         this.identifier.priority = priority;
         this.initialize();

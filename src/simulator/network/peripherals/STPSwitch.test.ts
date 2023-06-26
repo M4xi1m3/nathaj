@@ -99,19 +99,28 @@ it('save', () => {
     expect(h1.save()).toStrictEqual({
         type: 'stp-switch',
         mac: '00:00:00:00:00:01',
+        priority: 32768,
         name: 'sw1',
         interfaces: [
             {
                 name: 'eth0',
+                cost: 1,
+                disabled: false,
             },
             {
                 name: 'eth1',
+                cost: 1,
+                disabled: false,
             },
             {
                 name: 'eth2',
+                cost: 1,
+                disabled: false,
             },
             {
                 name: 'eth3',
+                cost: 1,
+                disabled: false,
             },
         ],
         x: 0,
