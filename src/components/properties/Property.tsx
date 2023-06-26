@@ -8,6 +8,7 @@ import {
     TableCell,
     TableCellProps,
     TableRow,
+    Tooltip,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
@@ -80,25 +81,31 @@ export const EditableProperty: React.FC<{
                         endAdornment={
                             edited ? (
                                 <InputAdornment position='end'>
-                                    <IconButton
-                                        edge='end'
-                                        disabled={!validator(val)}
-                                        onClick={() => {
-                                            setValue(val);
-                                            setEdited(false);
-                                        }}>
-                                        <Done
-                                            color={validator(val) ? 'primary' : 'disabled'}
-                                            sx={{ fontSize: '0.75em' }}
-                                        />
-                                    </IconButton>
-                                    <IconButton
-                                        onClick={() => {
-                                            setVal(value);
-                                            setEdited(false);
-                                        }}>
-                                        <Close color='error' sx={{ fontSize: '0.75em' }} />
-                                    </IconButton>
+                                    <Tooltip title='Save'>
+                                        <span>
+                                            <IconButton
+                                                edge='end'
+                                                disabled={!validator(val)}
+                                                onClick={() => {
+                                                    setValue(val);
+                                                    setEdited(false);
+                                                }}>
+                                                <Done
+                                                    color={validator(val) ? 'primary' : 'disabled'}
+                                                    sx={{ fontSize: '0.75em' }}
+                                                />
+                                            </IconButton>
+                                        </span>
+                                    </Tooltip>
+                                    <Tooltip title='Cancel'>
+                                        <IconButton
+                                            onClick={() => {
+                                                setVal(value);
+                                                setEdited(false);
+                                            }}>
+                                            <Close color='error' sx={{ fontSize: '0.75em' }} />
+                                        </IconButton>
+                                    </Tooltip>
                                 </InputAdornment>
                             ) : null
                         }

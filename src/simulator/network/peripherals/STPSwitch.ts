@@ -748,4 +748,24 @@ export class STPSwitch extends Switch {
             host.addInterface(intf.name);
         });
     }
+
+    public getRole(intf: string) {
+        return this.port_infos[this.getInterface(intf).getName()].role;
+    }
+
+    public getState(intf: string) {
+        return this.port_infos[this.getInterface(intf).getName()].state;
+    }
+
+    public enablePort(intf: string) {
+        this.port_infos[this.getInterface(intf).getName()].enable();
+        this.portAssignation();
+        this.changed();
+    }
+
+    public disablePort(intf: string) {
+        this.port_infos[this.getInterface(intf).getName()].disable();
+        this.portAssignation();
+        this.changed();
+    }
 }

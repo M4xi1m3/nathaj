@@ -162,7 +162,7 @@ export abstract class Device extends Drawable implements EventTarget {
         }) as EventListenerOrEventListenerObject);
         this.interfaces[intf.getName()] = intf;
 
-        this.dispatchEvent(new Event('changed'));
+        this.changed();
 
         return intf;
     }
@@ -187,7 +187,7 @@ export abstract class Device extends Drawable implements EventTarget {
         delete intf['owner'];
         delete this.interfaces[name];
 
-        this.dispatchEvent(new Event('changed'));
+        this.changed();
     }
 
     /**
@@ -293,6 +293,10 @@ export abstract class Device extends Drawable implements EventTarget {
      */
     public time(): number {
         return this.getNetwork().time();
+    }
+
+    protected changed() {
+        this.dispatchEvent(new Event('changed'));
     }
 
     /**

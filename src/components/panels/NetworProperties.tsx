@@ -1,10 +1,11 @@
-import { Divider, Grid, Stack, Typography } from '@mui/material';
+import { ToggleOff, ToggleOn } from '@mui/icons-material';
+import { Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { NetworkContext } from '../../NetworkContext';
 import { Device } from '../../simulator/network/peripherals/Device';
 import { Host } from '../../simulator/network/peripherals/Host';
 import { Hub } from '../../simulator/network/peripherals/Hub';
-import { STPSwitch } from '../../simulator/network/peripherals/STPSwitch';
+import { PortRole, PortState, STPSwitch } from '../../simulator/network/peripherals/STPSwitch';
 import { Switch } from '../../simulator/network/peripherals/Switch';
 import { MACProperty } from '../properties/MACProperty';
 import { InterfaceProperties, Properties } from '../properties/Properties';
@@ -85,10 +86,31 @@ export const NetowrkProperties: React.FC<{
                             dev={dev}
                             properties={(intf) => (
                                 <>
-                                    <Property label='Role' value='' />
-                                    <Property label='State' value='' />
+                                    <Property
+                                        label='Role'
+                                        value={PortRole[(dev as STPSwitch).getRole(intf.getName())]}
+                                    />
+                                    <Property
+                                        label='State'
+                                        value={PortState[(dev as STPSwitch).getState(intf.getName())]}
+                                    />
                                 </>
                             )}
+                            actions={(dev, intf) =>
+                                (dev as STPSwitch).getState(intf.getName()) === PortState.Disabled ? (
+                                    <Tooltip title='Enable'>
+                                        <IconButton onClick={() => (dev as STPSwitch).enablePort(intf.getName())}>
+                                            <ToggleOff color='primary' sx={{ fontSize: '0.75em' }} />
+                                        </IconButton>
+                                    </Tooltip>
+                                ) : (
+                                    <Tooltip title='Disable'>
+                                        <IconButton onClick={() => (dev as STPSwitch).disablePort(intf.getName())}>
+                                            <ToggleOn color='error' sx={{ fontSize: '0.75em' }} />
+                                        </IconButton>
+                                    </Tooltip>
+                                )
+                            }
                         />
                     </>
                 ) : dev instanceof Switch ? (
