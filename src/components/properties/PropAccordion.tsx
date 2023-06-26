@@ -12,7 +12,14 @@ import {
 import React from 'react';
 
 export const PropAccordion: React.FC<AccordionProps> = styled((props: AccordionProps) => (
-    <Accordion disableGutters elevation={0} defaultExpanded square {...props} />
+    <Accordion
+        TransitionProps={{ unmountOnExit: true }}
+        disableGutters
+        elevation={0}
+        defaultExpanded
+        square
+        {...props}
+    />
 ))(() => ({}));
 
 export const PropAccordionSummary: React.FC<AccordionSummaryProps> = styled(

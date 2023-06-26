@@ -95,7 +95,7 @@ export const NetworkRenderer: React.FC<{
                             </IconButton>
                         </Tooltip>
                         <Tooltip title={showLabel ? 'Hide labels' : 'Show labels'}>
-                            <IconButton onClick={() => setShowLabel(!showLabel)} size='small'>
+                            <IconButton onClick={() => setShowLabel(!showLabel)} size='small' edge='end'>
                                 {showLabel ? <Label /> : <LabelOff />}
                             </IconButton>
                         </Tooltip>

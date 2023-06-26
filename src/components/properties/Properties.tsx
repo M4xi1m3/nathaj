@@ -1,4 +1,5 @@
-import { Table, TableBody, Typography } from '@mui/material';
+import { Delete } from '@mui/icons-material';
+import { IconButton, Table, TableBody, Tooltip, Typography } from '@mui/material';
 import React from 'react';
 import { Device } from '../../simulator/network/peripherals/Device';
 import { PropAccordion, PropAccordionDetails, PropAccordionSummary } from './PropAccordion';
@@ -23,6 +24,11 @@ export const InterfaceProperties: React.FC<{
                         Interface {intf.getName()}
                     </Typography>
                     {actions === undefined ? null : actions(intf)}
+                    <Tooltip title='Delete'>
+                        <IconButton edge='start' onClick={() => intf.getOwner().removeInterface(intf.getName())}>
+                            <Delete color='error' sx={{ fontSize: '16px' }} />
+                        </IconButton>
+                    </Tooltip>
                 </PropAccordionSummary>
                 <PropAccordionDetails>
                     <Table>
