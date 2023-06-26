@@ -94,7 +94,7 @@ export function isSavedInterface(arg: any): arg is SavedInterface {
 /**
  * Network interface, which can send and receive packets
  */
-export class Interface extends EventTarget {
+export class Interface<T extends Device = Device<any>> extends EventTarget {
     /**
      * Name of the interface
      */
@@ -103,7 +103,7 @@ export class Interface extends EventTarget {
     /**
      * Device that owns the interface
      */
-    private owner?: Device;
+    private owner?: T;
 
     /**
      * Interface to which the interface is connected
@@ -121,7 +121,7 @@ export class Interface extends EventTarget {
      * @param {Device} owner Owner of the interface
      * @param {string} name Name of the interface
      */
-    constructor(owner: Device, name: string) {
+    constructor(owner: T, name: string) {
         super();
         this.owner = owner;
         this.name = name;
@@ -134,7 +134,7 @@ export class Interface extends EventTarget {
      *
      * @returns {Device} owner of the interface
      */
-    getOwner(): Device {
+    getOwner(): T {
         if (this.owner === undefined) throw new DisconnectedException(this);
 
         return this.owner;

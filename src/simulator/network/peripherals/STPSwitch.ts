@@ -4,14 +4,27 @@ import { Network } from '../Network';
 import { BPDU as BPDUPacket } from '../packets/definitions/BPDU';
 import { Ethernet } from '../packets/definitions/Ethernet';
 import { isSavedDevice } from './Device';
-import { Interface } from './Interface';
+import { Interface, isSavedInterface, SavedInterface } from './Interface';
 import { SavedSwitch, Switch } from './Switch';
 
 const STPSwitchImage = new Image();
 STPSwitchImage.src = STPSwitchImg;
 
-export function isSavedSTPSwitch(arg: any): arg is SavedSwitch {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SavedSTPSwitch extends SavedSwitch<SavedSTPInterface> {
+    //
+}
+
+export function isSavedSTPSwitch(arg: any): arg is SavedSTPSwitch {
     return arg && arg.mac && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'stp-switch';
+}
+
+export interface SavedSTPInterface extends SavedInterface {
+    disabled: boolean;
+}
+
+export function isSavedSTPInterface(arg: any): arg is SavedSTPInterface {
+    return arg && arg.disabled !== undefined && typeof arg.disabled === 'boolean' && isSavedInterface(arg);
 }
 
 /**
@@ -210,25 +223,18 @@ class BPDU {
 }
 
 /**
- * Class storing the data of a port in an STP switch
- *
- * @internal
+ * Interface with STP support
  */
-class PortData {
-    /**
-     * Controller to which the port is attached
-     */
-    controller: STPSwitch;
-
+export class STPInterface extends Interface<STPSwitch> {
     /**
      * ID of the port
      */
-    id: number;
+    id = 0;
 
     /**
      * Cost of traveling trough the port
      */
-    path_cost: number;
+    path_cost = 0;
 
     /**
      * State of the port
@@ -260,24 +266,26 @@ class PortData {
      */
     forward_delay_expiry = 0;
 
-    constructor(controller: STPSwitch, id: number, path_cost: number) {
-        this.controller = controller;
-        this.id = id;
-        this.path_cost = path_cost;
-        this.initialize();
-    }
-
     /**
      * Initialize the port's data
      */
-    initialize() {
-        this.state = PortState.Blocking;
-        this.role = PortRole.Designated;
-        this.bpdu = new BPDU(this.controller.identifier, this.path_cost, this.controller.identifier, this.id);
+    initialize(id: number, path_cost: number, disabled = false) {
+        this.id = id;
+        this.path_cost = path_cost;
 
-        this.hold_timer_expiry = this.controller.time() + this.controller.hold_time;
-        this.message_age_expiry = this.controller.time() + this.controller.message_age;
-        this.forward_delay_expiry = this.controller.time() + this.controller.forward_delay;
+        if (disabled) {
+            this.state = PortState.Disabled;
+            this.role = PortRole.Disabled;
+        } else {
+            this.state = PortState.Blocking;
+            this.role = PortRole.Designated;
+        }
+
+        this.bpdu = new BPDU(this.getOwner().identifier, this.path_cost, this.getOwner().identifier, this.id);
+
+        this.hold_timer_expiry = this.getOwner().time() + this.getOwner().hold_time;
+        this.message_age_expiry = this.getOwner().time() + this.getOwner().message_age;
+        this.forward_delay_expiry = this.getOwner().time() + this.getOwner().forward_delay;
     }
 
     /**
@@ -288,7 +296,7 @@ class PortData {
     canSend(): boolean {
         if (this.disabled() || this.blocking()) return false;
 
-        if (this.controller.time() < this.hold_timer_expiry) return false;
+        if (this.getOwner().time() < this.hold_timer_expiry) return false;
 
         return true;
     }
@@ -297,7 +305,9 @@ class PortData {
      * Enable the port
      */
     enable() {
-        this.initialize();
+        this.initialize(this.id, this.path_cost, false);
+        this.getOwner().portAssignation();
+        this.getOwner().changed();
     }
 
     /**
@@ -306,6 +316,8 @@ class PortData {
     disable() {
         this.makeDesignated();
         this.updateState(PortState.Disabled, PortRole.Disabled);
+        this.getOwner().portAssignation();
+        this.getOwner().changed();
     }
 
     /**
@@ -334,15 +346,15 @@ class PortData {
     updateConfig(config: BPDU) {
         this.bpdu = this.bpdu.winner(config);
 
-        this.message_age_expiry = this.controller.time() + this.controller.message_age;
-        this.controller.portAssignation();
+        this.message_age_expiry = this.getOwner().time() + this.getOwner().message_age;
+        this.getOwner().portAssignation();
     }
 
     /**
      * Advance in the Listening -> Learning -> Forwarding state cycle
      */
     doForward() {
-        if (this.controller.time() > this.forward_delay_expiry) {
+        if (this.getOwner().time() > this.forward_delay_expiry) {
             switch (this.state) {
                 case PortState.Listening:
                     this.updateState(PortState.Learning, this.role);
@@ -352,7 +364,7 @@ class PortData {
                     break;
             }
 
-            this.forward_delay_expiry = this.controller.time() + this.controller.forward_delay;
+            this.forward_delay_expiry = this.getOwner().time() + this.getOwner().forward_delay;
         }
     }
 
@@ -366,7 +378,8 @@ class PortData {
         this.state = state;
         this.role = role;
 
-        this.message_age_expiry = this.controller.time() + this.controller.message_age;
+        this.message_age_expiry = this.getOwner().time() + this.getOwner().message_age;
+        this.getOwner().changed();
     }
 
     /**
@@ -401,6 +414,21 @@ class PortData {
 
         this.updateState(PortState.Listening, PortRole.Designated);
     }
+
+    public save(): SavedSTPInterface {
+        return {
+            name: this.getName(),
+            disabled: this.state === PortState.Disabled,
+            ...(this.isConnected()
+                ? {
+                      connected_to: {
+                          device: this.getConnection()?.getOwner().getName() ?? '',
+                          interface: this.getConnection()?.getName() ?? '',
+                      },
+                  }
+                : {}),
+        };
+    }
 }
 
 /**
@@ -408,7 +436,7 @@ class PortData {
  *
  * See IEEE 802.1D (1998) section 8 and 9
  */
-export class STPSwitch extends Switch {
+export class STPSwitch extends Switch<STPInterface> {
     /**
      * Switch identifier
      * @internal
@@ -416,12 +444,6 @@ export class STPSwitch extends Switch {
     identifier: Identifier;
 
     private hello_timer_expiry = 0;
-
-    /**
-     * Ports informations
-     * @internal
-     */
-    private port_infos: { [intf: string]: PortData };
 
     hold_time: number;
     message_age: number;
@@ -439,7 +461,6 @@ export class STPSwitch extends Switch {
     constructor(network: Network, name: string, mac: string, ports: number) {
         super(network, name, mac, ports);
         this.identifier = new Identifier(32768, mac);
-        this.port_infos = {};
 
         this.message_age = 20;
         this.forward_delay = 15;
@@ -448,21 +469,13 @@ export class STPSwitch extends Switch {
         this.initialize();
     }
 
-    public addInterface(name: string): Interface {
-        const intf = super.addInterface(name);
+    public addInterface(name: string, disabled = false): STPInterface {
+        const intf = this.createInterface(name, STPInterface);
 
-        if (this.port_infos !== undefined) {
-            const i = Math.max(0, ...Object.values(this.port_infos).map((v) => v.id));
-            this.port_infos[intf.getName()] = new PortData(this, i, 1);
-            this.port_infos[intf.getName()].initialize();
-        }
+        const i = Math.max(0, ...Object.values(this.getInterfaces()).map((v) => v.id));
+        intf.initialize(i, 1, disabled);
 
         return intf;
-    }
-
-    public removeInterface(name: string): void {
-        super.removeInterface(name);
-        delete this.port_infos[name];
     }
 
     /**
@@ -471,8 +484,7 @@ export class STPSwitch extends Switch {
     private initialize() {
         let i = 0;
         this.getInterfaces().forEach((intf) => {
-            this.port_infos[intf.getName()] = new PortData(this, i, 1);
-            this.port_infos[intf.getName()].initialize();
+            intf.initialize(i, 1, intf.state === PortState.Disabled);
             i++;
         });
 
@@ -486,9 +498,9 @@ export class STPSwitch extends Switch {
      * @internal
      */
     private getBestBPDU(): BPDU {
-        let best = this.port_infos[this.getInterfaces()[0].getName()].bpdu;
+        let best = this.getInterfaces()[0].bpdu;
         this.getInterfaces().forEach((intf) => {
-            best = best.winner(this.port_infos[intf.getName()].bpdu);
+            best = best.winner(intf.bpdu);
         });
         return best;
     }
@@ -496,17 +508,17 @@ export class STPSwitch extends Switch {
     /**
      * Get the root port's data
      *
-     * @returns {PortData | null} Root's port data, or null if the switch has no root port (ie. is a root switch)
+     * @returns {STPInterface | null} Root's port data, or null if the switch has no root port (ie. is a root switch)
      * @internal
      */
-    private getRootPort(): PortData | null {
+    private getRootPort(): STPInterface | null {
         if (this.getBestBPDU().root_id.eq(this.identifier)) return null;
 
-        let best = this.port_infos[this.getInterfaces()[0].getName()];
+        let best = this.getInterfaces()[0];
 
         this.getInterfaces().forEach((intf) => {
-            const tmp = best.bpdu.winner(this.port_infos[intf.getName()].bpdu);
-            best = tmp === best.bpdu ? best : this.port_infos[intf.getName()];
+            const tmp = best.bpdu.winner(intf.bpdu);
+            best = tmp === best.bpdu ? best : intf;
         });
         return best;
     }
@@ -514,10 +526,9 @@ export class STPSwitch extends Switch {
     /**
      * Transmit a BPDU to an interface
      *
-     * @param {Interface} intf Interface to tramit a BPDU to
+     * @param {STPInterface} port STPInterface to tramit a BPDU to
      */
-    private transmitConfig(intf: Interface): void {
-        const port = this.port_infos[intf.getName()];
+    private transmitConfig(port: STPInterface): void {
         if (!port.canSend()) return;
 
         const best = this.getBestBPDU();
@@ -528,7 +539,7 @@ export class STPSwitch extends Switch {
             port.id
         );
 
-        intf.send(bpdu.toPacket(this.getMac()).raw());
+        port.send(bpdu.toPacket(this.getMac()).raw());
     }
 
     /**
@@ -548,11 +559,10 @@ export class STPSwitch extends Switch {
      * Handle a received BPDU
      *
      * @param {BPDU} bpdu BPDU to handle
-     * @param {Interface} intf Interface on which the BPDU was received
+     * @param {STPInterface} intf Interface on which the BPDU was received
      * @internal
      */
-    private handleBPDU(bpdu: BPDU, intf: Interface) {
-        const port = this.port_infos[intf.getName()];
+    private handleBPDU(bpdu: BPDU, port: STPInterface) {
         port.updateConfig(bpdu);
         this.portAssignation();
 
@@ -570,9 +580,7 @@ export class STPSwitch extends Switch {
     portAssignation() {
         const best = this.getBestBPDU();
 
-        for (const intf of this.getInterfaces()) {
-            const port = this.port_infos[intf.getName()];
-
+        for (const port of this.getInterfaces()) {
             if (best.root_id.eq(this.identifier)) {
                 const would_be_bpdu = new BPDU(best.root_id, best.root_cost, this.identifier, port.id);
 
@@ -595,7 +603,7 @@ export class STPSwitch extends Switch {
         }
     }
 
-    onPacketReceived(iface: Interface, data: ArrayBuffer): void {
+    onPacketReceived(iface: STPInterface, data: ArrayBuffer): void {
         const packet = new Ethernet(data);
 
         if (packet.dst === '01:81:c2:00:00:00') {
@@ -607,22 +615,19 @@ export class STPSwitch extends Switch {
             return;
         }
 
-        if (
-            this.port_infos[iface.getName()].state === PortState.Learning ||
-            this.port_infos[iface.getName()].state === PortState.Forwarding
-        ) {
+        if (iface.state === PortState.Learning || iface.state === PortState.Forwarding) {
             this.mac_address_table[packet.src] = iface.getName();
         }
 
-        if (this.port_infos[iface.getName()].state === PortState.Forwarding) {
+        if (iface.state === PortState.Forwarding) {
             if (packet.dst in this.mac_address_table) {
-                if (this.port_infos[this.mac_address_table[packet.dst]].state === PortState.Forwarding) {
+                if (this.getInterface(this.mac_address_table[packet.dst]).state === PortState.Forwarding) {
                     this.getInterface(this.mac_address_table[packet.dst]).send(data);
                 }
             } else {
                 this.getInterfaces()
                     .filter((intf) => intf !== iface)
-                    .filter((intf) => this.port_infos[intf.getName()].state === PortState.Forwarding)
+                    .filter((intf) => intf.state === PortState.Forwarding)
                     .forEach((intf) => intf.send(data));
             }
         }
@@ -632,7 +637,7 @@ export class STPSwitch extends Switch {
      * Draw an STP interface
      *
      * @param {CanvasRenderingContext2D} ctx Canvas context used to draw
-     * @param {Interface} intf Interface to draw
+     * @param {STPInterface} intf Interface to draw
      * @param {number} devRadius Radius of the device to draw the interface on
      * @param {Vector2D} drawPos Draw position of the device
      * @param {Vector2D} direction Direction at which to put the interface
@@ -647,7 +652,7 @@ export class STPSwitch extends Switch {
     ) {
         const intfPos = drawPos.add(direction.mul(devRadius + 5));
 
-        switch (this.port_infos[intf.getName()].role) {
+        switch ((intf as STPInterface).role) {
             case PortRole.Disabled:
                 ctx.fillStyle = '#DD0000';
                 break;
@@ -666,7 +671,7 @@ export class STPSwitch extends Switch {
         ctx.arc(intfPos.x, intfPos.y, 5, 0.25 * Math.PI, 1.25 * Math.PI);
         ctx.fill();
 
-        switch (this.port_infos[intf.getName()].state) {
+        switch ((intf as STPInterface).state) {
             case PortState.Disabled:
                 ctx.fillStyle = '#DD0000';
                 break;
@@ -708,7 +713,7 @@ export class STPSwitch extends Switch {
             }
         }
 
-        for (const port of Object.values(this.port_infos)) {
+        for (const port of this.getInterfaces()) {
             port.doForward();
 
             if (this.time() > port.message_age_expiry) {
@@ -740,32 +745,12 @@ export class STPSwitch extends Switch {
      * @param {Network} net Network to load into
      * @param {SavedSwitch} data Data to load from
      */
-    public static load(net: Network, data: SavedSwitch) {
+    public static load(net: Network, data: SavedSTPSwitch) {
         const host = new STPSwitch(net, data.name, data.mac, 0);
         host.removeAllInterfaces();
         host.setPosition(new Vector2D(data.x, data.y));
         data.interfaces.forEach((intf) => {
-            host.addInterface(intf.name);
+            host.addInterface(intf.name, intf.disabled);
         });
-    }
-
-    public getRole(intf: string) {
-        return this.port_infos[this.getInterface(intf).getName()].role;
-    }
-
-    public getState(intf: string) {
-        return this.port_infos[this.getInterface(intf).getName()].state;
-    }
-
-    public enablePort(intf: string) {
-        this.port_infos[this.getInterface(intf).getName()].enable();
-        this.portAssignation();
-        this.changed();
-    }
-
-    public disablePort(intf: string) {
-        this.port_infos[this.getInterface(intf).getName()].disable();
-        this.portAssignation();
-        this.changed();
     }
 }

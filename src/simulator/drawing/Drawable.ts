@@ -4,7 +4,7 @@ import { Vector2D } from './Vector2D';
 /**
  * Represents something that can be drawn
  */
-export abstract class Drawable {
+export abstract class Drawable<T extends Interface = Interface> {
     /**
      * Position of the drawable object
      */
@@ -86,7 +86,7 @@ export abstract class Drawable {
      */
     protected drawSimpleInterface(
         ctx: CanvasRenderingContext2D,
-        intf: Interface,
+        intf: T,
         devRadius: number,
         drawPos: Vector2D,
         direction: Vector2D,
@@ -117,11 +117,11 @@ export abstract class Drawable {
         ctx: CanvasRenderingContext2D,
         drawPos: Vector2D,
         devRadius: number,
-        interfaces: Interface[],
+        interfaces: T[],
         intfPosition: (direction: Vector2D) => Vector2D = this.intfPositionCircle,
         drawIntferface: (
             ctx: CanvasRenderingContext2D,
-            intf: Interface,
+            intf: T,
             devRadius: number,
             drawPos: Vector2D,
             direction: Vector2D

@@ -1,4 +1,5 @@
 import { Device } from '../peripherals/Device';
+import { Interface } from '../peripherals/Interface';
 
 const macRegexp = new RegExp('^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$');
 
@@ -11,7 +12,7 @@ export class InvalidMACException extends Error {
 /**
  * Class representing a device with a mac address
  */
-export abstract class MACable extends Device {
+export abstract class MACable<T extends Interface = Interface> extends Device<T> {
     /**
      * MAC address of the host
      */

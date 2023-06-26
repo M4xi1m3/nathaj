@@ -1,7 +1,6 @@
 import { Stack, Table, TableBody, Typography } from '@mui/material';
 import React from 'react';
 import { Device } from '../../simulator/network/peripherals/Device';
-import { Interface } from '../../simulator/network/peripherals/Interface';
 import { Property } from './Property';
 
 export const Properties: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -12,8 +11,8 @@ export const Properties: React.FC<{ children: React.ReactNode }> = ({ children }
 
 export const InterfaceProperties: React.FC<{
     dev: Device;
-    properties?: (intf: Interface) => React.ReactNode;
-    actions?: (dev: Device, intf: Interface) => React.ReactNode;
+    properties?: (intf: any) => React.ReactNode;
+    actions?: (intf: any) => React.ReactNode;
 }> = ({ dev, properties, actions }) => (
     <>
         {dev.getInterfaces().map((intf, key) => (
@@ -22,7 +21,7 @@ export const InterfaceProperties: React.FC<{
                     <Typography variant='h6' sx={{ padding: '0 8px', flexGrow: 1 }}>
                         Interface {intf.getName()}
                     </Typography>
-                    {actions === undefined ? null : actions(dev, intf)}
+                    {actions === undefined ? null : actions(intf)}
                 </Stack>
                 <Table>
                     <TableBody>

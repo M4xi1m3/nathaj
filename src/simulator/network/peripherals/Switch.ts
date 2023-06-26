@@ -6,12 +6,12 @@ import { Network } from '../Network';
 import { Ethernet } from '../packets/definitions/Ethernet';
 import { isSavedDevice, SavedDevice } from './Device';
 import { Hub } from './Hub';
-import { Interface } from './Interface';
+import { Interface, SavedInterface } from './Interface';
 
 const SwitchImage = new Image();
 SwitchImage.src = SwitchImg;
 
-export interface SavedSwitch extends SavedDevice {
+export interface SavedSwitch<T extends SavedInterface = SavedInterface> extends SavedDevice<T> {
     mac: string;
 }
 
@@ -19,7 +19,7 @@ export function isSavedSwitch(arg: any): arg is SavedSwitch {
     return arg && arg.mac && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'switch';
 }
 
-export interface Switch extends Hub, MACable {}
+export interface Switch<T extends Interface = Interface> extends Hub<T>, MACable<T> {}
 
 /**
  * Basic learning switch
@@ -29,7 +29,7 @@ export interface Switch extends Hub, MACable {}
  * the relation between mac address and interface to
  * only send the packet to the right interface
  */
-export class Switch extends Hub {
+export class Switch<T extends Interface = Interface> extends Hub<T> {
     /**
      * Dictionary storing the relations between mac addresses and interfaces
      */

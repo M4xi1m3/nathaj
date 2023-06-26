@@ -51,10 +51,10 @@ export class DeviceRemoved extends DeviceException {
     }
 }
 
-export interface SavedDevice {
+export interface SavedDevice<T extends SavedInterface = SavedInterface> {
     type: string;
     name: string;
-    interfaces: SavedInterface[];
+    interfaces: T[];
     x: number;
     y: number;
 }
@@ -80,11 +80,11 @@ export function isSavedDevice(arg: any): arg is SavedDevice {
 /**
  * A device in the network simulation
  */
-export abstract class Device extends Drawable implements EventTarget {
+export abstract class Device<T extends Interface = Interface> extends Drawable implements EventTarget {
     /**
      * Ijnterfaces of the device, indexed by name
      */
-    private interfaces: { [id: string]: Interface };
+    private interfaces: { [id: string]: T };
 
     /**
      * Network the device is associated with
@@ -135,7 +135,7 @@ export abstract class Device extends Drawable implements EventTarget {
      * @param {Interface} iface Interfave on whick the packet has been received
      * @param {ArrayBuffer} data Data in the packet
      */
-    public abstract onPacketReceived(iface: Interface, data: ArrayBuffer): void;
+    public abstract onPacketReceived(iface: T, data: ArrayBuffer): void;
 
     /**
      * Method called every network tick
@@ -147,16 +147,10 @@ export abstract class Device extends Drawable implements EventTarget {
      */
     public abstract reset(): void;
 
-    /**
-     * Add an interface to the device
-     *
-     * @param {string} name Name of the interface
-     * @returns {Interface} The new interface
-     */
-    public addInterface(name: string): Interface {
+    protected createInterface<U extends Device = Device>(name: string, ctor: { new (dev: U, name: string): T }): T {
         if (name in this.interfaces) throw new InterfaceNameTaken(this, name);
 
-        const intf: Interface = new Interface(this, name);
+        const intf: T = new ctor(this as unknown as U, name);
         intf.addEventListener('receivedata', ((e: CustomEvent<ReceivedPacketEventData>) => {
             this.onPacketReceived(intf, e.detail.packet);
         }) as EventListenerOrEventListenerObject);
@@ -164,7 +158,17 @@ export abstract class Device extends Drawable implements EventTarget {
 
         this.changed();
 
-        return intf;
+        return intf as T;
+    }
+
+    /**
+     * Add an interface to the device
+     *
+     * @param {string} name Name of the interface
+     * @returns {Interface} The new interface
+     */
+    public addInterface(name: string): T {
+        return this.createInterface(name, Interface as new (dev: Device<Interface>, name: string) => T);
     }
 
     public removeAllInterfaces(): void {
@@ -196,7 +200,7 @@ export abstract class Device extends Drawable implements EventTarget {
      * @param {string} name Name of the interface to get
      * @returns {Interface} The interface
      */
-    public getInterface(name: string): Interface {
+    public getInterface(name: string): T {
         return this.interfaces[name];
     }
 
@@ -215,7 +219,7 @@ export abstract class Device extends Drawable implements EventTarget {
      *
      * @returns {Interface[]} List of interfaces
      */
-    public getInterfaces(): Interface[] {
+    public getInterfaces(): T[] {
         return Object.values(this.interfaces);
     }
 
@@ -224,7 +228,7 @@ export abstract class Device extends Drawable implements EventTarget {
      *
      * @returns {Interface} Available interface, or undefined if no interfaces available
      */
-    public getFreeInterface(ignore?: string[]): Interface {
+    public getFreeInterface(ignore?: string[]): T {
         let intfs = this.getInterfaces();
         if (ignore !== undefined) {
             intfs = intfs.filter((intf) => ignore.indexOf(intf.getName()) === -1);
@@ -295,7 +299,7 @@ export abstract class Device extends Drawable implements EventTarget {
         return this.getNetwork().time();
     }
 
-    protected changed() {
+    public changed() {
         this.dispatchEvent(new Event('changed'));
     }
 
