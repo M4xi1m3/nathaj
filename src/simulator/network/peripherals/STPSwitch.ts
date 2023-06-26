@@ -10,13 +10,20 @@ import { SavedSwitch, Switch } from './Switch';
 const STPSwitchImage = new Image();
 STPSwitchImage.src = STPSwitchImg;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedSTPSwitch extends SavedSwitch<SavedSTPInterface> {
-    //
+    priority: number;
 }
 
 export function isSavedSTPSwitch(arg: any): arg is SavedSTPSwitch {
-    return arg && arg.mac && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'stp-switch';
+    return (
+        arg &&
+        arg.mac !== undefined &&
+        typeof arg.mac === 'string' &&
+        arg.priority !== undefined &&
+        typeof arg.priority === 'number' &&
+        isSavedDevice(arg) &&
+        arg.type === 'stp-switch'
+    );
 }
 
 export interface SavedSTPInterface extends SavedInterface {
@@ -80,13 +87,13 @@ class Identifier {
      *
      * @returns {number} Number corresponding to the identifier
      */
-    toNumber() {
-        let mac = 0;
+    toNumber(): bigint {
+        let mac = 0n;
         this.mac.split(':').forEach((v: string) => {
-            mac <<= 8;
-            mac |= parseInt(v, 16) & 0xff;
+            mac <<= 8n;
+            mac |= BigInt(parseInt(v, 16) & 0xff);
         });
-        return (this.priority << 48) | mac;
+        return (BigInt(this.priority) << 48n) | mac;
     }
 
     /**
@@ -603,6 +610,15 @@ export class STPSwitch extends Switch<STPInterface> {
         }
     }
 
+    getPriority() {
+        return this.identifier.priority;
+    }
+
+    setPriority(priority: number) {
+        this.identifier.priority = priority;
+        this.initialize();
+    }
+
     onPacketReceived(iface: STPInterface, data: ArrayBuffer): void {
         const packet = new Ethernet(data);
 
@@ -728,10 +744,11 @@ export class STPSwitch extends Switch<STPInterface> {
         this.initialize();
     }
 
-    public save(): SavedSwitch {
+    public save(): SavedSTPSwitch {
         return {
             type: 'stp-switch',
             mac: this.getMac(),
+            priority: this.getPriority(),
             name: this.getName(),
             interfaces: this.getInterfaces().map((intf) => intf.save()),
             x: this.getPosition().x,
@@ -749,6 +766,7 @@ export class STPSwitch extends Switch<STPInterface> {
         const host = new STPSwitch(net, data.name, data.mac, 0);
         host.removeAllInterfaces();
         host.setPosition(new Vector2D(data.x, data.y));
+        host.identifier.priority = data.priority;
         data.interfaces.forEach((intf) => {
             host.addInterface(intf.name, intf.disabled);
         });

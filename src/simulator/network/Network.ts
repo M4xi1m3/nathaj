@@ -96,7 +96,7 @@ export interface SavedNetwork {
 export function isSavedNetwork(arg: any): arg is SavedNetwork {
     return (
         arg &&
-        arg.devices &&
+        arg.devices !== undefined &&
         typeof arg.devices === 'object' &&
         Array.isArray(arg.devices) &&
         (arg.devices as any[]).map(isSavedDevice).reduce((prev, curr) => prev && curr) &&

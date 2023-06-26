@@ -16,7 +16,7 @@ export interface SavedSwitch<T extends SavedInterface = SavedInterface> extends 
 }
 
 export function isSavedSwitch(arg: any): arg is SavedSwitch {
-    return arg && arg.mac && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'switch';
+    return arg && arg.mac !== undefined && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'switch';
 }
 
 export interface Switch<T extends Interface = Interface> extends Hub<T>, MACable<T> {}

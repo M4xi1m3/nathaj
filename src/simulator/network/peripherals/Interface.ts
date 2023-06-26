@@ -79,13 +79,13 @@ export interface SavedInterface {
 export function isSavedInterface(arg: any): arg is SavedInterface {
     return (
         arg &&
-        arg.name &&
+        arg.name !== undefined &&
         typeof arg.name === 'string' &&
-        (arg.connected_to
+        (arg.connected_to !== undefined
             ? typeof arg.connected_to === 'object' &&
-              arg.connected_to.device &&
+              arg.connected_to.device !== undefined &&
               typeof arg.connected_to.device === 'string' &&
-              arg.connected_to.interface &&
+              arg.connected_to.interface !== undefined &&
               typeof arg.connected_to.interface === 'string'
             : true)
     );

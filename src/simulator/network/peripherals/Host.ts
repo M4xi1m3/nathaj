@@ -10,7 +10,7 @@ export interface SavedHost extends SavedDevice {
 }
 
 export function isSavedHost(arg: any): arg is SavedHost {
-    return arg && arg.mac && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'host';
+    return arg && arg.mac !== undefined && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'host';
 }
 
 export interface Host extends Device, MACable {}

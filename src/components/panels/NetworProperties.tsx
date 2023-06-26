@@ -9,7 +9,7 @@ import { PortRole, PortState, STPInterface, STPSwitch } from '../../simulator/ne
 import { Switch } from '../../simulator/network/peripherals/Switch';
 import { MACProperty } from '../properties/MACProperty';
 import { InterfaceProperties, Properties } from '../properties/Properties';
-import { Property } from '../properties/Property';
+import { EditableProperty, Property } from '../properties/Property';
 
 export const NetowrkProperties: React.FC<{
     selected: string | null;
@@ -81,6 +81,14 @@ export const NetowrkProperties: React.FC<{
                             <Property label='Type' value='STP Switch' />
                             <Property label='Name' value={dev.getName()} />
                             <MACProperty dev={dev} />
+                            <EditableProperty
+                                label='Priority'
+                                value={dev.getPriority().toString()}
+                                setValue={(v) => (dev as STPSwitch).setPriority(parseInt(v))}
+                                validator={(value) => {
+                                    return !isNaN(parseInt(value)) && parseInt(value) >= 0 && parseInt(value) < 65536;
+                                }}
+                            />
                         </Properties>
                         <InterfaceProperties
                             dev={dev}

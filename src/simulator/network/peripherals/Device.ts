@@ -62,15 +62,15 @@ export interface SavedDevice<T extends SavedInterface = SavedInterface> {
 export function isSavedDevice(arg: any): arg is SavedDevice {
     return (
         arg &&
-        arg.type &&
+        arg.type !== undefined &&
         typeof arg.type === 'string' &&
-        arg.name &&
+        arg.name !== undefined &&
         typeof arg.name === 'string' &&
-        arg.x &&
+        arg.x !== undefined &&
         typeof arg.x === 'number' &&
-        arg.y &&
+        arg.y !== undefined &&
         typeof arg.y === 'number' &&
-        arg.interfaces &&
+        arg.interfaces !== undefined &&
         typeof arg.interfaces === 'object' &&
         Array.isArray(arg.interfaces) &&
         (arg.interfaces as any[]).map(isSavedInterface).reduce((prev, curr) => prev && curr)
