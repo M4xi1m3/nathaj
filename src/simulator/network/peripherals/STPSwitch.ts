@@ -28,10 +28,18 @@ export function isSavedSTPSwitch(arg: any): arg is SavedSTPSwitch {
 
 export interface SavedSTPInterface extends SavedInterface {
     disabled: boolean;
+    cost: number;
 }
 
 export function isSavedSTPInterface(arg: any): arg is SavedSTPInterface {
-    return arg && arg.disabled !== undefined && typeof arg.disabled === 'boolean' && isSavedInterface(arg);
+    return (
+        arg &&
+        arg.disabled !== undefined &&
+        typeof arg.disabled === 'boolean' &&
+        arg.cost !== undefined &&
+        typeof arg.cost === 'number' &&
+        isSavedInterface(arg)
+    );
 }
 
 /**
@@ -426,6 +434,7 @@ export class STPInterface extends Interface<STPSwitch> {
         return {
             name: this.getName(),
             disabled: this.state === PortState.Disabled,
+            cost: this.path_cost,
             ...(this.isConnected()
                 ? {
                       connected_to: {
@@ -435,6 +444,11 @@ export class STPInterface extends Interface<STPSwitch> {
                   }
                 : {}),
         };
+    }
+
+    public setCost(cost: number) {
+        this.path_cost = cost;
+        this.getOwner().portAssignation();
     }
 }
 
@@ -476,11 +490,11 @@ export class STPSwitch extends Switch<STPInterface> {
         this.initialize();
     }
 
-    public addInterface(name: string, disabled = false): STPInterface {
+    public addInterface(name: string, disabled = false, cost = 1): STPInterface {
         const intf = this.createInterface(name, STPInterface);
 
         const i = Math.max(0, ...Object.values(this.getInterfaces()).map((v) => v.id));
-        intf.initialize(i, 1, disabled);
+        intf.initialize(i, cost, disabled);
 
         return intf;
     }
@@ -491,7 +505,7 @@ export class STPSwitch extends Switch<STPInterface> {
     private initialize() {
         let i = 0;
         this.getInterfaces().forEach((intf) => {
-            intf.initialize(i, 1, intf.state === PortState.Disabled);
+            intf.initialize(i, intf.path_cost, intf.state === PortState.Disabled);
             i++;
         });
 
@@ -768,7 +782,7 @@ export class STPSwitch extends Switch<STPInterface> {
         host.setPosition(new Vector2D(data.x, data.y));
         host.identifier.priority = data.priority;
         data.interfaces.forEach((intf) => {
-            host.addInterface(intf.name, intf.disabled);
+            host.addInterface(intf.name, intf.disabled, intf.cost);
         });
     }
 }

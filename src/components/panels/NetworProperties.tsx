@@ -7,9 +7,10 @@ import { Host } from '../../simulator/network/peripherals/Host';
 import { Hub } from '../../simulator/network/peripherals/Hub';
 import { PortRole, PortState, STPInterface, STPSwitch } from '../../simulator/network/peripherals/STPSwitch';
 import { Switch } from '../../simulator/network/peripherals/Switch';
+import { IntProperty } from '../properties/IntProperty';
 import { MACProperty } from '../properties/MACProperty';
 import { InterfaceProperties, Properties } from '../properties/Properties';
-import { EditableProperty, Property } from '../properties/Property';
+import { Property } from '../properties/Property';
 
 export const NetowrkProperties: React.FC<{
     selected: string | null;
@@ -25,7 +26,6 @@ export const NetowrkProperties: React.FC<{
     // TODO: Envie de crever
     useEffect(() => {
         const handleChanged = () => {
-            console.log('changed');
             setChg(chg + 1);
         };
 
@@ -81,13 +81,12 @@ export const NetowrkProperties: React.FC<{
                             <Property label='Type' value='STP Switch' />
                             <Property label='Name' value={dev.getName()} />
                             <MACProperty dev={dev} />
-                            <EditableProperty
+                            <IntProperty
                                 label='Priority'
-                                value={dev.getPriority().toString()}
-                                setValue={(v) => (dev as STPSwitch).setPriority(parseInt(v))}
-                                validator={(value) => {
-                                    return !isNaN(parseInt(value)) && parseInt(value) >= 0 && parseInt(value) < 65536;
-                                }}
+                                value={dev.getPriority()}
+                                setValue={(v) => (dev as STPSwitch).setPriority(v)}
+                                min={0}
+                                max={65536}
                             />
                         </Properties>
                         <InterfaceProperties
@@ -96,19 +95,25 @@ export const NetowrkProperties: React.FC<{
                                 <>
                                     <Property label='Role' value={PortRole[intf.role]} />
                                     <Property label='State' value={PortState[intf.state]} />
+                                    <IntProperty
+                                        label='Cost'
+                                        value={intf.path_cost}
+                                        setValue={(v) => intf.setCost(v)}
+                                        min={0}
+                                    />
                                 </>
                             )}
                             actions={(intf: STPInterface) =>
                                 intf.state === PortState.Disabled ? (
                                     <Tooltip title='Enable'>
                                         <IconButton onClick={() => intf.enable()}>
-                                            <ToggleOff color='primary' sx={{ fontSize: '0.75em' }} />
+                                            <ToggleOff color='error' sx={{ fontSize: '0.75em' }} />
                                         </IconButton>
                                     </Tooltip>
                                 ) : (
                                     <Tooltip title='Disable'>
                                         <IconButton onClick={() => intf.disable()}>
-                                            <ToggleOn color='error' sx={{ fontSize: '0.75em' }} />
+                                            <ToggleOn color='primary' sx={{ fontSize: '0.75em' }} />
                                         </IconButton>
                                     </Tooltip>
                                 )
