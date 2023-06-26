@@ -6,6 +6,7 @@ import { SnackbarProvider } from 'notistack';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import './assets/index.d';
 import { Theme } from './components/Theme';
 import './index.css';
 import { NetworkContext } from './NetworkContext';
