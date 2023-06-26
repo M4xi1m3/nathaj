@@ -15,7 +15,7 @@ build:
     - yarn typedoc
   artifacts:
     paths:
-      - build/
+      - dist/
       - docs/
   cache:
     key:
@@ -30,7 +30,7 @@ test:
   before_script:
     - yarn install --frozen-lockfile
   script:
-    - yarn test --ci --coverage --detectOpenHandles --forceExit --watchAll=false --all
+    - yarn test --coverage
   cache:
     key:
       files:
@@ -38,6 +38,11 @@ test:
     paths:
       - node_modules/
   coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/clover.xml
 
 pages:
   image: alpine:latest
@@ -45,7 +50,7 @@ pages:
   variables:
     GIT_STRATEGY: none
   script:
-    - mv build public
+    - mv dist public
     - mv docs public/docs
   artifacts:
     paths:
