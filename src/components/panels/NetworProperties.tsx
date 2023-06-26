@@ -8,6 +8,7 @@ import { Hub } from '../../simulator/network/peripherals/Hub';
 import { PortRole, PortState, STPInterface, STPSwitch } from '../../simulator/network/peripherals/STPSwitch';
 import { Switch } from '../../simulator/network/peripherals/Switch';
 import { IntProperty } from '../properties/IntProperty';
+import { MACAddressTableProperty } from '../properties/MACAddressTableProperty';
 import { MACProperty } from '../properties/MACProperty';
 import { InterfaceProperties, Properties } from '../properties/Properties';
 import { Property } from '../properties/Property';
@@ -89,6 +90,7 @@ export const NetowrkProperties: React.FC<{
                                 max={65536}
                             />
                         </Properties>
+                        <MACAddressTableProperty dev={dev} />
                         <InterfaceProperties
                             dev={dev}
                             properties={(intf: STPInterface) => (
@@ -127,6 +129,7 @@ export const NetowrkProperties: React.FC<{
                             <Property label='Name' value={dev.getName()} />
                             <MACProperty dev={dev} />
                         </Properties>
+                        <MACAddressTableProperty dev={dev} />
                         <InterfaceProperties dev={dev} />
                     </>
                 ) : dev instanceof Hub ? (

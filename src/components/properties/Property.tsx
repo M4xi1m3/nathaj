@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
-const PropCell = styled(TableCell)<TableCellProps>(() => ({
+export const PropCell = styled(TableCell)<TableCellProps>(() => ({
     '&.MuiTableCell-root': {
         padding: '0 8px',
         fontSize: '0.75em',
@@ -21,7 +21,7 @@ const PropCell = styled(TableCell)<TableCellProps>(() => ({
     },
 }));
 
-const PropValue = styled(TableCell)<TableCellProps>(() => ({
+export const PropValue = styled(TableCell)<TableCellProps>(() => ({
     '&.MuiTableCell-root': {
         padding: '0 8px',
         fontFamily: 'Roboto Mono',
