@@ -109,13 +109,13 @@ export const NetowrkProperties: React.FC<{
                                 intf.state === PortState.Disabled ? (
                                     <Tooltip title='Enable'>
                                         <IconButton onClick={() => intf.enable()}>
-                                            <ToggleOff color='error' sx={{ fontSize: '0.75em' }} />
+                                            <ToggleOff color='error' sx={{ fontSize: '16px' }} />
                                         </IconButton>
                                     </Tooltip>
                                 ) : (
                                     <Tooltip title='Disable'>
                                         <IconButton onClick={() => intf.disable()}>
-                                            <ToggleOn color='primary' sx={{ fontSize: '0.75em' }} />
+                                            <ToggleOn color='primary' sx={{ fontSize: '16px' }} />
                                         </IconButton>
                                     </Tooltip>
                                 )

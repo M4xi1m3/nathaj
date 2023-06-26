@@ -14,7 +14,7 @@ export const MACAddressTableProperty: React.FC<{ dev: Switch }> = ({ dev }) => {
                 </Typography>
                 <Tooltip title='Clear'>
                     <IconButton onClick={() => dev.clearMacAddressTable()}>
-                        <Delete color='error' sx={{ fontSize: '0.75em' }} />
+                        <Delete color='error' sx={{ fontSize: '16px' }} />
                     </IconButton>
                 </Tooltip>
             </PropAccordionSummary>
