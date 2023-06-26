@@ -11,11 +11,15 @@ import { Canvas } from '../Canvas';
 /**
  * Network renderer component
  */
-export const NetworkRenderer: React.FC = () => {
+export const NetworkRenderer: React.FC<{
+    setSelected: (name: string | null) => void;
+    selected: string | null;
+}> = ({ setSelected, selected }) => {
     const network = useContext(NetworkContext);
 
     const { enqueueSnackbar } = useSnackbar();
 
+    const [moved, setMoved] = useState(false);
     const [dragging, setDragging] = useState(false);
     const [panning, setPanning] = useState(false);
     const [offset, setOffset] = useState(new Vector2D());
@@ -113,6 +117,7 @@ export const NetworkRenderer: React.FC = () => {
                                 e.pageY - e.currentTarget.getBoundingClientRect().top
                             ).div(scale)
                         );
+                        setMoved(false);
 
                         // Handle adding or removing links
                         if (addingLink || removingLink) {
@@ -122,8 +127,13 @@ export const NetworkRenderer: React.FC = () => {
                                         setSelectedDev1(dev.getName());
                                     } else {
                                         try {
-                                            if (addingLink) network.addLink(selectedDev1, dev.getName());
-                                            else if (removingLink) network.removeLink(selectedDev1, dev.getName());
+                                            if (addingLink) {
+                                                network.addLink(selectedDev1, dev.getName());
+                                                enqueueSnackbar('Link added');
+                                            } else if (removingLink) {
+                                                network.removeLink(selectedDev1, dev.getName());
+                                                enqueueSnackbar('Link removed');
+                                            }
                                         } catch (e: any) {
                                             enqueueSnackbar((e as Error).message, { variant: 'error' });
                                         }
@@ -140,6 +150,9 @@ export const NetworkRenderer: React.FC = () => {
                                 if (dev.collision(mousePos.sub(offset).add(centerOffset))) {
                                     try {
                                         network.removeDevice(dev.getName());
+                                        e.currentTarget.style.cursor = 'default';
+                                        if (dev.getName() === selected) setSelected(null);
+                                        enqueueSnackbar('Device ' + dev.getName() + ' removed');
                                     } catch (e: any) {
                                         enqueueSnackbar((e as Error).message, { variant: 'error' });
                                     }
@@ -167,6 +180,13 @@ export const NetworkRenderer: React.FC = () => {
                             .div(2)
                             .div(scale);
 
+                        if (dragging && dragged !== null && !moved) {
+                            setSelected(dragged);
+                            setDragging(false);
+                            setDragged(null);
+                            return;
+                        }
+
                         setMousePos(
                             new Vector2D(
                                 e.pageX - e.currentTarget.getBoundingClientRect().left,
@@ -178,7 +198,7 @@ export const NetworkRenderer: React.FC = () => {
                             e.currentTarget.style.cursor = 'pointer';
                             network.getDevice(dragged).setPosition(mousePos.sub(offset.add(centerOffset)));
                         } else if (panning) {
-                            e.currentTarget.style.cursor = 'pointer';
+                            e.currentTarget.style.cursor = 'default';
                         }
 
                         setPanning(false);
@@ -195,6 +215,7 @@ export const NetworkRenderer: React.FC = () => {
                                 e.pageY - e.currentTarget.getBoundingClientRect().top
                             ).div(scale)
                         );
+                        setMoved(true);
 
                         if (dragging && dragged !== null) {
                             // Drag a device

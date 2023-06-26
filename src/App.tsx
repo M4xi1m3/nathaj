@@ -26,6 +26,8 @@ const App: React.FC = () => {
     const [viewProperties, setViewProperties] = useState<boolean>(true);
     const [viewAnalyzer, setViewAnalyzer] = useState<boolean>(true);
 
+    const [selected, setSelected] = useState<string | null>(null);
+
     const noPanel = !(viewNetwork || viewProperties || viewAnalyzer);
 
     const net = useContext(NetworkContext);
@@ -68,6 +70,7 @@ const App: React.FC = () => {
                                                     const dec = new TextDecoder('utf-8');
                                                     try {
                                                         net.load(JSON.parse(dec.decode(buffer)));
+                                                        setSelected(null);
                                                     } catch (e: any) {
                                                         enqueueSnackbar((e as Error).message, {
                                                             variant: 'error',
@@ -130,7 +133,12 @@ const App: React.FC = () => {
                             ]}
                         />
 
-                        <RemoveDeviceDialog opened={removeDeviceOpened} close={() => setRemoveDeviceOpened(false)} />
+                        <RemoveDeviceDialog
+                            opened={removeDeviceOpened}
+                            close={() => setRemoveDeviceOpened(false)}
+                            selected={selected}
+                            setSelected={setSelected}
+                        />
                         <RemoveLinkDialog opened={removeLinkOpened} close={() => setRemoveLinkOpened(false)} />
 
                         <ActionMenu
@@ -162,12 +170,12 @@ const App: React.FC = () => {
                 {!noPanel ? (
                     <PanelGroup direction='vertical'>
                         {viewProperties || viewNetwork ? (
-                            <Panel defaultSize={50} style={{ display: 'flex' }}>
+                            <Panel defaultSize={50} style={{ display: 'flex' }} order={1}>
                                 <PanelGroup direction='horizontal'>
                                     {viewProperties ? (
-                                        <Panel style={{ display: 'flex' }}>
-                                            <Paper sx={{ flexGrow: 1, margin: 1 }}>
-                                                <NetowrkProperties />
+                                        <Panel style={{ display: 'flex' }} order={1}>
+                                            <Paper sx={{ flexGrow: 1, margin: 1, width: '100%', overflowX: 'auto' }}>
+                                                <NetowrkProperties selected={selected} />
                                             </Paper>
                                         </Panel>
                                     ) : (
@@ -175,9 +183,9 @@ const App: React.FC = () => {
                                     )}
                                     {viewProperties && viewNetwork ? <VerticalDivider /> : <></>}
                                     {viewNetwork ? (
-                                        <Panel defaultSize={75} style={{ display: 'flex' }}>
+                                        <Panel defaultSize={75} style={{ display: 'flex' }} order={2}>
                                             <Paper sx={{ flexGrow: 1, margin: 1 }}>
-                                                <NetworkRenderer />
+                                                <NetworkRenderer setSelected={setSelected} selected={selected} />
                                             </Paper>
                                         </Panel>
                                     ) : (
@@ -190,7 +198,7 @@ const App: React.FC = () => {
                         )}
                         {(viewProperties || viewNetwork) && viewAnalyzer ? <HorizontalDivider /> : <></>}
                         {viewAnalyzer ? (
-                            <Panel style={{ display: 'flex' }}>
+                            <Panel style={{ display: 'flex' }} order={2}>
                                 <Paper sx={{ flexGrow: 1, maxWidth: '100%', overflowX: 'auto', margin: 1 }}>
                                     <NetworkAnalyzer />
                                 </Paper>

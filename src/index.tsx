@@ -17,6 +17,8 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 const net = new Network();
 
+(window as any)['net'] = net;
+
 new STPSwitch(net, 's1', '00:0b:00:00:00:01', 4);
 new STPSwitch(net, 's2', '00:0b:00:00:00:02', 5);
 

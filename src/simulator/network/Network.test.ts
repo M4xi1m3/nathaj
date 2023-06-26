@@ -52,7 +52,7 @@ it('add device', () => {
 it('remove device', () => {
     const net = new Network();
     const h1 = new Host(net, 'h1', '00:0a:00:00:00:01');
-    new Host(net, 'h2', '00:0a:00:00:02');
+    new Host(net, 'h2', '00:0a:00:00:00:02');
 
     net.addLink('h1', 'h2');
 

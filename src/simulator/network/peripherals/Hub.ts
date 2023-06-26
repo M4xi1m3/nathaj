@@ -17,7 +17,7 @@ export function isSavedHub(arg: any): arg is SavedDevice {
  * Upon receiving a packet on one of its interface, a hub
  * re-transmits it, untouched, on all of its other interfaces
  */
-export class Hub extends Device {
+export class Hub<T extends Interface = Interface> extends Device<T> {
     constructor(network: Network, name: string, ports: number) {
         super(network, name);
         for (let i = 0; i < ports; i++) this.addInterface('eth' + i);

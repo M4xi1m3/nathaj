@@ -51,10 +51,10 @@ export class DeviceRemoved extends DeviceException {
     }
 }
 
-export interface SavedDevice {
+export interface SavedDevice<T extends SavedInterface = SavedInterface> {
     type: string;
     name: string;
-    interfaces: SavedInterface[];
+    interfaces: T[];
     x: number;
     y: number;
 }
@@ -62,15 +62,15 @@ export interface SavedDevice {
 export function isSavedDevice(arg: any): arg is SavedDevice {
     return (
         arg &&
-        arg.type &&
+        arg.type !== undefined &&
         typeof arg.type === 'string' &&
-        arg.name &&
+        arg.name !== undefined &&
         typeof arg.name === 'string' &&
-        arg.x &&
+        arg.x !== undefined &&
         typeof arg.x === 'number' &&
-        arg.y &&
+        arg.y !== undefined &&
         typeof arg.y === 'number' &&
-        arg.interfaces &&
+        arg.interfaces !== undefined &&
         typeof arg.interfaces === 'object' &&
         Array.isArray(arg.interfaces) &&
         (arg.interfaces as any[]).map(isSavedInterface).reduce((prev, curr) => prev && curr)
@@ -80,11 +80,11 @@ export function isSavedDevice(arg: any): arg is SavedDevice {
 /**
  * A device in the network simulation
  */
-export abstract class Device extends Drawable {
+export abstract class Device<T extends Interface = Interface> extends Drawable implements EventTarget {
     /**
      * Ijnterfaces of the device, indexed by name
      */
-    private interfaces: { [id: string]: Interface };
+    private interfaces: { [id: string]: T };
 
     /**
      * Network the device is associated with
@@ -97,13 +97,19 @@ export abstract class Device extends Drawable {
     private name: string;
 
     /**
+     * Event target of the device
+     */
+    event_target: EventTarget;
+
+    /**
      * Initialize a device
      *
      * @param {Network} network Network to which the device belongs
-     * @param [string="unknown"] name Name of the device in the network
+     * @param {string} [name='unknown'] Name of the device in the network
      */
     public constructor(network: Network, name = 'unknown') {
         super();
+        this.event_target = new EventTarget();
         this.interfaces = {};
         this.name = name;
         this.network = network;
@@ -129,7 +135,7 @@ export abstract class Device extends Drawable {
      * @param {Interface} iface Interfave on whick the packet has been received
      * @param {ArrayBuffer} data Data in the packet
      */
-    public abstract onPacketReceived(iface: Interface, data: ArrayBuffer): void;
+    public abstract onPacketReceived(iface: T, data: ArrayBuffer): void;
 
     /**
      * Method called every network tick
@@ -141,21 +147,28 @@ export abstract class Device extends Drawable {
      */
     public abstract reset(): void;
 
+    protected createInterface<U extends Device = Device>(name: string, ctor: { new (dev: U, name: string): T }): T {
+        if (name in this.interfaces) throw new InterfaceNameTaken(this, name);
+
+        const intf: T = new ctor(this as unknown as U, name);
+        intf.addEventListener('receivedata', ((e: CustomEvent<ReceivedPacketEventData>) => {
+            this.onPacketReceived(intf, e.detail.packet);
+        }) as EventListenerOrEventListenerObject);
+        this.interfaces[intf.getName()] = intf;
+
+        this.changed();
+
+        return intf as T;
+    }
+
     /**
      * Add an interface to the device
      *
      * @param {string} name Name of the interface
      * @returns {Interface} The new interface
      */
-    public addInterface(name: string): Interface {
-        if (name in this.interfaces) throw new InterfaceNameTaken(this, name);
-
-        const intf: Interface = new Interface(this, name);
-        intf.addEventListener('receivedata', ((e: CustomEvent<ReceivedPacketEventData>) => {
-            this.onPacketReceived(intf, e.detail.packet);
-        }) as EventListenerOrEventListenerObject);
-        this.interfaces[intf.getName()] = intf;
-        return intf;
+    public addInterface(name: string): T {
+        return this.createInterface(name, Interface as new (dev: Device<Interface>, name: string) => T);
     }
 
     public removeAllInterfaces(): void {
@@ -177,6 +190,8 @@ export abstract class Device extends Drawable {
 
         delete intf['owner'];
         delete this.interfaces[name];
+
+        this.changed();
     }
 
     /**
@@ -185,7 +200,7 @@ export abstract class Device extends Drawable {
      * @param {string} name Name of the interface to get
      * @returns {Interface} The interface
      */
-    public getInterface(name: string): Interface {
+    public getInterface(name: string): T {
         return this.interfaces[name];
     }
 
@@ -204,7 +219,7 @@ export abstract class Device extends Drawable {
      *
      * @returns {Interface[]} List of interfaces
      */
-    public getInterfaces(): Interface[] {
+    public getInterfaces(): T[] {
         return Object.values(this.interfaces);
     }
 
@@ -213,7 +228,7 @@ export abstract class Device extends Drawable {
      *
      * @returns {Interface} Available interface, or undefined if no interfaces available
      */
-    public getFreeInterface(ignore?: string[]): Interface {
+    public getFreeInterface(ignore?: string[]): T {
         let intfs = this.getInterfaces();
         if (ignore !== undefined) {
             intfs = intfs.filter((intf) => ignore.indexOf(intf.getName()) === -1);
@@ -284,10 +299,37 @@ export abstract class Device extends Drawable {
         return this.getNetwork().time();
     }
 
+    public changed() {
+        this.dispatchEvent(new Event('changed'));
+    }
+
     /**
      * Serialize a device
      *
      * @return {SavedDevice} The serialized device
      */
     abstract save(): SavedDevice;
+
+    // TODO: Find a better way to make the class extend Drawable and also
+    // be an EventEmitter. This works but it is ugly.
+
+    addEventListener(
+        type: string,
+        callback: EventListenerOrEventListenerObject | null,
+        options?: boolean | AddEventListenerOptions | undefined
+    ): void {
+        this.event_target.addEventListener(type, callback, options);
+    }
+
+    dispatchEvent(event: Event): boolean {
+        return this.event_target.dispatchEvent(event);
+    }
+
+    removeEventListener(
+        type: string,
+        callback: EventListenerOrEventListenerObject | null,
+        options?: boolean | EventListenerOptions | undefined
+    ): void {
+        this.event_target.removeEventListener(type, callback, options);
+    }
 }

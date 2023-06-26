@@ -11,31 +11,31 @@ it('forwarding', () => {
     net['paused_at'] = 3;
     for (let i = 0; i < 10; i++) net.tick();
 
-    expect(sw1['port_infos']['eth0'].state).toEqual(PortState.Listening);
-    expect(sw1['port_infos']['eth0'].role).toEqual(PortRole.Designated);
+    expect(sw1.getInterface('eth0').state).toEqual(PortState.Listening);
+    expect(sw1.getInterface('eth0').role).toEqual(PortRole.Designated);
 
-    expect(sw2['port_infos']['eth0'].state).toEqual(PortState.Listening);
-    expect(sw2['port_infos']['eth0'].role).toEqual(PortRole.Root);
+    expect(sw2.getInterface('eth0').state).toEqual(PortState.Listening);
+    expect(sw2.getInterface('eth0').role).toEqual(PortRole.Root);
 
     net['paused_at'] = 20;
 
     for (let i = 0; i < 10; i++) net.tick();
 
-    expect(sw1['port_infos']['eth0'].state).toEqual(PortState.Learning);
-    expect(sw1['port_infos']['eth0'].role).toEqual(PortRole.Designated);
+    expect(sw1.getInterface('eth0').state).toEqual(PortState.Learning);
+    expect(sw1.getInterface('eth0').role).toEqual(PortRole.Designated);
 
-    expect(sw2['port_infos']['eth0'].state).toEqual(PortState.Learning);
-    expect(sw2['port_infos']['eth0'].role).toEqual(PortRole.Root);
+    expect(sw2.getInterface('eth0').state).toEqual(PortState.Learning);
+    expect(sw2.getInterface('eth0').role).toEqual(PortRole.Root);
 
     net['paused_at'] = 40;
 
     for (let i = 0; i < 10; i++) net.tick();
 
-    expect(sw1['port_infos']['eth0'].state).toEqual(PortState.Forwarding);
-    expect(sw1['port_infos']['eth0'].role).toEqual(PortRole.Designated);
+    expect(sw1.getInterface('eth0').state).toEqual(PortState.Forwarding);
+    expect(sw1.getInterface('eth0').role).toEqual(PortRole.Designated);
 
-    expect(sw2['port_infos']['eth0'].state).toEqual(PortState.Forwarding);
-    expect(sw2['port_infos']['eth0'].role).toEqual(PortRole.Root);
+    expect(sw2.getInterface('eth0').state).toEqual(PortState.Forwarding);
+    expect(sw2.getInterface('eth0').role).toEqual(PortRole.Root);
 });
 
 it('root loop', () => {
@@ -47,10 +47,10 @@ it('root loop', () => {
     net['paused_at'] = 3;
     for (let i = 0; i < 10; i++) net.tick();
 
-    expect(sw1['port_infos']['eth0'].state).toEqual(PortState.Listening);
-    expect(sw1['port_infos']['eth0'].role).toEqual(PortRole.Designated);
-    expect(sw1['port_infos']['eth1'].state).toEqual(PortState.Blocking);
-    expect(sw1['port_infos']['eth1'].role).toEqual(PortRole.Blocking);
+    expect(sw1.getInterface('eth0').state).toEqual(PortState.Listening);
+    expect(sw1.getInterface('eth0').role).toEqual(PortRole.Designated);
+    expect(sw1.getInterface('eth1').state).toEqual(PortState.Blocking);
+    expect(sw1.getInterface('eth1').role).toEqual(PortRole.Blocking);
 });
 
 it('triangle', () => {
@@ -66,20 +66,20 @@ it('triangle', () => {
     net['paused_at'] = 3;
     for (let i = 0; i < 10; i++) net.tick();
 
-    expect(sw1['port_infos']['eth0'].state).toEqual(PortState.Listening);
-    expect(sw1['port_infos']['eth0'].role).toEqual(PortRole.Designated);
-    expect(sw1['port_infos']['eth1'].state).toEqual(PortState.Listening);
-    expect(sw1['port_infos']['eth1'].role).toEqual(PortRole.Designated);
+    expect(sw1.getInterface('eth0').state).toEqual(PortState.Listening);
+    expect(sw1.getInterface('eth0').role).toEqual(PortRole.Designated);
+    expect(sw1.getInterface('eth1').state).toEqual(PortState.Listening);
+    expect(sw1.getInterface('eth1').role).toEqual(PortRole.Designated);
 
-    expect(sw2['port_infos']['eth0'].state).toEqual(PortState.Listening);
-    expect(sw2['port_infos']['eth0'].role).toEqual(PortRole.Designated);
-    expect(sw2['port_infos']['eth1'].state).toEqual(PortState.Listening);
-    expect(sw2['port_infos']['eth1'].role).toEqual(PortRole.Root);
+    expect(sw2.getInterface('eth0').state).toEqual(PortState.Listening);
+    expect(sw2.getInterface('eth0').role).toEqual(PortRole.Designated);
+    expect(sw2.getInterface('eth1').state).toEqual(PortState.Listening);
+    expect(sw2.getInterface('eth1').role).toEqual(PortRole.Root);
 
-    expect(sw3['port_infos']['eth0'].state).toEqual(PortState.Listening);
-    expect(sw3['port_infos']['eth0'].role).toEqual(PortRole.Root);
-    expect(sw3['port_infos']['eth1'].state).toEqual(PortState.Blocking);
-    expect(sw3['port_infos']['eth1'].role).toEqual(PortRole.Blocking);
+    expect(sw3.getInterface('eth0').state).toEqual(PortState.Listening);
+    expect(sw3.getInterface('eth0').role).toEqual(PortRole.Root);
+    expect(sw3.getInterface('eth1').state).toEqual(PortState.Blocking);
+    expect(sw3.getInterface('eth1').role).toEqual(PortRole.Blocking);
 });
 
 /**
@@ -99,19 +99,28 @@ it('save', () => {
     expect(h1.save()).toStrictEqual({
         type: 'stp-switch',
         mac: '00:00:00:00:00:01',
+        priority: 32768,
         name: 'sw1',
         interfaces: [
             {
                 name: 'eth0',
+                cost: 1,
+                disabled: false,
             },
             {
                 name: 'eth1',
+                cost: 1,
+                disabled: false,
             },
             {
                 name: 'eth2',
+                cost: 1,
+                disabled: false,
             },
             {
                 name: 'eth3',
+                cost: 1,
+                disabled: false,
             },
         ],
         x: 0,

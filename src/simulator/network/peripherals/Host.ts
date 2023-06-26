@@ -1,4 +1,6 @@
 import { Vector2D } from '../../drawing/Vector2D';
+import { MACable } from '../mixins/MACable';
+import { applyMixins } from '../mixins/Mixins';
 import { Network } from '../Network';
 import { Device, isSavedDevice, SavedDevice } from './Device';
 import { Interface } from './Interface';
@@ -8,18 +10,15 @@ export interface SavedHost extends SavedDevice {
 }
 
 export function isSavedHost(arg: any): arg is SavedHost {
-    return arg && arg.mac && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'host';
+    return arg && arg.mac !== undefined && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'host';
 }
+
+export interface Host extends Device, MACable {}
 
 /**
  * Represents an host with a single interface in the network
  */
 export class Host extends Device {
-    /**
-     * MAC address of the host
-     */
-    private mac: string;
-
     /**
      * Create the host
      *
@@ -30,21 +29,12 @@ export class Host extends Device {
     constructor(network: Network, name: string, mac: string) {
         super(network, name);
         this.addInterface('eth0');
-        this.mac = mac.toLowerCase();
+        this.setMac(mac);
     }
 
     public onPacketReceived(iface: Interface, data: ArrayBuffer): void {
         iface;
         data;
-    }
-
-    /**
-     * Get the MAC address of the host
-     *
-     * @returns {string} MAC address of the host
-     */
-    public getMac(): string {
-        return this.mac;
     }
 
     public tick(): void {
@@ -86,3 +76,5 @@ export class Host extends Device {
         });
     }
 }
+
+applyMixins(Host, [MACable]);

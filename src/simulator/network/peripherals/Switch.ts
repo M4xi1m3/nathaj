@@ -1,21 +1,25 @@
 import SwitchImg from '../../../assets/switch.png';
 import { Vector2D } from '../../drawing/Vector2D';
+import { MACable } from '../mixins/MACable';
+import { applyMixins } from '../mixins/Mixins';
 import { Network } from '../Network';
 import { Ethernet } from '../packets/definitions/Ethernet';
 import { isSavedDevice, SavedDevice } from './Device';
 import { Hub } from './Hub';
-import { Interface } from './Interface';
+import { Interface, SavedInterface } from './Interface';
 
 const SwitchImage = new Image();
 SwitchImage.src = SwitchImg;
 
-export interface SavedSwitch extends SavedDevice {
+export interface SavedSwitch<T extends SavedInterface = SavedInterface> extends SavedDevice<T> {
     mac: string;
 }
 
 export function isSavedSwitch(arg: any): arg is SavedSwitch {
-    return arg && arg.mac && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'switch';
+    return arg && arg.mac !== undefined && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'switch';
 }
+
+export interface Switch<T extends Interface = Interface> extends Hub<T>, MACable<T> {}
 
 /**
  * Basic learning switch
@@ -25,16 +29,11 @@ export function isSavedSwitch(arg: any): arg is SavedSwitch {
  * the relation between mac address and interface to
  * only send the packet to the right interface
  */
-export class Switch extends Hub {
+export class Switch<T extends Interface = Interface> extends Hub<T> {
     /**
      * Dictionary storing the relations between mac addresses and interfaces
      */
     protected mac_address_table: { [mac: string]: string };
-
-    /**
-     * Mac address of the switch
-     */
-    private mac: string;
 
     /**
      * Create a switch
@@ -47,22 +46,17 @@ export class Switch extends Hub {
     constructor(network: Network, name: string, mac: string, ports: number) {
         super(network, name, ports);
         this.mac_address_table = {};
-        this.mac = mac.toLowerCase();
-    }
-
-    /**
-     * Get the MAC address of the switch
-     *
-     * @returns {string} MAC address of the switch
-     */
-    public getMac(): string {
-        return this.mac;
+        this.setMac(mac.toLowerCase());
     }
 
     onPacketReceived(iface: Interface, data: ArrayBuffer): void {
         const packet = new Ethernet(data);
 
-        this.mac_address_table[packet.src] = iface.getName();
+        if (this.mac_address_table[packet.src] !== iface.getName()) {
+            this.mac_address_table[packet.src] = iface.getName();
+            this.changed();
+        }
+
         if (packet.dst in this.mac_address_table) {
             this.getInterface(this.mac_address_table[packet.dst]).send(data);
         } else {
@@ -80,6 +74,23 @@ export class Switch extends Hub {
     reset(): void {
         super.reset();
         this.mac_address_table = {};
+    }
+
+    /**
+     * Get the mac address table as an array of mac <> interface association
+     *
+     * @returns Mac address table
+     */
+    getMacAddressTable(): [string, string][] {
+        return Object.entries(this.mac_address_table);
+    }
+
+    /**
+     * Clear the mac address table
+     */
+    clearMacAddressTable() {
+        this.mac_address_table = {};
+        this.changed();
     }
 
     public save(): SavedSwitch {
@@ -108,3 +119,5 @@ export class Switch extends Hub {
         });
     }
 }
+
+applyMixins(Switch, [MACable]);
