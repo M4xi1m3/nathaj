@@ -1,7 +1,6 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { useSnackbar } from 'notistack';
-import React, { useContext, useEffect, useState } from 'react';
-import { NetworkContext } from '../../NetworkContext';
+import React, { useEffect, useState } from 'react';
 import { Device } from '../../simulator/network/peripherals/Device';
 import { InterfaceNameInput } from '../fields/InterfaceNameInput';
 
@@ -12,8 +11,6 @@ interface AddInterfaceDialogProps {
 }
 
 export const AddInterfaceDialog: React.FC<AddInterfaceDialogProps> = ({ opened, close, device }) => {
-    const network = useContext(NetworkContext);
-
     const { enqueueSnackbar } = useSnackbar();
 
     const [name, setName] = useState<string>('');

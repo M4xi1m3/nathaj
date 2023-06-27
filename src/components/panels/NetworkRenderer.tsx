@@ -1,7 +1,7 @@
 import { AddLink, CenterFocusStrong, Hub, Label, LabelOff, LinkOff } from '@mui/icons-material';
 import { Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { useSnackbar } from 'notistack';
-import React, { useContext, useState } from 'react';
+import React, { Touch, useContext, useState } from 'react';
 import { CloseNetwork } from '../../icons/CloseNetwork';
 import { NetworkContext } from '../../NetworkContext';
 import { Layout } from '../../simulator/drawing/Layout';
@@ -27,6 +27,7 @@ export const NetworkRenderer: React.FC<{
     const [dragged, setDragged] = useState<string | null>(null);
 
     const [scale, setScale] = useState<number>(1);
+    const [startScale, setStartScale] = useState<number>(1);
 
     const [addingLink, setAddingLink] = useState<boolean>(false);
     const [removingLink, setRemovingLink] = useState<boolean>(false);
@@ -42,6 +43,40 @@ export const NetworkRenderer: React.FC<{
         setRemovingLink(false);
         setSelectedDev1(null);
     };
+
+    type SavedTouch = {
+        identifier: number;
+        pageX: number;
+        pageY: number;
+        startX: number;
+        startY: number;
+        previousX: number;
+        previousY: number;
+    };
+
+    const [touches, setTouches] = useState<SavedTouch[]>([]);
+
+    const startTouch = (e: Touch, r: DOMRect): SavedTouch => ({
+        identifier: e.identifier,
+        pageX: e.pageX - r.left,
+        pageY: e.pageY - r.top,
+        startX: e.pageX - r.left,
+        startY: e.pageY - r.top,
+        previousX: e.pageX - r.left,
+        previousY: e.pageY - r.top,
+    });
+
+    const moveTouch = (e: Touch, o: SavedTouch, r: DOMRect): SavedTouch => ({
+        identifier: e.identifier,
+        pageX: e.pageX - r.left,
+        pageY: e.pageY - r.top,
+        startX: o.startX,
+        startY: o.startY,
+        previousX: o.pageX,
+        previousY: o.pageY,
+    });
+
+    let tmpTouches: SavedTouch[] = touches;
 
     return (
         <Grid container direction='column' flexWrap='nowrap' sx={{ height: '100%' }}>
@@ -106,6 +141,187 @@ export const NetworkRenderer: React.FC<{
             {/* TODO: Find a way to do that without using calc with a fixed height */}
             <Grid item sx={{ height: 'calc(100% - 33px)' }}>
                 <Canvas
+                    onTouchStart={(e) => {
+                        e.preventDefault();
+
+                        // Add the new touch to the list of touches
+                        for (let i = 0; i < e.changedTouches.length; i++) {
+                            console.log(`start: ${i}`);
+                            tmpTouches = [
+                                ...tmpTouches,
+                                startTouch(e.changedTouches[i], e.currentTarget.getBoundingClientRect()),
+                            ];
+                        }
+                        setTouches(tmpTouches);
+
+                        if (tmpTouches.length === 1) {
+                            const pointer = tmpTouches[0];
+
+                            setMousePos(new Vector2D(pointer.pageX, pointer.pageY).div(scale));
+                            const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height)
+                                .mul(-0.5)
+                                .div(scale);
+
+                            const touch = tmpTouches[0];
+                            const page = new Vector2D(touch.pageX, touch.pageY).div(scale);
+                            // Handle dragging devices
+                            for (const dev of network.getDevices()) {
+                                if (dev.collision(page.sub(offset).add(centerOffset))) {
+                                    e.currentTarget.style.cursor = 'grab';
+                                    setDragging(true);
+                                    setDragged(dev.getName());
+                                    return;
+                                }
+                            }
+                        }
+                    }}
+                    onTouchMove={(e) => {
+                        e.preventDefault();
+                        const newTmpTouches: SavedTouch[] = [];
+                        for (let i = 0; i < e.touches.length; i++) {
+                            const touch = tmpTouches.find((t) => t.identifier === e.changedTouches[i].identifier);
+                            if (touch === undefined) continue;
+
+                            newTmpTouches.push(moveTouch(e.touches[i], touch, e.currentTarget.getBoundingClientRect()));
+                        }
+                        tmpTouches = newTmpTouches;
+                        setTouches(tmpTouches);
+
+                        if (tmpTouches.length === 1) {
+                            const pointer = tmpTouches[0];
+                            setMousePos(new Vector2D(pointer.pageX, pointer.pageY).div(scale));
+
+                            if (dragging && dragged !== null) {
+                                // Drag a device
+                                e.currentTarget.style.cursor = 'grab';
+                                network.getDevice(dragged).setPosition(
+                                    network
+                                        .getDevice(dragged)
+                                        .getPosition()
+                                        .add(
+                                            new Vector2D(
+                                                pointer.pageX - pointer.previousX,
+                                                pointer.pageY - pointer.previousY
+                                            ).div(scale)
+                                        )
+                                );
+                                return;
+                            }
+
+                            setOffset(
+                                offset.add(
+                                    new Vector2D(
+                                        pointer.pageX - pointer.previousX,
+                                        pointer.pageY - pointer.previousY
+                                    ).div(scale)
+                                )
+                            );
+                        }
+                        if (tmpTouches.length === 2) {
+                            const a = tmpTouches[0];
+                            const b = tmpTouches[1];
+                            const startDist = new Vector2D(a.startX, a.startY).dist(new Vector2D(b.startX, b.startY));
+                            const currentDist = new Vector2D(a.pageX, a.pageY).dist(new Vector2D(b.pageX, b.pageY));
+
+                            const diff = currentDist - startDist;
+                            let tmpScale = startScale + diff / 100;
+                            if (tmpScale < 0.1) tmpScale = 0.1;
+                            if (tmpScale > 4) tmpScale = 4;
+
+                            setScale(tmpScale);
+                        } else {
+                            setStartScale(scale);
+                        }
+                    }}
+                    onTouchEnd={(e) => {
+                        e.preventDefault();
+
+                        for (let i = 0; i < e.changedTouches.length; i++) {
+                            tmpTouches = tmpTouches.filter((t) => t.identifier !== e.changedTouches[i].identifier);
+                        }
+                        setTouches(tmpTouches);
+
+                        if (touches.length === 1) {
+                            const pointer = touches[0];
+
+                            const start = new Vector2D(pointer.startX, pointer.startY);
+                            const page = new Vector2D(pointer.pageX, pointer.pageY);
+
+                            if (dragging && dragged !== null) {
+                                setDragging(false);
+                                setDragged(null);
+                            }
+
+                            if (start.sqdist(page) < 100) {
+                                // We clicked on an element
+                                const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height)
+                                    .mul(-0.5)
+                                    .div(scale);
+
+                                // Handle adding or removing links
+                                if (addingLink || removingLink) {
+                                    for (const dev of network.getDevices()) {
+                                        if (dev.collision(page.div(scale).sub(offset).add(centerOffset))) {
+                                            if (selectedDev1 === null) {
+                                                setSelectedDev1(dev.getName());
+                                            } else {
+                                                try {
+                                                    if (addingLink) {
+                                                        network.addLink(selectedDev1, dev.getName());
+                                                        enqueueSnackbar('Link added');
+                                                    } else if (removingLink) {
+                                                        network.removeLink(selectedDev1, dev.getName());
+                                                        enqueueSnackbar('Link removed');
+                                                    }
+                                                } catch (e: any) {
+                                                    enqueueSnackbar((e as Error).message, { variant: 'error' });
+                                                }
+                                                allActionsOff();
+                                            }
+                                            return;
+                                        }
+                                    }
+                                }
+
+                                // Handle removing devices
+                                if (removingDevice) {
+                                    for (const dev of network.getDevices()) {
+                                        if (dev.collision(page.div(scale).sub(offset).add(centerOffset))) {
+                                            try {
+                                                network.removeDevice(dev.getName());
+                                                e.currentTarget.style.cursor = 'default';
+                                                if (dev.getName() === selected) setSelected(null);
+                                                enqueueSnackbar('Device ' + dev.getName() + ' removed');
+                                            } catch (e: any) {
+                                                enqueueSnackbar((e as Error).message, { variant: 'error' });
+                                            }
+                                            allActionsOff();
+                                            return;
+                                        }
+                                    }
+                                }
+
+                                // Handle selecting
+                                for (const dev of network.getDevices()) {
+                                    if (dev.collision(page.div(scale).sub(offset).add(centerOffset))) {
+                                        setSelected(dev.getName());
+                                        setDragging(false);
+                                        setDragged(null);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        if (tmpTouches.length !== 2) {
+                            setStartScale(scale);
+                        }
+                    }}
+                    onTouchCancel={(e) => {
+                        e.preventDefault();
+                        for (let i = 0; i < e.changedTouches.length; i++) {
+                            setTouches(touches.filter((t) => t.identifier !== e.changedTouches[i].identifier));
+                        }
+                    }}
                     onMouseDown={(e) => {
                         const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height)
                             .mul(-0.5)
