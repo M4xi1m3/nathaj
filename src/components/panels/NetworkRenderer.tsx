@@ -8,6 +8,7 @@ import { NetworkContext } from '../../NetworkContext';
 import { Layout } from '../../simulator/drawing/Layout';
 import { Vector2D } from '../../simulator/drawing/Vector2D';
 import { Canvas } from '../Canvas';
+import { AddMenu } from '../menus/AddMenu';
 
 /**
  * Network renderer component
@@ -93,6 +94,7 @@ export const NetworkRenderer: React.FC<{
                         </Typography>
                     </Stack>
                     <Stack direction='row'>
+                        <AddMenu icon />
                         <Tooltip title='Remove device'>
                             <IconButton
                                 size='small'
@@ -129,13 +131,13 @@ export const NetworkRenderer: React.FC<{
                                 <Hub />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title='Re-center view'>
+                        <Tooltip title='Center view'>
                             <IconButton onClick={() => setOffset(new Vector2D(0, 0))} size='small'>
                                 <CenterFocusStrong />
                             </IconButton>
                         </Tooltip>
                         <Divider orientation='vertical' />
-                        <Tooltip title={showLabel ? 'Hide labels' : 'Show labels'}>
+                        <Tooltip title='Toggle labels'>
                             <IconButton
                                 onClick={() => setShowLabel(!showLabel)}
                                 size='small'
@@ -144,7 +146,7 @@ export const NetworkRenderer: React.FC<{
                                 <Label />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={snapGrid ? 'Snap to grid' : 'Place freely'}>
+                        <Tooltip title='Toggle snap to grid'>
                             <IconButton
                                 onClick={() => setSnapGrid(!snapGrid)}
                                 size='small'
@@ -153,7 +155,7 @@ export const NetworkRenderer: React.FC<{
                                 <SnapToGrid />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={showGrid ? 'Hide grid' : 'Show grid'}>
+                        <Tooltip title='Toggle grid'>
                             <IconButton
                                 onClick={() => setShowGrid(!showGrid)}
                                 size='small'

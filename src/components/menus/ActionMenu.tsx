@@ -1,4 +1,4 @@
-import { Button, Divider, ListItemText, Menu, MenuItem } from '@mui/material';
+import { Button, Divider, IconButton, ListItemText, Menu, MenuItem, Tooltip } from '@mui/material';
 import { bindMenu, bindTrigger, usePopupState } from 'material-ui-popup-state/hooks';
 import React from 'react';
 
@@ -9,14 +9,28 @@ type ActionElement =
       }
     | 'separator';
 
-export const ActionMenu: React.FC<{ elements: ActionElement[]; title: string }> = ({ elements, title }) => {
+export const ActionMenu: React.FC<{
+    elements: ActionElement[];
+    title: string;
+    icon?: boolean;
+    iconElement?: React.ReactNode;
+    iconTooltip?: string;
+}> = ({ elements, title, icon, iconElement, iconTooltip }) => {
     const popupState = usePopupState({ variant: 'popover' });
 
     return (
         <>
-            <Button sx={{ color: 'white', display: 'block' }} {...bindTrigger(popupState)}>
-                {title}
-            </Button>
+            {icon && iconElement !== undefined && iconTooltip !== undefined ? (
+                <Tooltip title={iconTooltip}>
+                    <IconButton size='small' {...bindTrigger(popupState)}>
+                        {iconElement}
+                    </IconButton>
+                </Tooltip>
+            ) : (
+                <Button sx={{ color: 'white', display: 'block' }} {...bindTrigger(popupState)}>
+                    {title}
+                </Button>
+            )}
             <Menu MenuListProps={{ dense: true }} {...bindMenu(popupState)}>
                 {elements.map((element, key) => {
                     if (element === 'separator') {
