@@ -147,6 +147,20 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
      */
     public abstract reset(): void;
 
+    /**
+     * Get the type of the device
+     *
+     * @returns Type of the device
+     */
+    abstract getType(): string;
+
+    /**
+     * Serialize a device
+     *
+     * @return {SavedDevice} The serialized device
+     */
+    abstract save(): SavedDevice;
+
     protected createInterface<U extends Device = Device>(name: string, ctor: { new (dev: U, name: string): T }): T {
         if (name in this.interfaces) throw new InterfaceNameTaken(this, name);
 
@@ -299,16 +313,24 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
         return this.getNetwork().time();
     }
 
+    /**
+     * Dispatch the changed event on the device.
+     */
     public changed() {
         this.dispatchEvent(new Event('changed'));
     }
 
     /**
-     * Serialize a device
-     *
-     * @return {SavedDevice} The serialized device
+     * Dispatch the poschanged event on the device.
      */
-    abstract save(): SavedDevice;
+    public posChanged() {
+        this.dispatchEvent(new Event('poschanged'));
+    }
+
+    public setPosition(position: Vector2D) {
+        super.setPosition(position);
+        this.posChanged();
+    }
 
     // TODO: Find a better way to make the class extend Drawable and also
     // be an EventEmitter. This works but it is ugly.

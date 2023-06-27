@@ -46,6 +46,10 @@ export class Hub<T extends Interface = Interface> extends Device<T> {
         //
     }
 
+    public getType(): string {
+        return 'Hub';
+    }
+
     /**
      * Save a hub to an object
      *

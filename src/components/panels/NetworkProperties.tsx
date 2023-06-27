@@ -12,14 +12,13 @@ import { AddInterfaceDialog } from '../dialogs/AddInterfaceDialog';
 import { IntProperty } from '../properties/IntProperty';
 import { MACAddressTableProperty } from '../properties/MACAddressTableProperty';
 import { MACProperty } from '../properties/MACProperty';
-import { InterfaceProperties, Properties } from '../properties/Properties';
+import { DeviceProperties, InterfaceProperties, Properties } from '../properties/Properties';
 import { Property } from '../properties/Property';
 
 export const NetowrkProperties: React.FC<{
     selected: string | null;
 }> = ({ selected }) => {
     const network = useContext(NetworkContext);
-    const [chg, setChg] = useState(0);
     const [addInterfaceOpened, setAddInterfaceOpened] = useState(false);
 
     let dev: null | Device = null;
@@ -28,6 +27,7 @@ export const NetowrkProperties: React.FC<{
     }
 
     // TODO: Envie de crever
+    const [chg, setChg] = useState(0);
     useEffect(() => {
         const handleChanged = () => {
             setChg(chg + 1);
@@ -84,25 +84,25 @@ export const NetowrkProperties: React.FC<{
                     ) : dev instanceof Host ? (
                         <>
                             <Properties>
-                                <Property label='Type' value='Host' />
-                                <Property label='Name' value={dev.getName()} />
-                                <MACProperty dev={dev} />
+                                <DeviceProperties dev={dev}>
+                                    <MACProperty dev={dev} />
+                                </DeviceProperties>
                             </Properties>
                             <InterfaceProperties dev={dev} />
                         </>
                     ) : dev instanceof STPSwitch ? (
                         <>
                             <Properties>
-                                <Property label='Type' value='STP Switch' />
-                                <Property label='Name' value={dev.getName()} />
-                                <MACProperty dev={dev} />
-                                <IntProperty
-                                    label='Priority'
-                                    value={dev.getPriority()}
-                                    setValue={(v) => (dev as STPSwitch).setPriority(v)}
-                                    min={0}
-                                    max={65536}
-                                />
+                                <DeviceProperties dev={dev}>
+                                    <MACProperty dev={dev} />
+                                    <IntProperty
+                                        label='Priority'
+                                        value={dev.getPriority()}
+                                        setValue={(v) => (dev as STPSwitch).setPriority(v)}
+                                        min={0}
+                                        max={65536}
+                                    />
+                                </DeviceProperties>
                             </Properties>
                             <MACAddressTableProperty dev={dev} />
                             <InterfaceProperties
@@ -139,9 +139,9 @@ export const NetowrkProperties: React.FC<{
                     ) : dev instanceof Switch ? (
                         <>
                             <Properties>
-                                <Property label='Type' value='Switch' />
-                                <Property label='Name' value={dev.getName()} />
-                                <MACProperty dev={dev} />
+                                <DeviceProperties dev={dev}>
+                                    <MACProperty dev={dev} />
+                                </DeviceProperties>
                             </Properties>
                             <MACAddressTableProperty dev={dev} />
                             <InterfaceProperties dev={dev} />
@@ -149,16 +149,14 @@ export const NetowrkProperties: React.FC<{
                     ) : dev instanceof Hub ? (
                         <>
                             <Properties>
-                                <Property label='Type' value='Hub' />
-                                <Property label='Name' value={dev.getName()} />
+                                <DeviceProperties dev={dev} />
                             </Properties>
                             <InterfaceProperties dev={dev} />
                         </>
                     ) : (
                         <>
                             <Properties>
-                                <Property label='Type' value='Device' />
-                                <Property label='Name' value={dev.getName()} />
+                                <DeviceProperties dev={dev} />
                             </Properties>
                             <InterfaceProperties dev={dev} />
                         </>

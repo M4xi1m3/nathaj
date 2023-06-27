@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { RemoveDeviceDialog } from '../dialogs/RemoveDeviceDialog';
 import { RemoveLinkDialog } from '../dialogs/RemoveLinkDialog';
 import { ActionMenu } from './ActionMenu';

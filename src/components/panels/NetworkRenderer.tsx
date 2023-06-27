@@ -294,9 +294,11 @@ export const NetworkRenderer: React.FC<{
                                                 try {
                                                     if (addingLink) {
                                                         network.addLink(selectedDev1, dev.getName());
+                                                        setSelectedDev1(null);
                                                         enqueueSnackbar('Link added');
                                                     } else if (removingLink) {
                                                         network.removeLink(selectedDev1, dev.getName());
+                                                        setSelectedDev1(null);
                                                         enqueueSnackbar('Link removed');
                                                     }
                                                 } catch (e: any) {
@@ -369,9 +371,11 @@ export const NetworkRenderer: React.FC<{
                                         try {
                                             if (addingLink) {
                                                 network.addLink(selectedDev1, dev.getName());
+                                                setSelectedDev1(null);
                                                 enqueueSnackbar('Link added');
                                             } else if (removingLink) {
                                                 network.removeLink(selectedDev1, dev.getName());
+                                                setSelectedDev1(null);
                                                 enqueueSnackbar('Link removed');
                                             }
                                         } catch (e: any) {

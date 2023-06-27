@@ -45,6 +45,10 @@ export class Host extends Device {
         //
     }
 
+    public getType(): string {
+        return 'Host';
+    }
+
     /**
      * Save a host to an object
      *

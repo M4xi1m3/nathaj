@@ -1,5 +1,5 @@
 import { useSnackbar } from 'notistack';
-import { useContext, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { selectFile } from '../../hooks/selectFile';
 import { NetworkContext } from '../../NetworkContext';
 import { SaveDialog } from '../dialogs/SaveDialog';
@@ -8,7 +8,7 @@ import { ActionMenu } from './ActionMenu';
 export const FileMenu: React.FC<{
     selected: string | null;
     setSelected: (name: string | null) => void;
-}> = ({ selected, setSelected }) => {
+}> = ({ setSelected }) => {
     const [saveOpened, setSaveOpened] = useState<boolean>(false);
 
     const net = useContext(NetworkContext);

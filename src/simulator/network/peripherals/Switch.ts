@@ -104,6 +104,10 @@ export class Switch<T extends Interface = Interface> extends Hub<T> {
         };
     }
 
+    public getType(): string {
+        return 'Switch';
+    }
+
     /**
      * Load a switch from an object
      *

@@ -708,7 +708,7 @@ export class STPSwitch extends Switch<STPInterface> {
         }
 
         ctx.beginPath();
-        ctx.arc(intfPos.x, intfPos.y, 5, 0.25 * Math.PI, 1.25 * Math.PI);
+        ctx.arc(intfPos.x, intfPos.y, 5, 0.24 * Math.PI, 1.26 * Math.PI);
         ctx.fill();
 
         switch ((intf as STPInterface).state) {
@@ -766,6 +766,10 @@ export class STPSwitch extends Switch<STPInterface> {
 
     reset(): void {
         this.initialize();
+    }
+
+    public getType(): string {
+        return 'STP Switch';
     }
 
     public save(): SavedSTPSwitch {
