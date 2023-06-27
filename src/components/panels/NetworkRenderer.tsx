@@ -1,8 +1,9 @@
-import { AddLink, CenterFocusStrong, Hub, Label, LabelOff, LinkOff } from '@mui/icons-material';
+import { AddLink, CenterFocusStrong, GridOn, Hub, Label, LinkOff } from '@mui/icons-material';
 import { Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import React, { Touch, useContext, useState } from 'react';
 import { CloseNetwork } from '../../icons/CloseNetwork';
+import { SnapToGrid } from '../../icons/SnapToGrid';
 import { NetworkContext } from '../../NetworkContext';
 import { Layout } from '../../simulator/drawing/Layout';
 import { Vector2D } from '../../simulator/drawing/Vector2D';
@@ -36,6 +37,8 @@ export const NetworkRenderer: React.FC<{
     const [removingDevice, setRemovingDevice] = useState<boolean>(false);
 
     const [showLabel, setShowLabel] = useState(false);
+    const [showGrid, setShowGrid] = useState(false);
+    const [snapGrid, setSnapGrid] = useState(false);
 
     const allActionsOff = () => {
         setRemovingDevice(false);
@@ -77,6 +80,8 @@ export const NetworkRenderer: React.FC<{
     });
 
     let tmpTouches: SavedTouch[] = touches;
+
+    const GRID_SIZE = scale >= 1 ? 25 : scale >= 0.3 ? 50 : 100;
 
     return (
         <Grid container direction='column' flexWrap='nowrap' sx={{ height: '100%' }}>
@@ -120,7 +125,7 @@ export const NetworkRenderer: React.FC<{
                         </Tooltip>
                         <Divider orientation='vertical' />
                         <Tooltip title='Automatic layout'>
-                            <IconButton onClick={() => Layout.spring_layout(network)} size='small'>
+                            <IconButton onClick={() => Layout.spring_layout(network, GRID_SIZE, snapGrid)} size='small'>
                                 <Hub />
                             </IconButton>
                         </Tooltip>
@@ -129,9 +134,32 @@ export const NetworkRenderer: React.FC<{
                                 <CenterFocusStrong />
                             </IconButton>
                         </Tooltip>
+                        <Divider orientation='vertical' />
                         <Tooltip title={showLabel ? 'Hide labels' : 'Show labels'}>
-                            <IconButton onClick={() => setShowLabel(!showLabel)} size='small' edge='end'>
-                                {showLabel ? <Label /> : <LabelOff />}
+                            <IconButton
+                                onClick={() => setShowLabel(!showLabel)}
+                                size='small'
+                                edge='end'
+                                color={showLabel ? 'primary' : 'default'}>
+                                <Label />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={snapGrid ? 'Snap to grid' : 'Place freely'}>
+                            <IconButton
+                                onClick={() => setSnapGrid(!snapGrid)}
+                                size='small'
+                                edge='end'
+                                color={snapGrid ? 'primary' : 'default'}>
+                                <SnapToGrid />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={showGrid ? 'Hide grid' : 'Show grid'}>
+                            <IconButton
+                                onClick={() => setShowGrid(!showGrid)}
+                                size='small'
+                                edge='end'
+                                color={showGrid ? 'primary' : 'default'}>
+                                <GridOn />
                             </IconButton>
                         </Tooltip>
                     </Stack>
@@ -193,18 +221,14 @@ export const NetworkRenderer: React.FC<{
 
                             if (dragging && dragged !== null) {
                                 // Drag a device
+                                const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height)
+                                    .mul(-0.5)
+                                    .div(scale);
+
                                 e.currentTarget.style.cursor = 'grab';
-                                network.getDevice(dragged).setPosition(
-                                    network
-                                        .getDevice(dragged)
-                                        .getPosition()
-                                        .add(
-                                            new Vector2D(
-                                                pointer.pageX - pointer.previousX,
-                                                pointer.pageY - pointer.previousY
-                                            ).div(scale)
-                                        )
-                                );
+                                network
+                                    .getDevice(dragged)
+                                    .setPosition(mousePos.sub(offset).add(centerOffset).align(GRID_SIZE, snapGrid));
                                 return;
                             }
 
@@ -276,7 +300,6 @@ export const NetworkRenderer: React.FC<{
                                                 } catch (e: any) {
                                                     enqueueSnackbar((e as Error).message, { variant: 'error' });
                                                 }
-                                                allActionsOff();
                                             }
                                             return;
                                         }
@@ -295,7 +318,6 @@ export const NetworkRenderer: React.FC<{
                                             } catch (e: any) {
                                                 enqueueSnackbar((e as Error).message, { variant: 'error' });
                                             }
-                                            allActionsOff();
                                             return;
                                         }
                                     }
@@ -353,7 +375,6 @@ export const NetworkRenderer: React.FC<{
                                         } catch (e: any) {
                                             enqueueSnackbar((e as Error).message, { variant: 'error' });
                                         }
-                                        allActionsOff();
                                     }
                                     return;
                                 }
@@ -372,7 +393,6 @@ export const NetworkRenderer: React.FC<{
                                     } catch (e: any) {
                                         enqueueSnackbar((e as Error).message, { variant: 'error' });
                                     }
-                                    allActionsOff();
                                     return;
                                 }
                             }
@@ -412,7 +432,9 @@ export const NetworkRenderer: React.FC<{
 
                         if (dragging && dragged !== null) {
                             e.currentTarget.style.cursor = 'pointer';
-                            network.getDevice(dragged).setPosition(mousePos.sub(offset.add(centerOffset)));
+                            network
+                                .getDevice(dragged)
+                                .setPosition(mousePos.sub(offset.add(centerOffset)).align(GRID_SIZE, snapGrid));
                         } else if (panning) {
                             e.currentTarget.style.cursor = 'default';
                         }
@@ -436,7 +458,9 @@ export const NetworkRenderer: React.FC<{
                         if (dragging && dragged !== null) {
                             // Drag a device
                             e.currentTarget.style.cursor = 'grab';
-                            network.getDevice(dragged).setPosition(mousePos.sub(offset.add(centerOffset)));
+                            network
+                                .getDevice(dragged)
+                                .setPosition(mousePos.sub(offset.add(centerOffset)).align(GRID_SIZE, snapGrid));
                         } else if (panning) {
                             // Pan the view
                             e.currentTarget.style.cursor = 'grab';
@@ -472,22 +496,57 @@ export const NetworkRenderer: React.FC<{
                          * @param {Vector2D} pos Screen-position
                          * @param {boolean} center Wether or not the text is centered arround the position
                          */
-                        const showText = (text: string, pos: Vector2D, center = false) => {
-                            const HEIGHT = 18;
-                            ctx.font = HEIGHT + 'px monospace';
+                        const showText = (
+                            text: string,
+                            pos: Vector2D,
+                            center = false,
+                            verticalCenter = false,
+                            height = 18
+                        ) => {
+                            ctx.font = height + 'px monospace';
                             const { width } = ctx.measureText(text);
                             ctx.fillStyle = '#000000AA';
                             const rectPos = pos.sub(new Vector2D(3 + (center ? width / 2 : 0), 0));
-                            ctx.fillRect(rectPos.x, rectPos.y, width + 6, HEIGHT + 3);
+                            ctx.fillRect(
+                                rectPos.x,
+                                rectPos.y - (verticalCenter ? height / 2 : 0),
+                                width + 6,
+                                height + 3
+                            );
                             ctx.fillStyle = '#FFFFFF';
-                            const textPos = pos.sub(new Vector2D(center ? width / 2 : 0, -HEIGHT));
-                            ctx.fillText(text, textPos.x, textPos.y);
+                            const textPos = pos.sub(new Vector2D(center ? width / 2 : 0, -height));
+                            ctx.fillText(text, textPos.x, textPos.y - (verticalCenter ? height / 2 : 0));
                         };
 
                         ctx.fillStyle = '#ffffff';
                         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
                         ctx.scale(scale, scale);
+
+                        ctx.fillStyle = '#000000';
+
+                        // Drazw the grid
+                        if (showGrid) {
+                            for (
+                                let i =
+                                    (offset.x % GRID_SIZE) +
+                                    centerOffset.x -
+                                    Math.ceil(centerOffset.x / GRID_SIZE) * GRID_SIZE;
+                                i < centerOffset.x * 2;
+                                i += GRID_SIZE
+                            ) {
+                                for (
+                                    let j =
+                                        (offset.y % GRID_SIZE) +
+                                        centerOffset.y -
+                                        Math.ceil(centerOffset.y / GRID_SIZE) * GRID_SIZE;
+                                    j < centerOffset.y * 2;
+                                    j += GRID_SIZE
+                                ) {
+                                    ctx.fillRect(i, j, 1, 1);
+                                }
+                            }
+                        }
 
                         // Draw the links between devices
                         for (const dev of network.getDevices()) {
@@ -535,14 +594,16 @@ export const NetworkRenderer: React.FC<{
                                     dev
                                         .getPosition()
                                         .add(offset.add(centerOffset))
-                                        .mul(scale)
-                                        .add(new Vector2D(0, -40)),
-                                    true
+                                        .add(new Vector2D(0, -24))
+                                        .mul(scale),
+                                    true,
+                                    true,
+                                    16
                                 );
                             } else {
                                 if (dev.collision(mousePos.sub(offset.add(centerOffset)))) {
                                     const text = dev.getText();
-                                    showText(text, mousePos.mul(scale).add(new Vector2D(0, -20)));
+                                    showText(text, mousePos.mul(scale).add(new Vector2D(0, -24)), true, false, 16);
                                 }
                             }
                             ctx.scale(scale, scale);

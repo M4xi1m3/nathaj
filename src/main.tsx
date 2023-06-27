@@ -10,7 +10,7 @@ import './assets/index.d';
 import { Theme } from './components/Theme';
 import './index.css';
 import { NetworkContext } from './NetworkContext';
-import { Layout } from './simulator/drawing/Layout';
+import { Vector2D } from './simulator/drawing/Vector2D';
 import { Network } from './simulator/network/Network';
 import { STPSwitch } from './simulator/network/peripherals/STPSwitch';
 
@@ -24,8 +24,8 @@ new STPSwitch(net, 's1', '00:0b:00:00:00:01', 4);
 new STPSwitch(net, 's2', '00:0b:00:00:00:02', 5);
 
 net.addLink('s1', 's2');
-
-Layout.spring_layout(net);
+net.getDevice('s1').setPosition(new Vector2D(0, 0));
+net.getDevice('s2').setPosition(new Vector2D(200, 0));
 
 root.render(
     <React.StrictMode>
