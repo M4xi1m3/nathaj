@@ -5,8 +5,8 @@ import { PortRole, PortState, STPSwitch } from './STPSwitch';
 describe('STP Switch', () => {
     it('forwarding', () => {
         const net = new Network();
-        const sw1 = new STPSwitch(net, 'sw1', '00:00:00:00:00:01', 3);
-        const sw2 = new STPSwitch(net, 'sw2', '00:00:00:00:00:02', 3);
+        const sw1 = new STPSwitch(net, 'sw1', 3, '00:00:00:00:00:01');
+        const sw2 = new STPSwitch(net, 'sw2', 3, '00:00:00:00:00:02');
 
         net.addLink('sw1', 'eth0', 'sw2', 'eth0');
 
@@ -42,7 +42,7 @@ describe('STP Switch', () => {
 
     it('root loop', () => {
         const net = new Network();
-        const sw1 = new STPSwitch(net, 'sw1', '00:00:00:00:00:01', 3);
+        const sw1 = new STPSwitch(net, 'sw1', 3, '00:00:00:00:00:01');
 
         net.addLink('sw1', 'eth0', 'sw1', 'eth1');
 
@@ -57,9 +57,9 @@ describe('STP Switch', () => {
 
     it('triangle', () => {
         const net = new Network();
-        const sw1 = new STPSwitch(net, 'sw1', '00:00:00:00:00:01', 3);
-        const sw2 = new STPSwitch(net, 'sw2', '00:00:00:00:00:02', 3);
-        const sw3 = new STPSwitch(net, 'sw3', '00:00:00:00:00:03', 3);
+        const sw1 = new STPSwitch(net, 'sw1', 3, '00:00:00:00:01:01');
+        const sw2 = new STPSwitch(net, 'sw2', 3, '00:00:00:00:02:01');
+        const sw3 = new STPSwitch(net, 'sw3', 3, '00:00:00:00:03:01');
 
         net.addLink('sw1', 'eth0', 'sw2', 'eth1');
         net.addLink('sw2', 'eth0', 'sw3', 'eth1');
@@ -84,42 +84,35 @@ describe('STP Switch', () => {
         expect(sw3.getInterface('eth1').role).toEqual(PortRole.Blocking);
     });
 
-    /**
-     * Test the getMac method
-     */
-    it('mac', () => {
-        const net = new Network();
-        const sw1 = new STPSwitch(net, 'sw1', '00:00:00:00:00:01', 4);
-
-        expect(sw1.getMac()).toEqual('00:00:00:00:00:01');
-    });
-
     it('save', () => {
         const net = new Network();
-        const h1 = new STPSwitch(net, 'sw1', '00:00:00:00:00:01', 4);
+        const h1 = new STPSwitch(net, 'sw1', 4, '00:00:00:00:00:01');
 
         expect(h1.save()).toStrictEqual({
             type: 'stp-switch',
-            mac: '00:00:00:00:00:01',
             priority: 32768,
             name: 'sw1',
             interfaces: [
                 {
+                    mac: '00:00:00:00:00:01',
                     name: 'eth0',
                     cost: 1,
                     disabled: false,
                 },
                 {
+                    mac: '00:00:00:00:00:02',
                     name: 'eth1',
                     cost: 1,
                     disabled: false,
                 },
                 {
+                    mac: '00:00:00:00:00:03',
                     name: 'eth2',
                     cost: 1,
                     disabled: false,
                 },
                 {
+                    mac: '00:00:00:00:00:04',
                     name: 'eth3',
                     cost: 1,
                     disabled: false,

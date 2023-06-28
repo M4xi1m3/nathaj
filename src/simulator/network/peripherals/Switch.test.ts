@@ -13,7 +13,7 @@ describe('Switch', () => {
         const h1 = new Host(net, 'h1', '00:00:00:00:00:01');
         const h2 = new Host(net, 'h2', '00:00:00:00:00:02');
         const h3 = new Host(net, 'h3', '00:00:00:00:00:03');
-        const sw1 = new Switch(net, 'sw1', '00:00:00:00:00:04', 3);
+        const sw1 = new Switch(net, 'sw1', 3, '00:00:00:00:00:04');
 
         net.addLink('sw1', 'h1');
         net.addLink('sw1', 'h2');
@@ -70,36 +70,29 @@ describe('Switch', () => {
         expect(Object.values(sw1['mac_address_table']).length).toEqual(0);
     });
 
-    /**
-     * Test the getMac method
-     */
-    it('mac', () => {
-        const net = new Network();
-        const sw1 = new Switch(net, 'sw1', '00:00:00:00:00:01', 4);
-
-        expect(sw1.getMac()).toEqual('00:00:00:00:00:01');
-    });
-
     it('save', () => {
         const net = new Network();
-        const h1 = new Switch(net, 'sw1', '00:00:00:00:00:01', 4);
+        const h1 = new Switch(net, 'sw1', 4, '00:00:00:00:00:01');
 
         expect(h1.save()).toStrictEqual({
             type: 'switch',
-            mac: '00:00:00:00:00:01',
             name: 'sw1',
             interfaces: [
                 {
                     name: 'eth0',
+                    mac: '00:00:00:00:00:01',
                 },
                 {
                     name: 'eth1',
+                    mac: '00:00:00:00:00:02',
                 },
                 {
                     name: 'eth2',
+                    mac: '00:00:00:00:00:03',
                 },
                 {
                     name: 'eth3',
+                    mac: '00:00:00:00:00:04',
                 },
             ],
             x: 0,

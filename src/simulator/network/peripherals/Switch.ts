@@ -1,25 +1,17 @@
 import SwitchImg from '../../../assets/switch.png';
 import { Vector2D } from '../../drawing/Vector2D';
-import { MACable } from '../mixins/MACable';
-import { applyMixins } from '../mixins/Mixins';
 import { Network } from '../Network';
 import { Ethernet } from '../packets/definitions/Ethernet';
 import { isSavedDevice, SavedDevice } from './Device';
 import { Hub } from './Hub';
-import { Interface, SavedInterface } from './Interface';
+import { Interface } from './Interface';
 
 const SwitchImage = new Image();
 SwitchImage.src = SwitchImg;
 
-export interface SavedSwitch<T extends SavedInterface = SavedInterface> extends SavedDevice<T> {
-    mac: string;
+export function isSavedSwitch(arg: any): arg is SavedDevice {
+    return arg && isSavedDevice(arg) && arg.type === 'switch';
 }
-
-export function isSavedSwitch(arg: any): arg is SavedSwitch {
-    return arg && arg.mac !== undefined && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'switch';
-}
-
-export interface Switch<T extends Interface = Interface> extends Hub<T>, MACable<T> {}
 
 /**
  * Basic learning switch
@@ -40,13 +32,12 @@ export class Switch<T extends Interface = Interface> extends Hub<T> {
      *
      * @param {Network} network Network to put the switch in
      * @param {string} name Name of the switch
-     * @param {string} mac MAC address of the switch
      * @param {number} ports Number of interfaces to create
+     * @param {string} base_mac MAC address of the switch
      */
-    constructor(network: Network, name: string, mac: string, ports: number) {
-        super(network, name, ports);
+    constructor(network: Network, name: string, ports?: number, base_mac?: string) {
+        super(network, name, ports, base_mac);
         this.mac_address_table = {};
-        this.setMac(mac.toLowerCase());
     }
 
     onPacketReceived(iface: Interface, data: ArrayBuffer): void {
@@ -93,10 +84,9 @@ export class Switch<T extends Interface = Interface> extends Hub<T> {
         this.changed();
     }
 
-    public save(): SavedSwitch {
+    public save(): SavedDevice {
         return {
             type: 'switch',
-            mac: this.getMac(),
             name: this.getName(),
             interfaces: this.getInterfaces().map((intf) => intf.save()),
             x: this.getPosition().x,
@@ -114,14 +104,12 @@ export class Switch<T extends Interface = Interface> extends Hub<T> {
      * @param {Network} net Network to load into
      * @param {SavedSwitch} data Data to load from
      */
-    public static load(net: Network, data: SavedSwitch) {
-        const host = new Switch(net, data.name, data.mac, 0);
+    public static load(net: Network, data: SavedDevice) {
+        const host = new Switch(net, data.name);
         host.removeAllInterfaces();
         host.setPosition(new Vector2D(data.x, data.y));
         data.interfaces.forEach((intf) => {
-            host.addInterface(intf.name);
+            host.addInterface(intf.name, intf.mac);
         });
     }
 }
-
-applyMixins(Switch, [MACable]);

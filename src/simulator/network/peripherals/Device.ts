@@ -82,7 +82,7 @@ export function isSavedDevice(arg: any): arg is SavedDevice {
  */
 export abstract class Device<T extends Interface = Interface> extends Drawable implements EventTarget {
     /**
-     * Ijnterfaces of the device, indexed by name
+     * Interfaces of the device, indexed by name
      */
     private interfaces: { [id: string]: T };
 
@@ -161,10 +161,14 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
      */
     abstract save(): SavedDevice;
 
-    protected createInterface<U extends Device = Device>(name: string, ctor: { new (dev: U, name: string): T }): T {
+    protected createInterface<U extends Device = Device>(
+        name: string,
+        mac: string,
+        ctor: { new (dev: U, name: string, mac: string): T }
+    ): T {
         if (name in this.interfaces) throw new InterfaceNameTaken(this, name);
 
-        const intf: T = new ctor(this as unknown as U, name);
+        const intf: T = new ctor(this as unknown as U, name, mac);
         intf.addEventListener('receivedata', ((e: CustomEvent<ReceivedPacketEventData>) => {
             this.onPacketReceived(intf, e.detail.packet);
         }) as EventListenerOrEventListenerObject);
@@ -181,8 +185,12 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
      * @param {string} name Name of the interface
      * @returns {Interface} The new interface
      */
-    public addInterface(name: string): T {
-        return this.createInterface(name, Interface as new (dev: Device<Interface>, name: string) => T);
+    public addInterface(name: string, mac: string): T {
+        return this.createInterface(
+            name,
+            mac,
+            Interface as unknown as new (dev: Device<Interface>, name: string, mac: string) => T
+        );
     }
 
     public removeAllInterfaces(): void {

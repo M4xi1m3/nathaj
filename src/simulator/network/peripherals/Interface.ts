@@ -68,8 +68,17 @@ export class DisconnectedException extends InterfaceException {
     }
 }
 
+const macRegexp = new RegExp('^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$');
+
+export class InvalidMACException extends Error {
+    constructor(mac: string) {
+        super('Invalid mac address ' + mac + '.');
+    }
+}
+
 export interface SavedInterface {
     name: string;
+    mac: string;
     connected_to?: {
         device: string;
         interface: string;
@@ -81,6 +90,8 @@ export function isSavedInterface(arg: any): arg is SavedInterface {
         arg &&
         arg.name !== undefined &&
         typeof arg.name === 'string' &&
+        arg.mac !== undefined &&
+        typeof arg.mac === 'string' &&
         (arg.connected_to !== undefined
             ? typeof arg.connected_to === 'object' &&
               arg.connected_to.device !== undefined &&
@@ -106,6 +117,11 @@ export class Interface<T extends Device = Device<any>> extends EventTarget {
     private owner?: T;
 
     /**
+     * MAC address of the interface
+     */
+    private mac = '';
+
+    /**
      * Interface to which the interface is connected
      */
     private connected_to: Interface | null;
@@ -121,12 +137,73 @@ export class Interface<T extends Device = Device<any>> extends EventTarget {
      * @param {Device} owner Owner of the interface
      * @param {string} name Name of the interface
      */
-    constructor(owner: T, name: string) {
+    constructor(owner: T, name: string, mac: string) {
         super();
         this.owner = owner;
         this.name = name;
+        this.setMac(mac);
         this.connected_to = null;
         this.receive_queue = [];
+    }
+
+    /**
+     * Get the MAC address of the host
+     *
+     * @returns {string} MAC address of the host
+     */
+    public getMac(): string {
+        return this.mac;
+    }
+
+    /**
+     * Set the MAC address of the host
+     *
+     * @param {string} mac New mac address
+     */
+    public setMac(mac: string) {
+        if (this.mac !== mac) {
+            if (macRegexp.test(mac) && (parseInt(mac.split(':')[0], 16) & 1) === 0) {
+                this.mac = mac;
+                this.getOwner().dispatchEvent(new Event('changed'));
+            } else {
+                throw new InvalidMACException(mac);
+            }
+        }
+    }
+
+    public static macToInt(mac: string): bigint {
+        if (macRegexp.test(mac)) {
+            const bytes = mac.split(':');
+            let out = 0n;
+
+            for (let i = 0; i < 6; i++) {
+                out |= BigInt(parseInt(bytes[i], 16)) << (40n - 8n * BigInt(i));
+            }
+
+            return out;
+        } else {
+            throw new InvalidMACException(mac);
+        }
+    }
+
+    public static intToMac(mac: bigint): string {
+        return mac
+            .toString(16)
+            .padStart(12, '0')
+            .match(/.{1,2}/g)
+            .join(':');
+    }
+
+    public static incrementMac(mac: string, toAdd: number = 1): string {
+        if (macRegexp.test(mac) && (parseInt(mac.split(':')[0], 16) & 1) === 0) {
+            let mac_num = Interface.macToInt(mac);
+            if (mac_num + BigInt(toAdd) > 0xffffffffffffn || mac_num + BigInt(toAdd) < 0) {
+                throw new InvalidMACException(mac + ' + ' + toAdd);
+            }
+            return Interface.intToMac(mac_num + BigInt(toAdd));
+        } else {
+            throw new InvalidMACException(mac);
+        }
     }
 
     /**
@@ -280,6 +357,7 @@ export class Interface<T extends Device = Device<any>> extends EventTarget {
     public save(): SavedInterface {
         return {
             name: this.getName(),
+            mac: this.getMac(),
             ...(this.isConnected()
                 ? {
                       connected_to: {

@@ -20,8 +20,8 @@ const net = new Network();
 
 (window as any)['net'] = net;
 
-new STPSwitch(net, 's1', '00:0b:00:00:00:01', 4);
-new STPSwitch(net, 's2', '00:0b:00:00:00:02', 5);
+new STPSwitch(net, 's1', 4, '00:0b:00:00:01:01');
+new STPSwitch(net, 's2', 5, '00:0b:00:00:02:01');
 
 net.addLink('s1', 's2');
 net.getDevice('s1').setPosition(new Vector2D(0, 0));

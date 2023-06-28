@@ -214,8 +214,10 @@ export class Network extends EventTarget {
         mac = mac.toLowerCase();
 
         for (const dev of this.getDevices()) {
-            if ('mac' in dev) {
-                if (mac === dev['mac']) return true;
+            for (const intf of dev.getInterfaces()) {
+                if (intf.getMac() === mac) {
+                    return true;
+                }
             }
         }
 

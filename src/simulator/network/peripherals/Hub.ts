@@ -18,9 +18,14 @@ export function isSavedHub(arg: any): arg is SavedDevice {
  * re-transmits it, untouched, on all of its other interfaces
  */
 export class Hub<T extends Interface = Interface> extends Device<T> {
-    constructor(network: Network, name: string, ports: number) {
+    constructor(network: Network, name: string, ports?: number, base_mac?: string) {
         super(network, name);
-        for (let i = 0; i < ports; i++) this.addInterface('eth' + i);
+
+        if (ports !== undefined && base_mac !== undefined) {
+            for (let i = 0; i < ports; i++) {
+                this.addInterface('eth' + i, Interface.incrementMac(base_mac, i));
+            }
+        }
     }
 
     onPacketReceived(iface: Interface, data: ArrayBuffer): void {
@@ -72,11 +77,11 @@ export class Hub<T extends Interface = Interface> extends Device<T> {
      * @param {SavedDevice} data Data to load from
      */
     public static load(net: Network, data: SavedDevice) {
-        const host = new Hub(net, data.name, 0);
+        const host = new Hub(net, data.name);
         host.removeAllInterfaces();
         host.setPosition(new Vector2D(data.x, data.y));
         data.interfaces.forEach((intf) => {
-            host.addInterface(intf.name);
+            host.addInterface(intf.name, intf.mac);
         });
     }
 }

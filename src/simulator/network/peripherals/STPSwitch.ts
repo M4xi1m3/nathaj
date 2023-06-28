@@ -3,22 +3,20 @@ import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
 import { BPDU as BPDUPacket } from '../packets/definitions/BPDU';
 import { Ethernet } from '../packets/definitions/Ethernet';
-import { isSavedDevice } from './Device';
+import { isSavedDevice, SavedDevice } from './Device';
 import { Interface, isSavedInterface, SavedInterface } from './Interface';
-import { SavedSwitch, Switch } from './Switch';
+import { Switch } from './Switch';
 
 const STPSwitchImage = new Image();
 STPSwitchImage.src = STPSwitchImg;
 
-export interface SavedSTPSwitch extends SavedSwitch<SavedSTPInterface> {
+export interface SavedSTPSwitch extends SavedDevice<SavedSTPInterface> {
     priority: number;
 }
 
 export function isSavedSTPSwitch(arg: any): arg is SavedSTPSwitch {
     return (
         arg &&
-        arg.mac !== undefined &&
-        typeof arg.mac === 'string' &&
         arg.priority !== undefined &&
         typeof arg.priority === 'number' &&
         isSavedDevice(arg) &&
@@ -435,6 +433,7 @@ export class STPInterface extends Interface<STPSwitch> {
             name: this.getName(),
             disabled: this.state === PortState.Disabled,
             cost: this.path_cost,
+            mac: this.getMac(),
             ...(this.isConnected()
                 ? {
                       connected_to: {
@@ -462,7 +461,7 @@ export class STPSwitch extends Switch<STPInterface> {
      * Switch identifier
      * @internal
      */
-    identifier: Identifier;
+    identifier: Identifier = new Identifier(32768, '00:00:00:00:00:00');
 
     private hello_timer_expiry = 0;
 
@@ -476,12 +475,12 @@ export class STPSwitch extends Switch<STPInterface> {
      *
      * @param {Network} network Network to put the switch in
      * @param {string} name Name of the switch
-     * @param {string} mac MAC address of the switch
      * @param {number} ports Number of interfaces to create
+     * @param {string} base_mac MAC address of the switch
      */
-    constructor(network: Network, name: string, mac: string, ports: number) {
-        super(network, name, mac, ports);
-        this.identifier = new Identifier(32768, mac);
+    constructor(network: Network, name: string, ports?: number, base_mac?: string) {
+        super(network, name, ports, base_mac);
+        this.identifier = new Identifier(32768, this.getBestMac());
 
         this.message_age = 20;
         this.forward_delay = 15;
@@ -490,13 +489,32 @@ export class STPSwitch extends Switch<STPInterface> {
         this.initialize();
     }
 
-    public addInterface(name: string, disabled = false, cost = 1): STPInterface {
-        const intf = this.createInterface(name, STPInterface);
+    private getBestMac() {
+        if (this.getInterfaces().length === 0) {
+            return '00:00:00:00:00:00';
+        } else {
+            return Interface.intToMac(
+                this.getInterfaces()
+                    .map((i) => Interface.macToInt(i.getMac()))
+                    .reduce((m, e) => (e < m ? e : m))
+            );
+        }
+    }
+
+    public addInterface(name: string, mac: string, disabled = false, cost = 1): STPInterface {
+        const intf = this.createInterface(name, mac, STPInterface);
 
         const i = Math.max(0, ...Object.values(this.getInterfaces()).map((v) => v.id));
         intf.initialize(i, cost, disabled);
 
+        if (this.identifier !== undefined) this.identifier.mac = this.getBestMac();
+
         return intf;
+    }
+
+    public removeInterface(name: string): void {
+        super.removeInterface(name);
+        this.identifier.mac = this.getBestMac();
     }
 
     /**
@@ -560,7 +578,7 @@ export class STPSwitch extends Switch<STPInterface> {
             port.id
         );
 
-        port.send(bpdu.toPacket(this.getMac()).raw());
+        port.send(bpdu.toPacket(port.getMac()).raw());
     }
 
     /**
@@ -775,7 +793,6 @@ export class STPSwitch extends Switch<STPInterface> {
     public save(): SavedSTPSwitch {
         return {
             type: 'stp-switch',
-            mac: this.getMac(),
             priority: this.getPriority(),
             name: this.getName(),
             interfaces: this.getInterfaces().map((intf) => intf.save()),
@@ -791,12 +808,12 @@ export class STPSwitch extends Switch<STPInterface> {
      * @param {SavedSwitch} data Data to load from
      */
     public static load(net: Network, data: SavedSTPSwitch) {
-        const host = new STPSwitch(net, data.name, data.mac, 0);
+        const host = new STPSwitch(net, data.name);
         host.removeAllInterfaces();
         host.setPosition(new Vector2D(data.x, data.y));
         host.identifier.priority = data.priority;
         data.interfaces.forEach((intf) => {
-            host.addInterface(intf.name, intf.disabled, intf.cost);
+            host.addInterface(intf.name, intf.mac, intf.disabled, intf.cost);
         });
     }
 }
