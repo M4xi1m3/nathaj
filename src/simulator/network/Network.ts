@@ -4,6 +4,7 @@ import { Hub, isSavedHub } from './peripherals/Hub';
 import { Interface, SavedInterface } from './peripherals/Interface';
 import { isSavedSTPSwitch, STPSwitch } from './peripherals/STPSwitch';
 import { isSavedSwitch, Switch } from './peripherals/Switch';
+import { Mac } from './utils/Mac';
 
 /**
  * Excpetion thrown for an error related to the network
@@ -211,15 +212,15 @@ export class Network extends EventTarget {
      * @param {number} range Span of the range of mac address to check
      * @returns {boolean} True if the MAC address is used, false otherwise
      */
-    public isMACUsed(mac: string, range: number = 0) {
+    public isMACUsed(mac: string, range = 0) {
         mac = mac.toLowerCase();
 
-        if (!Interface.isMacValid(mac)) return false;
+        if (!Mac.isValid(mac)) return false;
 
         for (const dev of this.getDevices()) {
             for (const intf of dev.getInterfaces()) {
                 for (let i = 0; i <= range; i++) {
-                    if (intf.getMac() === Interface.incrementMac(mac, i)) {
+                    if (intf.getMac() === Mac.increment(mac, i)) {
                         return true;
                     }
                 }

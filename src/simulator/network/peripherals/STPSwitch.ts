@@ -3,6 +3,7 @@ import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
 import { BPDU as BPDUPacket } from '../packets/definitions/BPDU';
 import { Ethernet } from '../packets/definitions/Ethernet';
+import { Mac } from '../utils/Mac';
 import { isSavedDevice, SavedDevice } from './Device';
 import { Interface, isSavedInterface, SavedInterface } from './Interface';
 import { Switch } from './Switch';
@@ -493,9 +494,9 @@ export class STPSwitch extends Switch<STPInterface> {
         if (this.getInterfaces().length === 0) {
             return '00:00:00:00:00:00';
         } else {
-            return Interface.intToMac(
+            return Mac.fromInt(
                 this.getInterfaces()
-                    .map((i) => Interface.macToInt(i.getMac()))
+                    .map((i) => Mac.toInt(i.getMac()))
                     .reduce((m, e) => (e < m ? e : m))
             );
         }
