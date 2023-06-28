@@ -26,12 +26,10 @@ export const AddSwitchDialog: React.FC<AddSwitchDialogProps> = ({ opened, close 
     const [macError, setMacError] = useState<boolean>(false);
 
     useEffect(() => {
-        setName('');
-        setNameError(true);
+        setName(Switch.getNextAvailableName(network));
         setPorts(4);
         setMac('');
-        setMacError(true);
-    }, [opened, setName, setNameError, setPorts, setMac, setMacError]);
+    }, [opened, setName, setPorts, setMac]);
 
     return (
         <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
@@ -46,7 +44,7 @@ export const AddSwitchDialog: React.FC<AddSwitchDialogProps> = ({ opened, close 
                 <Button
                     onClick={() => {
                         try {
-                            new Switch(network, name, mac, ports);
+                            new Switch(network, name, ports, mac);
                             enqueueSnackbar('Switch ' + name + ' added');
                         } catch (e: any) {
                             enqueueSnackbar((e as Error).message, { variant: 'error' });

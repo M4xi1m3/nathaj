@@ -1,19 +1,11 @@
 import { Vector2D } from '../../drawing/Vector2D';
-import { MACable } from '../mixins/MACable';
-import { applyMixins } from '../mixins/Mixins';
 import { Network } from '../Network';
 import { Device, isSavedDevice, SavedDevice } from './Device';
 import { Interface } from './Interface';
 
-export interface SavedHost extends SavedDevice {
-    mac: string;
+export function isSavedHost(arg: any): arg is SavedDevice {
+    return arg && isSavedDevice(arg) && arg.type === 'host';
 }
-
-export function isSavedHost(arg: any): arg is SavedHost {
-    return arg && arg.mac !== undefined && typeof arg.mac === 'string' && isSavedDevice(arg) && arg.type === 'host';
-}
-
-export interface Host extends Device, MACable {}
 
 /**
  * Represents an host with a single interface in the network
@@ -26,10 +18,9 @@ export class Host extends Device {
      * @param {string} name Name of the host
      * @param {string} mac Mac address of the host
      */
-    constructor(network: Network, name: string, mac: string) {
+    constructor(network: Network, name: string, mac?: string) {
         super(network, name);
-        this.addInterface('eth0');
-        this.setMac(mac);
+        if (mac !== undefined) this.addInterface('eth0', mac);
     }
 
     public onPacketReceived(iface: Interface, data: ArrayBuffer): void {
@@ -54,10 +45,9 @@ export class Host extends Device {
      *
      * @returns {SavedHost} Saved host
      */
-    public save(): SavedHost {
+    public save(): SavedDevice {
         return {
             type: 'host',
-            mac: this.getMac(),
             name: this.getName(),
             interfaces: this.getInterfaces().map((intf) => intf.save()),
             x: this.getPosition().x,
@@ -69,16 +59,18 @@ export class Host extends Device {
      * Load an host from an object
      *
      * @param {Network} net Network to load into
-     * @param {SavedHost} data Data to load from
+     * @param {SavedDevice} data Data to load from
      */
-    public static load(net: Network, data: SavedHost) {
-        const host = new Host(net, data.name, data.mac);
+    public static load(net: Network, data: SavedDevice) {
+        const host = new Host(net, data.name);
         host.removeAllInterfaces();
         host.setPosition(new Vector2D(data.x, data.y));
         data.interfaces.forEach((intf) => {
-            host.addInterface(intf.name);
+            host.addInterface(intf.name, intf.mac);
         });
     }
-}
 
-applyMixins(Host, [MACable]);
+    public static getDevNamePrefix(): string {
+        return 'h';
+    }
+}

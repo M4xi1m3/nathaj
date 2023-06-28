@@ -82,7 +82,7 @@ export function isSavedDevice(arg: any): arg is SavedDevice {
  */
 export abstract class Device<T extends Interface = Interface> extends Drawable implements EventTarget {
     /**
-     * Ijnterfaces of the device, indexed by name
+     * Interfaces of the device, indexed by name
      */
     private interfaces: { [id: string]: T };
 
@@ -130,6 +130,33 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
     }
 
     /**
+     * Generate the next mac address for an interface in the device.
+     *
+     * @returns {string} New mac address (or '' if no interfaces are in the device)
+     */
+    public generateNextMacAddress(): string {
+        if (this.getInterfaces().length === 0) return '';
+        return Interface.intToMac(
+            this.getInterfaces()
+                .map((i) => Interface.macToInt(i.getMac()))
+                .reduce((m, e) => (e > m ? e : m)) + 1n
+        );
+    }
+
+    /**
+     * Generate the next interface name for the device.
+     *
+     * @returns {string} Next intezrface name
+     */
+    public generateNextIntfName(): string {
+        for (let i = 0; ; i++) {
+            if (!this.hasInterface('eth' + i)) {
+                return 'eth' + i;
+            }
+        }
+    }
+
+    /**
      * Event handler called when a packet is received on an interface
      *
      * @param {Interface} iface Interfave on whick the packet has been received
@@ -161,10 +188,14 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
      */
     abstract save(): SavedDevice;
 
-    protected createInterface<U extends Device = Device>(name: string, ctor: { new (dev: U, name: string): T }): T {
+    protected createInterface<U extends Device = Device>(
+        name: string,
+        mac: string,
+        ctor: { new (dev: U, name: string, mac: string): T }
+    ): T {
         if (name in this.interfaces) throw new InterfaceNameTaken(this, name);
 
-        const intf: T = new ctor(this as unknown as U, name);
+        const intf: T = new ctor(this as unknown as U, name, mac);
         intf.addEventListener('receivedata', ((e: CustomEvent<ReceivedPacketEventData>) => {
             this.onPacketReceived(intf, e.detail.packet);
         }) as EventListenerOrEventListenerObject);
@@ -176,13 +207,39 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
     }
 
     /**
+     * Get device common name prefix
+     *
+     * @returns {string} Prefix
+     */
+    public static getDevNamePrefix(): string {
+        return 'dev';
+    }
+
+    /**
+     * Get the next available name for this type of device
+     *
+     * @return {string} Next available name
+     */
+    public static getNextAvailableName(net: Network): string {
+        for (let i = 0; ; i++) {
+            if (!net.hasDevice(this.getDevNamePrefix() + i)) {
+                return this.getDevNamePrefix() + i;
+            }
+        }
+    }
+
+    /**
      * Add an interface to the device
      *
      * @param {string} name Name of the interface
      * @returns {Interface} The new interface
      */
-    public addInterface(name: string): T {
-        return this.createInterface(name, Interface as new (dev: Device<Interface>, name: string) => T);
+    public addInterface(name: string, mac: string): T {
+        return this.createInterface(
+            name,
+            mac,
+            Interface as unknown as new (dev: Device<Interface>, name: string, mac: string) => T
+        );
     }
 
     public removeAllInterfaces(): void {

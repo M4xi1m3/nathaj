@@ -11,7 +11,6 @@ import { Switch } from '../../simulator/network/peripherals/Switch';
 import { AddInterfaceDialog } from '../dialogs/AddInterfaceDialog';
 import { IntProperty } from '../properties/IntProperty';
 import { MACAddressTableProperty } from '../properties/MACAddressTableProperty';
-import { MACProperty } from '../properties/MACProperty';
 import { DeviceProperties, InterfaceProperties, Properties } from '../properties/Properties';
 import { Property } from '../properties/Property';
 
@@ -84,9 +83,7 @@ export const NetowrkProperties: React.FC<{
                     ) : dev instanceof Host ? (
                         <>
                             <Properties>
-                                <DeviceProperties dev={dev}>
-                                    <MACProperty dev={dev} />
-                                </DeviceProperties>
+                                <DeviceProperties dev={dev} />
                             </Properties>
                             <InterfaceProperties dev={dev} />
                         </>
@@ -94,7 +91,6 @@ export const NetowrkProperties: React.FC<{
                         <>
                             <Properties>
                                 <DeviceProperties dev={dev}>
-                                    <MACProperty dev={dev} />
                                     <IntProperty
                                         label='Priority'
                                         value={dev.getPriority()}
@@ -139,9 +135,7 @@ export const NetowrkProperties: React.FC<{
                     ) : dev instanceof Switch ? (
                         <>
                             <Properties>
-                                <DeviceProperties dev={dev}>
-                                    <MACProperty dev={dev} />
-                                </DeviceProperties>
+                                <DeviceProperties dev={dev} />
                             </Properties>
                             <MACAddressTableProperty dev={dev} />
                             <InterfaceProperties dev={dev} />

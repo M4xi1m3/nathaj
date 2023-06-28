@@ -208,14 +208,21 @@ export class Network extends EventTarget {
      * Check if a device in the network is using a MAC address
      *
      * @param {string} mac MAC address to check for
+     * @param {number} range Span of the range of mac address to check
      * @returns {boolean} True if the MAC address is used, false otherwise
      */
-    public isMACUsed(mac: string) {
+    public isMACUsed(mac: string, range: number = 0) {
         mac = mac.toLowerCase();
 
+        if (!Interface.isMacValid(mac)) return false;
+
         for (const dev of this.getDevices()) {
-            if ('mac' in dev) {
-                if (mac === dev['mac']) return true;
+            for (const intf of dev.getInterfaces()) {
+                for (let i = 0; i <= range; i++) {
+                    if (intf.getMac() === Interface.incrementMac(mac, i)) {
+                        return true;
+                    }
+                }
             }
         }
 

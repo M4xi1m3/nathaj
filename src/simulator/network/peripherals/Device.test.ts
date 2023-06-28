@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Network } from '../Network';
 import { Device, InterfaceNameTaken, NoFreeInterfaces, SavedDevice } from './Device';
-import { Interface } from './Interface';
+import { Interface, InvalidMACException } from './Interface';
 
 describe('Device', () => {
     /**
@@ -27,6 +27,9 @@ describe('Device', () => {
                 y: 0,
             };
         }
+        public getType() {
+            return 'stub';
+        }
     }
 
     /**
@@ -35,8 +38,9 @@ describe('Device', () => {
     it('add interface', () => {
         const net = new Network();
         const dev = new StubDevice(net, 'd1');
-        expect(dev.addInterface('eth0')).toBeInstanceOf(Interface);
-        expect(() => dev.addInterface('eth0')).toThrowError(InterfaceNameTaken);
+        expect(dev.addInterface('eth0', '00:00:00:00:00:01')).toBeInstanceOf(Interface);
+        expect(() => dev.addInterface('eth0', '00:00:00:00:00:01')).toThrowError(InterfaceNameTaken);
+        expect(() => dev.addInterface('eth1', "W're no strangers to love")).toThrowError(InvalidMACException);
     });
 
     /**
@@ -45,8 +49,8 @@ describe('Device', () => {
     it('getters', () => {
         const net = new Network();
         const dev = new StubDevice(net, 'd1');
-        dev.addInterface('eth0');
-        dev.addInterface('eth1');
+        dev.addInterface('eth0', '00:00:00:00:00:01');
+        dev.addInterface('eth1', '00:00:00:00:00:02');
 
         expect(dev.getInterfaces().length).toEqual(2);
         expect(dev.getName()).toEqual('d1');
@@ -61,8 +65,8 @@ describe('Device', () => {
     it('get interface', () => {
         const net = new Network();
         const dev = new StubDevice(net, 'd1');
-        const eth0 = dev.addInterface('eth0');
-        dev.addInterface('eth1');
+        const eth0 = dev.addInterface('eth0', '00:00:00:00:00:01');
+        dev.addInterface('eth1', '00:00:00:00:00:02');
 
         expect(dev.hasInterface('eth0')).toEqual(true);
         expect(dev.getInterface('eth0')).toBe(eth0);
@@ -76,8 +80,8 @@ describe('Device', () => {
     it('get free interfaces', () => {
         const net = new Network();
         const dev = new StubDevice(net, 'd1');
-        const eth0 = dev.addInterface('eth0');
-        const eth1 = dev.addInterface('eth1');
+        const eth0 = dev.addInterface('eth0', '00:00:00:00:00:01');
+        const eth1 = dev.addInterface('eth1', '00:00:00:00:00:02');
 
         expect(dev.hasFreeInterface()).toEqual(true);
         expect(dev.getFreeInterface()).toBe(eth0);
@@ -95,8 +99,8 @@ describe('Device', () => {
     it('get free interfaces', () => {
         const net = new Network();
         const dev = new StubDevice(net, 'd1');
-        const eth0 = dev.addInterface('eth0');
-        const eth1 = dev.addInterface('eth1');
+        const eth0 = dev.addInterface('eth0', '00:00:00:00:00:01');
+        const eth1 = dev.addInterface('eth1', '00:00:00:00:00:02');
 
         expect(dev.hasConnectedInterface()).toEqual(false);
         eth0.connect(eth1);

@@ -34,6 +34,9 @@ describe('Network', () => {
                 y: 0,
             };
         }
+        public getType() {
+            return 'stub';
+        }
     }
 
     /**
@@ -96,10 +99,10 @@ describe('Network', () => {
      */
     it('add link', () => {
         const net = new Network();
-        const h1 = new Host(net, 'h1', '00:00:00:00:00:01');
-        h1.addInterface('eth1');
-        h1.addInterface('eth2');
-        const h2 = new Host(net, 'h2', '00:00:00:00:00:02');
+        const h1 = new Host(net, 'h1', '00:00:00:00:01:01');
+        h1.addInterface('eth1', '00:00:00:00:01:02');
+        h1.addInterface('eth2', '00:00:00:00:01:03');
+        const h2 = new Host(net, 'h2', '00:00:00:00:01:01');
 
         net.addLink('h1', 'h2');
         expect(h1.getInterface('eth0').getConnection()).toBe(h2.getInterface('eth0'));
@@ -119,12 +122,12 @@ describe('Network', () => {
      */
     it('remove link', () => {
         const net = new Network();
-        const h1 = new Host(net, 'h1', '00:00:00:00:00:01');
-        h1.addInterface('eth1');
-        const h2 = new Host(net, 'h2', '00:00:00:00:00:02');
-        h2.addInterface('eth1');
-        h2.addInterface('eth2');
-        const h3 = new Host(net, 'h3', '00:00:00:00:00:03');
+        const h1 = new Host(net, 'h1', '00:00:00:00:01:01');
+        h1.addInterface('eth1', '00:00:00:00:01:02');
+        const h2 = new Host(net, 'h2', '00:00:00:00:02:01');
+        h2.addInterface('eth1', '00:00:00:00:02:02');
+        h2.addInterface('eth2', '00:00:00:00:02:03');
+        const h3 = new Host(net, 'h3', '00:00:00:00:03:01');
 
         net.addLink('h1', 'eth0', 'h2', 'eth1');
         net.addLink('h1', 'eth1', 'h2', 'eth0');

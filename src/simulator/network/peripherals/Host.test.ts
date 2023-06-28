@@ -3,23 +3,16 @@ import { Network } from '../Network';
 import { Host } from './Host';
 
 describe('Host', () => {
-    it('mac', () => {
-        const net = new Network();
-        const h1 = new Host(net, 'h1', '00:00:00:00:00:01');
-
-        expect(h1.getMac()).toEqual('00:00:00:00:00:01');
-    });
-
     it('save', () => {
         const net = new Network();
         const h1 = new Host(net, 'h1', '00:00:00:00:00:01');
 
         expect(h1.save()).toStrictEqual({
             type: 'host',
-            mac: '00:00:00:00:00:01',
             name: 'h1',
             interfaces: [
                 {
+                    mac: '00:00:00:00:00:01',
                     name: 'eth0',
                 },
             ],
@@ -32,11 +25,11 @@ describe('Host', () => {
 
         expect(h1.save()).toStrictEqual({
             type: 'host',
-            mac: '00:00:00:00:00:01',
             name: 'h1',
             interfaces: [
                 {
                     name: 'eth0',
+                    mac: '00:00:00:00:00:01',
                     connected_to: {
                         device: 'h2',
                         interface: 'eth0',

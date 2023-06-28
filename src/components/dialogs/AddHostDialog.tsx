@@ -23,11 +23,9 @@ export const AddHostDialog: React.FC<AddHostDialogProps> = ({ opened, close }) =
     const [macError, setMacError] = useState<boolean>(false);
 
     useEffect(() => {
-        setName('');
+        setName(Host.getNextAvailableName(network));
         setMac('');
-        setNameError(true);
-        setMacError(true);
-    }, [opened, setName, setMac, setNameError, setMacError]);
+    }, [opened, setName, setMac]);
 
     return (
         <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
