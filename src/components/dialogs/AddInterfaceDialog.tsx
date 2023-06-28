@@ -21,7 +21,7 @@ export const AddInterfaceDialog: React.FC<AddInterfaceDialogProps> = ({ opened, 
     const [macError, setMacError] = useState<boolean>(false);
 
     useEffect(() => {
-        setName('');
+        setName(device === null ? '' : device.generateNextIntfName());
         setNameError(true);
         setMac(device === null ? '' : device.generateNextMacAddress());
     }, [opened, setName, setNameError, setMac, setMacError, device]);

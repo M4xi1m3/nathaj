@@ -144,6 +144,19 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
     }
 
     /**
+     * Generate the next interface name for the device.
+     *
+     * @returns {string} Next intezrface name
+     */
+    public generateNextIntfName(): string {
+        for (let i = 0; ; i++) {
+            if (!this.hasInterface('eth' + i)) {
+                return 'eth' + i;
+            }
+        }
+    }
+
+    /**
      * Event handler called when a packet is received on an interface
      *
      * @param {Interface} iface Interfave on whick the packet has been received
