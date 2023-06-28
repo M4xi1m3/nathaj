@@ -3,6 +3,7 @@ import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import { Device } from '../../simulator/network/peripherals/Device';
 import { InterfaceNameInput } from '../fields/InterfaceNameInput';
+import { MacInput } from '../fields/MacInput';
 
 interface AddInterfaceDialogProps {
     close: () => void;
@@ -16,10 +17,14 @@ export const AddInterfaceDialog: React.FC<AddInterfaceDialogProps> = ({ opened, 
     const [name, setName] = useState<string>('');
     const [nameError, setNameError] = useState<boolean>(false);
 
+    const [mac, setMac] = useState<string>('');
+    const [macError, setMacError] = useState<boolean>(false);
+
     useEffect(() => {
         setName('');
         setNameError(true);
-    }, [opened, setName, setNameError]);
+        setMac(device === null ? '' : device.generateNextMacAddress());
+    }, [opened, setName, setNameError, setMac, setMacError, device]);
 
     return (
         <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
@@ -32,20 +37,21 @@ export const AddInterfaceDialog: React.FC<AddInterfaceDialogProps> = ({ opened, 
                     nameError={nameError}
                     device={device}
                 />
+                <MacInput mac={mac} setMac={setMac} setMacError={setMacError} macError={macError} />
             </DialogContent>
             <DialogActions>
                 <Button onClick={() => close()}>Cancel</Button>
                 <Button
                     onClick={() => {
                         try {
-                            device.addInterface(name);
+                            device.addInterface(name, mac);
                             enqueueSnackbar('Interface ' + name + ' added');
                         } catch (e: any) {
                             enqueueSnackbar((e as Error).message, { variant: 'error' });
                         }
                         close();
                     }}
-                    disabled={nameError}>
+                    disabled={nameError || macError}>
                     Add
                 </Button>
             </DialogActions>

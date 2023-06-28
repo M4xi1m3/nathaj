@@ -1,5 +1,5 @@
 import { TextField } from '@mui/material';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { NetworkContext } from '../../NetworkContext';
 
 interface NameInputProps {
@@ -12,6 +12,10 @@ interface NameInputProps {
 export const NameInput: React.FC<NameInputProps> = ({ name, setName, setNameError, nameError }) => {
     const network = useContext(NetworkContext);
 
+    useEffect(() => {
+        setNameError(name === '' || network.hasDevice(name));
+    }, [setNameError, name, network]);
+
     return (
         <TextField
             variant='standard'
@@ -22,7 +26,6 @@ export const NameInput: React.FC<NameInputProps> = ({ name, setName, setNameErro
             value={name}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setName(event.target.value);
-                setNameError(event.target.value === '' || network.hasDevice(event.target.value));
             }}
             error={nameError}
         />

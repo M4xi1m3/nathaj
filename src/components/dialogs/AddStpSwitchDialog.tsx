@@ -26,12 +26,10 @@ export const AddStpSwitchDialog: React.FC<AddStpSwitchDialogProps> = ({ opened, 
     const [macError, setMacError] = useState<boolean>(false);
 
     useEffect(() => {
-        setName('');
-        setNameError(true);
+        setName(STPSwitch.getNextAvailableName(network));
         setPorts(4);
         setMac('');
-        setMacError(true);
-    }, [opened, setName, setNameError, setPorts, setMac, setMacError]);
+    }, [opened, setName, setPorts, setMac]);
 
     return (
         <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
@@ -46,7 +44,7 @@ export const AddStpSwitchDialog: React.FC<AddStpSwitchDialogProps> = ({ opened, 
                 <Button
                     onClick={() => {
                         try {
-                            new STPSwitch(network, name, mac, ports);
+                            new STPSwitch(network, name, ports, mac);
                             enqueueSnackbar('STP Switch ' + name + ' added');
                         } catch (e: any) {
                             enqueueSnackbar((e as Error).message, { variant: 'error' });

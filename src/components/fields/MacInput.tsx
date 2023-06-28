@@ -1,6 +1,6 @@
 import { Shuffle } from '@mui/icons-material';
 import { FormControl, FormHelperText, IconButton, Input, InputAdornment, InputLabel } from '@mui/material';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { NetworkContext } from '../../NetworkContext';
 
 const macRegexp = new RegExp('^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$');
@@ -28,6 +28,14 @@ export const MacInput: React.FC<MacInputProps> = ({ mac, setMac, setMacError, ma
         setMacError(false);
     };
 
+    useEffect(() => {
+        let macError = !macRegexp.test(mac);
+        if (!macError) {
+            macError = (parseInt(mac.split(':')[0], 16) & 1) !== 0;
+        }
+        setMacError(macError);
+    }, [mac, setMacError]);
+
     return (
         <FormControl fullWidth margin='dense' error={macError} variant='standard'>
             <InputLabel>MAC address</InputLabel>
@@ -36,11 +44,6 @@ export const MacInput: React.FC<MacInputProps> = ({ mac, setMac, setMacError, ma
                 value={mac}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     setMac(event.target.value);
-                    let macError = !macRegexp.test(event.target.value);
-                    if (!macError) {
-                        macError = (parseInt(event.target.value.split(':')[0], 16) & 1) !== 0;
-                    }
-                    setMacError(macError);
                 }}
                 endAdornment={
                     <InputAdornment position='end'>

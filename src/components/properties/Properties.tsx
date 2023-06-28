@@ -2,6 +2,7 @@ import { Delete } from '@mui/icons-material';
 import { IconButton, Table, TableBody, Tooltip, Typography } from '@mui/material';
 import React from 'react';
 import { Device } from '../../simulator/network/peripherals/Device';
+import { MACProperty } from './MACProperty';
 import { PosProperty } from './PosProperty';
 import { PropAccordion, PropAccordionDetails, PropAccordionSummary } from './PropAccordion';
 import { Property } from './Property';
@@ -49,6 +50,7 @@ export const InterfaceProperties: React.FC<{
                     <Table>
                         <TableBody>
                             <Property label='Name' value={intf.getFullName()} />
+                            <MACProperty intf={intf} />
                             <Property
                                 label='Connected to'
                                 value={intf.getConnection()?.getFullName() ?? 'Not connected'}
