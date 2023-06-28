@@ -1,3 +1,4 @@
+import { Buffers } from '../../utils/Buffers';
 import { Field } from '../Field';
 import { _Packet } from '../Packet';
 
@@ -22,7 +23,7 @@ export class MacField extends Field {
             dw.setUint8(k, parseInt(v, 16));
         });
 
-        return Field.concatenate(data, arr);
+        return Buffers.concatenate(data, arr);
     }
 
     repr(value: any): string {
