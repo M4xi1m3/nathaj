@@ -1,7 +1,7 @@
 import HubImg from '../../../assets/hub.png';
 import { Vector2D } from '../../drawing/Vector2D';
+import { Mac } from '../../utils/Mac';
 import { Network } from '../Network';
-import { Mac } from '../utils/Mac';
 import { Device, isSavedDevice, SavedDevice } from './Device';
 import { Interface } from './Interface';
 

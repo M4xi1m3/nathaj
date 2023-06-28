@@ -1,5 +1,5 @@
+import { Mac } from '../../utils/Mac';
 import { PacketEventData } from '../Network';
-import { Mac } from '../utils/Mac';
 import { Device } from './Device';
 
 /**

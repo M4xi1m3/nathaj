@@ -1,4 +1,4 @@
-import { Buffers } from '../../utils/Buffers';
+import { Buffers } from '../../../utils/Buffers';
 import { Field } from '../Field';
 import { _Packet } from '../Packet';
 

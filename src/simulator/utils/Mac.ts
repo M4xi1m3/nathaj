@@ -48,7 +48,7 @@ export class Mac {
      */
     public static fromBuffer(data: ArrayBuffer): string {
         if (data.byteLength < 6) {
-            throw new InvalidMACException('<ArrayBuffer (' + data.byteLength + ')>');
+            throw new RangeError();
         }
 
         const dw = new DataView(data);

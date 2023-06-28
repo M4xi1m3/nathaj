@@ -1,7 +1,7 @@
 import { Drawable } from '../../drawing/Drawable';
 import { Vector2D } from '../../drawing/Vector2D';
+import { Mac } from '../../utils/Mac';
 import { Network } from '../Network';
-import { Mac } from '../utils/Mac';
 import { Interface, isSavedInterface, ReceivedPacketEventData, SavedInterface } from './Interface';
 
 /**

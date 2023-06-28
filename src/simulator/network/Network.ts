@@ -1,10 +1,10 @@
+import { Mac } from '../utils/Mac';
 import { Device, isSavedDevice, SavedDevice } from './peripherals/Device';
 import { Host, isSavedHost } from './peripherals/Host';
 import { Hub, isSavedHub } from './peripherals/Hub';
 import { Interface, SavedInterface } from './peripherals/Interface';
 import { isSavedSTPSwitch, STPSwitch } from './peripherals/STPSwitch';
 import { isSavedSwitch, Switch } from './peripherals/Switch';
-import { Mac } from './utils/Mac';
 
 /**
  * Excpetion thrown for an error related to the network

@@ -1,5 +1,5 @@
-import { Buffers } from '../../utils/Buffers';
-import { Mac } from '../../utils/Mac';
+import { Buffers } from '../../../utils/Buffers';
+import { Mac } from '../../../utils/Mac';
 import { Field } from '../Field';
 import { _Packet } from '../Packet';
 

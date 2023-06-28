@@ -1,9 +1,9 @@
 import STPSwitchImg from '../../../assets/stp-switch.png';
 import { Vector2D } from '../../drawing/Vector2D';
+import { Mac } from '../../utils/Mac';
 import { Network } from '../Network';
 import { BPDU as BPDUPacket } from '../packets/definitions/BPDU';
 import { Ethernet } from '../packets/definitions/Ethernet';
-import { Mac } from '../utils/Mac';
 import { isSavedDevice, SavedDevice } from './Device';
 import { Interface, isSavedInterface, SavedInterface } from './Interface';
 import { Switch } from './Switch';
