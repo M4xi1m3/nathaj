@@ -194,9 +194,13 @@ export class Interface<T extends Device = Device<any>> extends EventTarget {
             .join(':');
     }
 
-    public static incrementMac(mac: string, toAdd: number = 1): string {
+    public static isMacValid(mac: string) {
+        return macRegexp.test(mac);
+    }
+
+    public static incrementMac(mac: string, toAdd = 1): string {
         if (macRegexp.test(mac) && (parseInt(mac.split(':')[0], 16) & 1) === 0) {
-            let mac_num = Interface.macToInt(mac);
+            const mac_num = Interface.macToInt(mac);
             if (mac_num + BigInt(toAdd) > 0xffffffffffffn || mac_num + BigInt(toAdd) < 0) {
                 throw new InvalidMACException(mac + ' + ' + toAdd);
             }

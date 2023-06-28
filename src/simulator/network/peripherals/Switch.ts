@@ -112,4 +112,8 @@ export class Switch<T extends Interface = Interface> extends Hub<T> {
             host.addInterface(intf.name, intf.mac);
         });
     }
+
+    public static getDevNamePrefix(): string {
+        return 'sw';
+    }
 }

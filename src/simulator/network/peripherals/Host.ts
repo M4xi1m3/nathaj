@@ -69,4 +69,8 @@ export class Host extends Device {
             host.addInterface(intf.name, intf.mac);
         });
     }
+
+    public static getDevNamePrefix(): string {
+        return 'h';
+    }
 }

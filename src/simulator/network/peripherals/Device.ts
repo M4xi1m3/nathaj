@@ -130,6 +130,20 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
     }
 
     /**
+     * Generate the next mac address for an interface in the device.
+     *
+     * @returns {string} New mac address (or '' if no interfaces are in the device)
+     */
+    public generateNextMacAddress(): string {
+        if (this.getInterfaces().length === 0) return '';
+        return Interface.intToMac(
+            this.getInterfaces()
+                .map((i) => Interface.macToInt(i.getMac()))
+                .reduce((m, e) => (e > m ? e : m)) + 1n
+        );
+    }
+
+    /**
      * Event handler called when a packet is received on an interface
      *
      * @param {Interface} iface Interfave on whick the packet has been received
@@ -177,6 +191,28 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
         this.changed();
 
         return intf as T;
+    }
+
+    /**
+     * Get device common name prefix
+     *
+     * @returns {string} Prefix
+     */
+    public static getDevNamePrefix(): string {
+        return 'dev';
+    }
+
+    /**
+     * Get the next available name for this type of device
+     *
+     * @return {string} Next available name
+     */
+    public static getNextAvailableName(net: Network): string {
+        for (let i = 0; ; i++) {
+            if (!net.hasDevice(this.getDevNamePrefix() + i)) {
+                return this.getDevNamePrefix() + i;
+            }
+        }
     }
 
     /**

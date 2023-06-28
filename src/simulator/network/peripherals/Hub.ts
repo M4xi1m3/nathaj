@@ -84,4 +84,8 @@ export class Hub<T extends Interface = Interface> extends Device<T> {
             host.addInterface(intf.name, intf.mac);
         });
     }
+
+    public static getDevNamePrefix(): string {
+        return 'hub';
+    }
 }
