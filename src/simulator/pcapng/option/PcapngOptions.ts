@@ -1,4 +1,4 @@
-import { Buffers } from '../../network/utils/Buffers';
+import { Buffers } from '../../utils/Buffers';
 import { PcapngOption } from './PcapngOption';
 
 export class PcapngOptions<T extends PcapngOption> extends Array<T> {

@@ -1,4 +1,4 @@
-import { Buffers } from '../../network/utils/Buffers';
+import { Buffers } from '../../utils/Buffers';
 import { OptComment } from '../option/opt/OptComment';
 import { PcapngOptions } from '../option/PcapngOptions';
 import { ShbHardware } from '../option/shb/ShbHardware';
@@ -6,8 +6,10 @@ import { ShbOS } from '../option/shb/ShbOS';
 import { ShbUserAppl } from '../option/shb/ShbUserAppl';
 import { PcapngBlock } from './PcapngBlock';
 
+export type HeaderOptions = ShbHardware | ShbOS | ShbUserAppl | OptComment;
+
 export class HeaderBlock extends PcapngBlock {
-    public readonly options = new PcapngOptions<ShbHardware | ShbOS | ShbUserAppl | OptComment>();
+    public readonly options = new PcapngOptions<HeaderOptions>();
 
     get type() {
         return 0x0a0d0d0a;

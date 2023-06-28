@@ -1,4 +1,4 @@
-import { Buffers } from '../../network/utils/Buffers';
+import { Buffers } from '../../utils/Buffers';
 
 export abstract class PcapngOption {
     abstract get code(): number;
@@ -8,8 +8,8 @@ export abstract class PcapngOption {
     public raw(): ArrayBuffer {
         const value = this.value;
 
-        let data = new ArrayBuffer(4);
-        let dw = new DataView(data);
+        const data = new ArrayBuffer(4);
+        const dw = new DataView(data);
 
         dw.setUint16(0, this.code);
         dw.setUint16(2, value.byteLength);

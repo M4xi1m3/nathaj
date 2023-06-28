@@ -1,4 +1,4 @@
-import { Buffers } from '../../network/utils/Buffers';
+import { Buffers } from '../../utils/Buffers';
 
 export abstract class PcapngBlock {
     abstract get type(): number;
@@ -10,8 +10,8 @@ export abstract class PcapngBlock {
      * @returns {ArrayBuffer} Block's raw data
      */
     public raw(): ArrayBuffer {
-        let startbuf = new ArrayBuffer(8);
-        let startdw = new DataView(startbuf);
+        const startbuf = new ArrayBuffer(8);
+        const startdw = new DataView(startbuf);
 
         let body = this.body;
         body = Buffers.concatenate(body, new ArrayBuffer((4 - (body.byteLength % 4)) % 4));
@@ -19,8 +19,8 @@ export abstract class PcapngBlock {
         startdw.setUint32(0, this.type);
         startdw.setUint32(4, body.byteLength + 12);
 
-        let endbuf = new ArrayBuffer(4);
-        let enddw = new DataView(endbuf);
+        const endbuf = new ArrayBuffer(4);
+        const enddw = new DataView(endbuf);
         enddw.setUint32(0, body.byteLength + 12);
 
         return Buffers.concatenate(startbuf, Buffers.concatenate(body, endbuf));
