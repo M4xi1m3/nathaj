@@ -7,7 +7,7 @@ describe('Signed short field', () => {
         const p: any = {};
         const d = new Uint8Array([0xff, 0xff]).buffer;
         const f = new SignedShortField('data');
-        f.parse(d, p as _Packet<{ data: number }>);
+        f.parse(d, 0, p as _Packet<{ data: number }>);
 
         expect(p['data']).toEqual(-1);
     });

@@ -8,7 +8,9 @@ describe('Ethernet', () => {
      */
     it('parse', () => {
         const data = new Uint8Array([
-            0x00, 0x0a, 0x00, 0x00, 0x00, 0x02, 0x00, 0x0a, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
+            0x00, 0x0a, 0x00, 0x00, 0x00, 0x02, 0x00, 0x0a, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 219, 6, 193, 92,
         ]);
 
         const packet = new Ethernet(data.buffer);
@@ -29,7 +31,9 @@ describe('Ethernet', () => {
         });
 
         const data = new Uint8Array([
-            0x00, 0x0a, 0x00, 0x00, 0x00, 0x02, 0x00, 0x0a, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
+            0x00, 0x0a, 0x00, 0x00, 0x00, 0x02, 0x00, 0x0a, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 219, 6, 193, 92,
         ]);
 
         expect(new Uint8Array(packet.raw())).toEqual(data);
@@ -40,7 +44,9 @@ describe('Ethernet', () => {
      */
     it('dissector', () => {
         const data = new Uint8Array([
-            0x00, 0x0a, 0x00, 0x00, 0x00, 0x02, 0x00, 0x0a, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
+            0x00, 0x0a, 0x00, 0x00, 0x00, 0x02, 0x00, 0x0a, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 219, 6, 193, 92,
         ]);
 
         const packet = new Ethernet(data.buffer);
@@ -55,8 +61,8 @@ describe('Ethernet', () => {
 
         expect(out.tree.items.length).toEqual(1);
         expect(out.tree.start).toEqual(0);
-        expect(out.tree.length).toEqual(14);
-        expect((out.tree.items[0] as AnalysisTree).items.length).toEqual(3);
+        expect(out.tree.length).toEqual(64);
+        expect((out.tree.items[0] as AnalysisTree).items.length).toEqual(5);
         expect((out.tree.items[0] as AnalysisTree).start).toEqual(0);
         expect((out.tree.items[0] as AnalysisTree).length).toEqual(14);
 

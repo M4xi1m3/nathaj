@@ -7,7 +7,7 @@ describe('Unsigned short field', () => {
         const p: any = {};
         const d = new Uint8Array([0, 5]).buffer;
         const f = new ShortField('data');
-        f.parse(d, p as _Packet<{ data: number }>);
+        f.parse(d, 0, p as _Packet<{ data: number }>);
 
         expect(p['data']).toEqual(5);
     });

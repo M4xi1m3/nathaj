@@ -7,7 +7,7 @@ describe('Mac address field', () => {
         const p: any = {};
         const d = new Uint8Array([0, 0x0a, 0, 0, 0, 1]).buffer;
         const f = new MacField('data');
-        f.parse(d, p as _Packet<{ data: number }>);
+        f.parse(d, 0, p as _Packet<{ data: number }>);
 
         expect(p['data']).toEqual('00:0a:00:00:00:01');
     });

@@ -7,7 +7,7 @@ import { _Packet } from '../Packet';
  * MAC address field
  */
 export class MacField extends Field {
-    parse(data: ArrayBuffer, packet: _Packet<any>): ArrayBuffer {
+    parse(data: ArrayBuffer, position: number, packet: _Packet<any>): ArrayBuffer {
         (packet as { [key: string]: any })[this.name] = Mac.fromBuffer(data);
         return data.slice(6);
     }

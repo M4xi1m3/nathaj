@@ -35,6 +35,10 @@ export class AnalysisItem {
     public bounds(): [number, number] {
         return [this.start, this.start + this.length - 1];
     }
+
+    public allBounds(): [number, number][] {
+        return [this.bounds()];
+    }
 }
 
 /**
@@ -102,6 +106,10 @@ export class AnalysisTree extends AnalysisItem {
         } else {
             return undefined;
         }
+    }
+
+    public allBounds(): [number, number][] {
+        return this.items.flatMap((item) => item.allBounds());
     }
 }
 
@@ -210,7 +218,12 @@ export class AnalyzedPacket {
 /**
  * Dissector function definition
  */
-export type Dissector<T> = (packet: _Packet<T> & T, analyzed: AnalyzedPacket) => void;
+export type Dissector<T> = (packet: _Packet<T> & T, analyzed: AnalyzedPacket) => AnalysisTree;
+
+/**
+ * Postdissector function definition
+ */
+export type PostDissector<T> = (packet: _Packet<T> & T, analyzed: AnalyzedPacket, tree: AnalysisTree) => void;
 
 /**
  * Packet class
@@ -224,12 +237,26 @@ export class _Packet<T> {
     /**
      * List of fields in the packet
      */
-    public static readonly fields: Field[];
+    public static readonly fields: Field[] = [];
+
+    /**
+     * List of fields at the end of the packet
+     */
+    public static readonly post_fields: Field[] = [];
 
     /**
      * Function used to dissect the packet
      */
-    public static readonly dissector: Dissector<any>;
+    public static readonly dissector: Dissector<any> = () => {
+        return undefined;
+    };
+
+    /**
+     * Function used to dissect the packet
+     */
+    public static readonly post_dissector: PostDissector<any> = () => {
+        //
+    };
 
     private next?: _Packet<any>;
 
@@ -264,12 +291,30 @@ export class _Packet<T> {
     }
 
     /**
+     * Get the post fields list
+     *
+     * @returns {Field[]} Packet's post field list
+     */
+    public getPostFields(): Field[] {
+        return (this.constructor as typeof _Packet).post_fields;
+    }
+
+    /**
      * Get the dissector
      *
      * @returns {Dissector} Packet's dissector
      */
     public getDissector(): Dissector<any> {
         return (this.constructor as typeof _Packet).dissector;
+    }
+
+    /**
+     * Get the post dissector
+     *
+     * @returns {PostDissector} Packet's post dissector
+     */
+    public getPostDissector(): PostDissector<any> {
+        return (this.constructor as typeof _Packet).post_dissector;
     }
 
     /**
@@ -288,14 +333,20 @@ export class _Packet<T> {
      * @returns {ArrayBuffer} Remaining data
      */
     public parse(data: ArrayBuffer): ArrayBuffer {
+        const length = data.byteLength;
+
         for (const field of this.getFields()) {
-            data = field.parse(data, this);
+            data = field.parse(data, length - data.byteLength, this);
         }
 
         const next = Layer.apply(this);
         if (next !== undefined) {
             this.next = new next();
             data = this.next.parse(data);
+        }
+
+        for (const post_field of this.getPostFields()) {
+            data = post_field.parse(data, length - data.byteLength, this);
         }
 
         return data;
@@ -308,11 +359,13 @@ export class _Packet<T> {
      * @returns {AnalyzedPacket} Dissected packet
      */
     public dissect(analyzed: AnalyzedPacket): AnalyzedPacket {
-        this.getDissector()(this, analyzed);
+        const tmp = this.getDissector()(this, analyzed);
 
         if (this.next !== undefined) {
             this.next.dissect(analyzed);
         }
+
+        this.getPostDissector()(this, analyzed, tmp);
 
         return analyzed;
     }
@@ -329,6 +382,10 @@ export class _Packet<T> {
         }
 
         if (this.next !== undefined) buffer = this.next.raw(buffer);
+
+        for (const post_field of this.getPostFields()) {
+            buffer = post_field.raw(buffer, this);
+        }
 
         return buffer;
     }

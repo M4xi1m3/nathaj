@@ -7,7 +7,7 @@ describe('Double field', () => {
         const p: any = {};
         const d = new Uint8Array([63, 224, 0, 0, 0, 0, 0, 0]).buffer;
         const f = new DoubleField('data');
-        f.parse(d, p as _Packet<{ data: number }>);
+        f.parse(d, 0, p as _Packet<{ data: number }>);
 
         expect(p['data']).toEqual(0.5);
     });

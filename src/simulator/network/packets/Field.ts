@@ -13,10 +13,11 @@ export abstract class Field {
      * Parse the field
      *
      * @param {ArrayBuffer} data Data to parse from
+     * @param {number} position Position in the packet
      * @param {_Packet} packet Packet to write the field to
      * @returns {ArrayBuffer} Remaining data
      */
-    abstract parse(data: ArrayBuffer, packet: _Packet<any>): ArrayBuffer;
+    abstract parse(data: ArrayBuffer, position: number, packet: _Packet<any>): ArrayBuffer;
 
     /**
      * Get the field as binary data

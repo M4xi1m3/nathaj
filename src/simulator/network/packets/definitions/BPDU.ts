@@ -3,7 +3,7 @@ import { IntField } from '../fields/IntField';
 import { MacField } from '../fields/MacField';
 import { ShortField } from '../fields/ShortField';
 import { Layer } from '../Layer';
-import { Dissector, Packet } from '../Packet';
+import { Dissector, Packet, PostDissector } from '../Packet';
 import { Ethernet } from './Ethernet';
 
 /**
@@ -56,6 +56,8 @@ export class BPDU extends Packet<BPDUFields> {
         new ShortField('bridge_port'),
     ];
 
+    static post_fields: Field[] = [];
+
     static dissector: Dissector<BPDUFields> = (packet, analyzed) => {
         analyzed.protocol = 'STP';
         analyzed.info =
@@ -84,6 +86,12 @@ export class BPDU extends Packet<BPDUFields> {
         bridge_id?.addItem('Priority: ' + packet.bridge_priority, 0, 2);
         bridge_id?.addItem('Address: ' + packet.bridge_mac, 2, 6);
         sub?.addItem('Port: ' + packet.bridge_port, 20, 2);
+
+        return sub;
+    };
+
+    static post_dissector: PostDissector<BPDUFields> = () => {
+        //
     };
 }
 
