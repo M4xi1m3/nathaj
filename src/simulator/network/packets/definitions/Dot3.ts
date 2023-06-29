@@ -1,16 +1,15 @@
 import { CRC32 } from '../../../utils/CRC32';
 import { Field } from '../Field';
 import { FCSField } from '../fields/FCSField';
+import { LenField } from '../fields/LenField';
 import { MacField } from '../fields/MacField';
 import { PaddingField } from '../fields/PaddingField';
-import { XShortField } from '../fields/XShortField';
 import { AnalysisItem, Dissector, Packet, PostDissector } from '../Packet';
-import { Dot3 } from './Dot3';
 
 /**
- * Fields used in an Ethernet packet
+ * Fields used in an Dot3 packet
  */
-export interface EthernetFields {
+export interface Dot3Fields {
     /**
      * Source MAC address
      */
@@ -22,9 +21,9 @@ export interface EthernetFields {
     dst: string;
 
     /**
-     * Protocol type
+     * Data length
      */
-    type: number;
+    length?: number;
 
     /**
      * Padding
@@ -38,28 +37,28 @@ export interface EthernetFields {
 }
 
 /**
- * Ethernet packet
+ * Dot3 packet
  */
-export class Ethernet extends Packet<EthernetFields> {
-    static proto = 'Ethernet II';
-    static fields: Field[] = [new MacField('dst'), new MacField('src'), new XShortField('type')];
+export class Dot3 extends Packet<Dot3Fields> {
+    static proto = 'IEEE 802.3 Ethernet';
+    static fields: Field[] = [new MacField('dst'), new MacField('src'), new LenField('length')];
     static post_fields: Field[] = [new PaddingField('padding', 60), new FCSField('fcs')];
 
-    static dissector: Dissector<EthernetFields> = (packet, analyzed) => {
+    static dissector: Dissector<Dot3Fields> = (packet, analyzed) => {
         analyzed.source = packet.src;
         analyzed.destination = packet.dst;
-        analyzed.protocol = Ethernet.fields[2].repr(packet.type);
-        analyzed.info = 'Ethernet II';
+        analyzed.protocol = 'IEEE 802.3';
+        analyzed.info = 'IEEE 802.3 Ethernet';
 
-        const sub = analyzed.tree.addSubTree('Ethernet II', 0, 14);
+        const sub = analyzed.tree.addSubTree('IEEE 802.3 Ethernet', 0, 14);
         sub?.addItem('Destionation: ' + packet.dst, 0, 6);
         sub?.addItem('Source: ' + packet.src, 6, 6);
-        sub?.addItem('Type: ' + Ethernet.fields[2].repr(packet.type), 12, 2);
+        sub?.addItem('Length: ' + Dot3.fields[2].repr(packet.length), 12, 2);
 
         return sub;
     };
 
-    static post_dissector: PostDissector<EthernetFields> = (packet, analyzed, tree) => {
+    static post_dissector: PostDissector<Dot3Fields> = (packet, analyzed, tree) => {
         const len = analyzed.data.byteLength;
 
         if (packet.padding.byteLength !== 0)
@@ -77,25 +76,10 @@ export class Ethernet extends Packet<EthernetFields> {
 
         tree.items.push(
             new AnalysisItem(
-                'FCS: ' + Ethernet.post_fields[1].repr(packet.fcs) + ' (' + (valid ? 'valid' : 'invalid') + ')',
+                'FCS: ' + Dot3.post_fields[1].repr(packet.fcs) + ' (' + (valid ? 'valid' : 'invalid') + ')',
                 len - 4,
                 4
             )
         );
     };
-
-    /**
-     * Parse a frame that is either Ethernet IEEE 802.3 or Ethernet II
-     * @param data
-     * @returns
-     */
-    public static ethernet(data: ArrayBuffer): Ethernet | Dot3 {
-        const dw = new DataView(data);
-        const length = dw.getUint16(12);
-        if (length < 1500) {
-            return new Dot3(data);
-        } else {
-            return new Ethernet(data);
-        }
-    }
 }

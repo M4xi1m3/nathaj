@@ -310,8 +310,7 @@ export const NetworkAnalyzer: React.FC = () => {
             e.detail.direction
         );
 
-        const p = new Ethernet();
-        p.parse(e.detail.packet);
+        const p = Ethernet.ethernet(e.detail.packet);
         p.dissect(packet);
         packetsTmp = [...packetsTmp, packet];
         setPackets([...packets, ...packetsTmp]);

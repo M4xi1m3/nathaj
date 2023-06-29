@@ -5,6 +5,7 @@ import { ShortField } from '../fields/ShortField';
 import { Layer } from '../Layer';
 import { Dissector, Packet, PostDissector } from '../Packet';
 import { Ethernet } from './Ethernet';
+import { LLC } from './LLC';
 
 /**
  * Fields used in a BPDU packet
@@ -96,3 +97,4 @@ export class BPDU extends Packet<BPDUFields> {
 }
 
 Layer.bind(Ethernet, BPDU, (p: Ethernet) => p.type === 0x8042);
+Layer.bind(LLC, BPDU, (p: LLC) => p.dsap === 0x42 && p.ssap === 0x42 && p.control === 3);

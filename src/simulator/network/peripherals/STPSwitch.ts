@@ -3,7 +3,9 @@ import { Vector2D } from '../../drawing/Vector2D';
 import { Mac } from '../../utils/Mac';
 import { Network } from '../Network';
 import { BPDU as BPDUPacket } from '../packets/definitions/BPDU';
+import { Dot3 } from '../packets/definitions/Dot3';
 import { Ethernet } from '../packets/definitions/Ethernet';
+import { LLC } from '../packets/definitions/LLC';
 import { isSavedDevice, SavedDevice } from './Device';
 import { Interface, isSavedInterface, SavedInterface } from './Interface';
 import { Switch } from './Switch';
@@ -173,25 +175,32 @@ class BPDU {
     /**
      * Convert the BPDU to a packet
      *
-     * @param {string} mac Ethernet packet's source address
-     * @returns {Ethernet} Ethernet packet containing the BPDU
+     * @param {string} mac IEEE 802.3 packet's source address
+     * @returns {Dot3} IEEE 802.3 packet containing the BPDU
      */
-    toPacket(mac: string): Ethernet {
-        const ether = new Ethernet({
+    toPacket(mac: string): Dot3 {
+        const ether = new Dot3({
             dst: '01:81:c2:00:00:00',
             src: mac,
-            type: 0x8042,
         });
-        ether.setNext(
-            new BPDUPacket({
-                root_priority: this.root_id.priority,
-                root_mac: this.root_id.mac,
-                root_cost: this.root_cost,
-                bridge_priority: this.bridge_id.priority,
-                bridge_mac: this.bridge_id.mac,
-                bridge_port: this.port_id,
-            })
-        );
+        ether
+            .setNext(
+                new LLC({
+                    dsap: 0x42,
+                    ssap: 0x42,
+                    control: 3,
+                })
+            )
+            .setNext(
+                new BPDUPacket({
+                    root_priority: this.root_id.priority,
+                    root_mac: this.root_id.mac,
+                    root_cost: this.root_cost,
+                    bridge_priority: this.bridge_id.priority,
+                    bridge_mac: this.bridge_id.mac,
+                    bridge_port: this.port_id,
+                })
+            );
         return ether;
     }
 
@@ -663,13 +672,18 @@ export class STPSwitch extends Switch<STPInterface> {
     }
 
     onPacketReceived(iface: STPInterface, data: ArrayBuffer): void {
-        const packet = new Ethernet(data);
+        const packet = Ethernet.ethernet(data);
 
-        if (packet.dst === '01:81:c2:00:00:00') {
-            if (packet.getNext() instanceof BPDUPacket) {
-                const bpdu_packet = packet.getNext() as BPDUPacket;
-                const bpdu = BPDU.fromPacket(bpdu_packet);
-                this.handleBPDU(bpdu, iface);
+        if (packet.dst === '01:81:c2:00:00:00' && packet instanceof Dot3) {
+            if (packet.getNext() instanceof LLC) {
+                const llc = packet.getNext() as LLC;
+                if (llc.dsap === 0x42 && llc.ssap === 0x42 && llc.control === 3) {
+                    if (llc.getNext() instanceof BPDUPacket) {
+                        const bpdu_packet = llc.getNext() as BPDUPacket;
+                        const bpdu = BPDU.fromPacket(bpdu_packet);
+                        this.handleBPDU(bpdu, iface);
+                    }
+                }
             }
             return;
         }
