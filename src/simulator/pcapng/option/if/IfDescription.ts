@@ -5,7 +5,7 @@ import { StringOption } from '../StringOption';
  */
 export class IfDescription extends StringOption {
     get code() {
-        return 2;
+        return 3;
     }
     get name() {
         return 'if_description';

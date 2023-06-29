@@ -2,7 +2,7 @@ import { IPv4 } from '../../../utils/IPv4';
 import { PcapngOption } from '../PcapngOption';
 
 /**
- * UTF-8 string containing the IPV4 address of the interface.
+ * IPV4 address of the interface.
  */
 export class IfIPv4Address extends PcapngOption {
     public readonly ip: string;
@@ -16,7 +16,7 @@ export class IfIPv4Address extends PcapngOption {
     }
 
     get code() {
-        return 6;
+        return 4;
     }
     get name() {
         return 'if_IPv4addr';

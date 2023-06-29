@@ -17,7 +17,7 @@ export class IPv4 {
      */
     public static toInt(ipv4: string): bigint {
         if (IPv4.isValid(ipv4, true)) {
-            var d = ipv4.split('.');
+            const d = ipv4.split('.');
             return (BigInt(d[0]) << 24n) | (BigInt(d[1]) << 16n) | (BigInt(d[2]) << 8n) | BigInt(d[3]);
         }
     }
@@ -82,7 +82,7 @@ export class IPv4 {
      * @returns {boolean} True if the interface is valid, false otherwise
      */
     public static isValid(ipv4: string, throwException = false) {
-        let valid = ipv4Regexp.test(ipv4);
+        const valid = ipv4Regexp.test(ipv4);
 
         if (throwException && !valid) {
             throw new InvalidIPV4Exception(ipv4);

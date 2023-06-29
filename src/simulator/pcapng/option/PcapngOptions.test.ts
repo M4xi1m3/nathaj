@@ -15,10 +15,16 @@ export class OptDummy extends PcapngOption {
 }
 
 describe('pcap options', () => {
-    it('raw', () => {
+    it('raw option', () => {
         const opt = new PcapngOptions<OptDummy>();
         opt.push(new OptDummy());
 
         expect(new Uint8Array(opt.raw())).toStrictEqual(new Uint8Array([0, 1, 0, 2, 0xca, 0xfe, 0, 0, 0, 0, 0, 0]));
+    });
+
+    it('raw empty', () => {
+        const opt = new PcapngOptions<OptDummy>();
+
+        expect(new Uint8Array(opt.raw())).toStrictEqual(new Uint8Array([]));
     });
 });

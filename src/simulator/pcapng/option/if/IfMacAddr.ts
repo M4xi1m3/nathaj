@@ -2,7 +2,7 @@ import { Mac } from '../../../utils/Mac';
 import { PcapngOption } from '../PcapngOption';
 
 /**
- * UTF-8 string containing the mac address of the interface.
+ * Mac address of the interface.
  */
 export class IfMacAddr extends PcapngOption {
     public readonly mac: string;
