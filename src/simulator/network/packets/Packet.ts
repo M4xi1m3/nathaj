@@ -53,41 +53,17 @@ export class AnalysisTree extends AnalysisItem {
     }
 
     /**
-     * Check if an item fits in that tree
-     *
-     * @param {number} start Start position to check
-     * @param {number} length Length to check
-     * @returns {boolean} True if it fits, false otherwise
-     */
-    private fits(start: number, length: number) {
-        const end = start + length - 1;
-
-        if (start < this.start || end > this.start + this.length - 1) {
-            return false;
-        }
-
-        for (const [other_start, other_end] of this.items.map((v) => v.bounds())) {
-            if (start <= other_end && end >= other_start) return true;
-        }
-        return false;
-    }
-
-    /**
      * Add an item to the tree
      *
      * @param {string} label Label of the item
      * @param {number} start Start position of the item
      * @param {number} length Length of the item
-     * @returns {AnalysisItem | undefined} The new item, or undefined if it didn't fit
+     * @returns {AnalysisItem | undefined} The new item
      */
-    public addItem(label: string, start: number, length: number): AnalysisItem | undefined {
-        if (!this.fits(start + this.start, length)) {
-            const item = new AnalysisItem(label, start + this.start, length);
-            this.items.push(item);
-            return item;
-        } else {
-            return undefined;
-        }
+    public addItem(label: string, start: number, length: number): AnalysisItem {
+        const item = new AnalysisItem(label, start + this.start, length);
+        this.items.push(item);
+        return item;
     }
 
     /**
@@ -96,16 +72,12 @@ export class AnalysisTree extends AnalysisItem {
      * @param {string} label Label of the sub tree
      * @param {number} start Start position of the sub tree
      * @param {number} length Length of the sub tree
-     * @returns {AnalysisTree | undefined} The new sub tree, or undefined if it didn't fit
+     * @returns {AnalysisTree | undefined} The new sub tree
      */
-    public addSubTree(label: string, start: number, length: number): AnalysisTree | undefined {
-        if (!this.fits(start, length)) {
-            const tree = new AnalysisTree(label, start + this.start, length);
-            this.items.push(tree);
-            return tree;
-        } else {
-            return undefined;
-        }
+    public addSubTree(label: string, start: number, length: number): AnalysisTree {
+        const tree = new AnalysisTree(label, start + this.start, length);
+        this.items.push(tree);
+        return tree;
     }
 
     public allBounds(): [number, number][] {

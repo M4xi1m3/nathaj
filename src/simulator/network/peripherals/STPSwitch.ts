@@ -193,12 +193,20 @@ class BPDU {
             )
             .setNext(
                 new BPDUPacket({
+                    protocol_identifier: 0,
+                    protocol_version: 0,
+                    bpdu_type: 0,
+                    bpdu_flags: 0,
                     root_priority: this.root_id.priority,
                     root_mac: this.root_id.mac,
                     root_cost: this.root_cost,
                     bridge_priority: this.bridge_id.priority,
                     bridge_mac: this.bridge_id.mac,
                     bridge_port: this.port_id,
+                    message_age: 0,
+                    max_age: 20 * 256,
+                    hello_time: 2 * 256,
+                    forward_delay: 15 * 256,
                 })
             );
         return ether;
