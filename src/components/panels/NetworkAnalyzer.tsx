@@ -189,19 +189,13 @@ export const HexDumpRenderer: React.FC<{
     buffer: ArrayBuffer;
     space: number;
     newline: number;
-    selection: null | [number, number];
+    selection: null | [number, number][];
 }> = ({ buffer, space, newline, selection }) => {
     const theme = useTheme();
 
     const arr: number[] = Array.from(new Uint8Array(buffer).values());
 
     const data = divideInChunks(arr, newline).map((v: number[]) => divideInChunks(v, space));
-
-    let start = -1;
-    let end = -1;
-    if (selection !== null) {
-        [start, end] = selection;
-    }
 
     return (
         <Grid container spacing={2}>
@@ -219,7 +213,18 @@ export const HexDumpRenderer: React.FC<{
                                 {group.map((v, byte_no) => {
                                     const index = line_no * newline + group_no * space + byte_no;
 
-                                    if (index >= start && index <= end)
+                                    let inside = false;
+
+                                    if (selection !== null) {
+                                        for (const [start, end] of selection) {
+                                            if (index >= start && index <= end) {
+                                                inside = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    if (inside)
                                         return (
                                             <span
                                                 key={byte_no}
@@ -249,7 +254,18 @@ export const HexDumpRenderer: React.FC<{
                                 {group.map((v, byte_no) => {
                                     const index = line_no * newline + group_no * space + byte_no;
 
-                                    if (index >= start && index <= end)
+                                    let inside = false;
+
+                                    if (selection !== null) {
+                                        for (const [start, end] of selection) {
+                                            if (index >= start && index <= end) {
+                                                inside = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    if (inside)
                                         return (
                                             <span
                                                 key={byte_no}
@@ -279,7 +295,7 @@ export const NetworkAnalyzer: React.FC = () => {
     const [lastId, setLastId] = useState(0);
     const [packets, setPackets] = useState<AnalyzedPacket[]>([]);
     const [selectedPacket, setSelectedPacket] = useState<number | null>(null);
-    const [selectionBounds, setSelectionBounds] = useState<null | [number, number]>(null);
+    const [selectionBounds, setSelectionBounds] = useState<null | [number, number][]>(null);
     const [exportOpen, setExportOpen] = useState(false);
     let packetsTmp: AnalyzedPacket[] = [];
     let lastIdTmp = lastId;
@@ -354,7 +370,7 @@ export const NetworkAnalyzer: React.FC = () => {
                 }
             }
 
-            setSelectionBounds(item.bounds());
+            setSelectionBounds(item.allBounds());
         }
     };
 
