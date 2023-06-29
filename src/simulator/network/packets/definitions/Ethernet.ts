@@ -1,3 +1,4 @@
+import { CRC32 } from '../../../utils/CRC32';
 import { Field } from '../Field';
 import { FCSField } from '../fields/FCSField';
 import { MacField } from '../fields/MacField';
@@ -39,7 +40,7 @@ export interface EthernetFields {
  * Ethernet packet
  */
 export class Ethernet extends Packet<EthernetFields> {
-    static proto = 'Ethernet';
+    static proto = 'Ethernet II';
     static fields: Field[] = [new MacField('dst'), new MacField('src'), new XShortField('type')];
     static post_fields: Field[] = [new PaddingField('padding', 60), new FCSField('fcs')];
 
@@ -47,9 +48,9 @@ export class Ethernet extends Packet<EthernetFields> {
         analyzed.source = packet.src;
         analyzed.destination = packet.dst;
         analyzed.protocol = Ethernet.fields[2].repr(packet.type);
-        analyzed.info = 'Ethernet';
+        analyzed.info = 'Ethernet II';
 
-        const sub = analyzed.tree.addSubTree('Ethernet', 0, 14);
+        const sub = analyzed.tree.addSubTree('Ethernet II', 0, 14);
         sub?.addItem('Destionation: ' + packet.dst, 0, 6);
         sub?.addItem('Source: ' + packet.src, 6, 6);
         sub?.addItem('Type: ' + Ethernet.fields[2].repr(packet.type), 12, 2);
@@ -69,6 +70,16 @@ export class Ethernet extends Packet<EthernetFields> {
                 )
             );
 
-        tree.items.push(new AnalysisItem('FCS: ' + Ethernet.post_fields[1].repr(packet.fcs), len - 4, 4));
+        const data = CRC32.ethernet(analyzed.data.slice(0, len - 4));
+        const dw = new DataView(data);
+        const valid = dw.getUint32(0) === packet.fcs;
+
+        tree.items.push(
+            new AnalysisItem(
+                'FCS: ' + Ethernet.post_fields[1].repr(packet.fcs) + ' (' + (valid ? 'valid' : 'invalid') + ')',
+                len - 4,
+                4
+            )
+        );
     };
 }

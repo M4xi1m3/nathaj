@@ -20,8 +20,7 @@ export class FCSField extends Field {
 
     raw(data: ArrayBuffer, packet: _Packet<any>): ArrayBuffer {
         packet;
-        const buf = new Uint32Array([CRC32.buff(CRC32.reverse(0x04c11db7), data)]);
-        return Buffers.concatenate(data, buf.buffer);
+        return Buffers.concatenate(data, CRC32.ethernet(data));
     }
 
     repr(value: any): string {

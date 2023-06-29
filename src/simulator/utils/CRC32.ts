@@ -70,4 +70,11 @@ export class CRC32 {
 
         return reversedPolynomial;
     }
+
+    public static ethernet(data: ArrayBuffer): ArrayBuffer {
+        const buf = new ArrayBuffer(4);
+        const dw = new DataView(buf);
+        dw.setUint32(0, CRC32.buff(CRC32.reverse(0x04c11db7), data), true);
+        return buf;
+    }
 }
