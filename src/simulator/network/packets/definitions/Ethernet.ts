@@ -28,7 +28,7 @@ export interface EthernetFields {
  */
 export class Ethernet extends Packet<EthernetFields> {
     static proto = 'Ethernet';
-    static fields: Field[] = [new MacField('src'), new MacField('dst'), new XShortField('type')];
+    static fields: Field[] = [new MacField('dst'), new MacField('src'), new XShortField('type')];
 
     static dissector: Dissector<EthernetFields> = (packet, analyzed) => {
         analyzed.source = packet.src;
@@ -37,8 +37,8 @@ export class Ethernet extends Packet<EthernetFields> {
         analyzed.info = 'Ethernet';
 
         const sub = analyzed.tree.addSubTree('Ethernet', 0, 14);
-        sub?.addItem('Source: ' + packet.src, 0, 6);
-        sub?.addItem('Destionation: ' + packet.dst, 6, 6);
+        sub?.addItem('Destionation: ' + packet.dst, 0, 6);
+        sub?.addItem('Source: ' + packet.src, 6, 6);
         sub?.addItem('Type: ' + packet.type, 12, 2);
     };
 }
