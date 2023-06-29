@@ -6,6 +6,7 @@ import { Buffers } from '../utils/Buffers';
 import { EnhancedPacketBlock } from './blocks/EnhancedPacketBlock';
 import { HeaderBlock } from './blocks/HeaderBlock';
 import { EpbFlags, FlagDirection } from './option/epb/EpbFlags';
+import { IfFscLen } from './option/if/IfFscLen';
 import { IfMacAddr } from './option/if/IfMacAddr';
 import { IfName } from './option/if/IfName';
 import { IfTsResol } from './option/if/IfTsResol';
@@ -25,6 +26,7 @@ export class PcapngWriter {
                 intf_block.options.push(new IfName(intf.getFullName()));
                 intf_block.options.push(new IfMacAddr(intf.getMac()));
                 intf_block.options.push(new IfTsResol(3));
+                intf_block.options.push(new IfFscLen(4));
             });
         });
 

@@ -1,5 +1,6 @@
 import { Buffers } from '../../utils/Buffers';
 import { IfDescription } from '../option/if/IfDescription';
+import { IfFscLen } from '../option/if/IfFscLen';
 import { IfIPv4Address } from '../option/if/IfIPv4Address';
 import { IfMacAddr } from '../option/if/IfMacAddr';
 import { IfName } from '../option/if/IfName';
@@ -16,7 +17,15 @@ export enum LinkType {
     LINKTYPE_ETHERNET = 1,
 }
 
-export type InterfaceOptions = IfName | IfDescription | IfMacAddr | IfIPv4Address | IfTsOffset | IfTsResol | OptComment;
+export type InterfaceOptions =
+    | IfName
+    | IfDescription
+    | IfMacAddr
+    | IfIPv4Address
+    | IfTsOffset
+    | IfTsResol
+    | IfFscLen
+    | OptComment;
 
 export class InterfaceBlock extends PcapngBlock {
     public readonly options = new PcapngOptions<InterfaceOptions>();
