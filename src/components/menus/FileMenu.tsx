@@ -51,6 +51,7 @@ export const FileMenu: React.FC<{
                         name: 'Clear',
                         action: () => {
                             net.clear();
+                            setSelected(null);
                         },
                     },
                 ]}

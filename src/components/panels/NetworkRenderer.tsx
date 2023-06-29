@@ -176,7 +176,6 @@ export const NetworkRenderer: React.FC<{
 
                         // Add the new touch to the list of touches
                         for (let i = 0; i < e.changedTouches.length; i++) {
-                            console.log(`start: ${i}`);
                             tmpTouches = [
                                 ...tmpTouches,
                                 startTouch(e.changedTouches[i], e.currentTarget.getBoundingClientRect()),

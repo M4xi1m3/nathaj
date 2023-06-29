@@ -372,6 +372,10 @@ export class Network extends EventTarget {
 
         Object.values(this.devices).forEach((dev) => {
             dev.reset();
+
+            dev.getInterfaces().forEach((intf) => {
+                intf.reset();
+            });
         });
     }
 

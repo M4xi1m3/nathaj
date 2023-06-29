@@ -140,6 +140,13 @@ export class Interface<T extends Device = Device<any>> extends EventTarget {
     }
 
     /**
+     * Reset the interface
+     */
+    reset() {
+        this.receive_queue = [];
+    }
+
+    /**
      * Get the MAC address of the host
      *
      * @returns {string} MAC address of the host
