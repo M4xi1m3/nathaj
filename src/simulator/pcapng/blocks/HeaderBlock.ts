@@ -4,12 +4,22 @@ import { PcapngOptions } from '../option/PcapngOptions';
 import { ShbHardware } from '../option/shb/ShbHardware';
 import { ShbOS } from '../option/shb/ShbOS';
 import { ShbUserAppl } from '../option/shb/ShbUserAppl';
+import { InterfaceBlock } from './InterfaceBlock';
 import { PcapngBlock } from './PcapngBlock';
 
 export type HeaderOptions = ShbHardware | ShbOS | ShbUserAppl | OptComment;
 
 export class HeaderBlock extends PcapngBlock {
     public readonly options = new PcapngOptions<HeaderOptions>();
+    public readonly interfaces: { [name: string]: InterfaceBlock } = {};
+    private last_intf_id = 0;
+
+    public addInterface(name: string): InterfaceBlock {
+        const intf = new InterfaceBlock(this.last_intf_id);
+        this.interfaces[name] = intf;
+        this.last_intf_id++;
+        return intf;
+    }
 
     get type() {
         return 0x0a0d0d0a;

@@ -1,9 +1,10 @@
 import { Buffers } from '../../utils/Buffers';
+import { EpbFlags } from '../option/epb/EpbFlags';
 import { OptComment } from '../option/opt/OptComment';
 import { PcapngOptions } from '../option/PcapngOptions';
 import { PcapngBlock } from './PcapngBlock';
 
-export type EnhancedPacketOptions = OptComment;
+export type EnhancedPacketOptions = EpbFlags | OptComment;
 
 export class EnhancedPacketBlock extends PcapngBlock {
     public readonly options = new PcapngOptions<EnhancedPacketOptions>();

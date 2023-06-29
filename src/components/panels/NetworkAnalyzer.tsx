@@ -5,6 +5,7 @@ import {
     ChevronRight,
     Clear,
     Delete,
+    Download,
     ExpandMore,
     FilterList,
 } from '@mui/icons-material';
@@ -37,6 +38,7 @@ import { NetworkContext } from '../../NetworkContext';
 import { PacketEventData } from '../../simulator/network/Network';
 import { Ethernet } from '../../simulator/network/packets/definitions/Ethernet';
 import { AnalysisItem, AnalysisTree, AnalyzedPacket } from '../../simulator/network/packets/Packet';
+import { PcapDialog } from '../dialogs/PcapDialog';
 import { HorizontalDivider } from '../Dividers';
 import { CustomTreeItem } from '../IconExpansionTreeView';
 
@@ -278,6 +280,7 @@ export const NetworkAnalyzer: React.FC = () => {
     const [packets, setPackets] = useState<AnalyzedPacket[]>([]);
     const [selectedPacket, setSelectedPacket] = useState<number | null>(null);
     const [selectionBounds, setSelectionBounds] = useState<null | [number, number]>(null);
+    const [exportOpen, setExportOpen] = useState(false);
     let packetsTmp: AnalyzedPacket[] = [];
     let lastIdTmp = lastId;
 
@@ -356,126 +359,134 @@ export const NetworkAnalyzer: React.FC = () => {
     };
 
     return (
-        <PanelGroup direction='vertical'>
-            <Panel defaultSize={50} style={{ display: 'flex' }}>
-                <Grid
-                    container
-                    direction='column'
-                    wrap='nowrap'
-                    sx={{ height: '100%', width: '100%', overflowX: 'auto' }}>
-                    <Grid item sx={{ width: '100%' }}>
-                        <Stack sx={{ padding: '0px 8px', height: '32px' }} direction='row'>
-                            <Stack direction='row' flexGrow={1}>
-                                <Typography component='h2' variant='h6'>
-                                    Packet analyzer
-                                </Typography>
+        <>
+            <PcapDialog opened={exportOpen} close={() => setExportOpen(false)} packets={packets} />
+            <PanelGroup direction='vertical'>
+                <Panel defaultSize={50} style={{ display: 'flex' }}>
+                    <Grid
+                        container
+                        direction='column'
+                        wrap='nowrap'
+                        sx={{ height: '100%', width: '100%', overflowX: 'auto' }}>
+                        <Grid item sx={{ width: '100%' }}>
+                            <Stack sx={{ padding: '0px 8px', height: '32px' }} direction='row'>
+                                <Stack direction='row' flexGrow={1}>
+                                    <Typography component='h2' variant='h6'>
+                                        Packet analyzer
+                                    </Typography>
+                                </Stack>
+                                <Stack direction='row'>
+                                    <Tooltip title='Save packets'>
+                                        <IconButton onClick={() => setExportOpen(true)} size='small'>
+                                            <Download />
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title='Clear history'>
+                                        <IconButton onClick={handleDelete} size='small' color='error'>
+                                            <Delete />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Stack>
                             </Stack>
-                            <Stack direction='row'>
-                                <Tooltip title='Clear history'>
-                                    <IconButton onClick={handleDelete} size='small' color='error'>
-                                        <Delete />
-                                    </IconButton>
-                                </Tooltip>
+                            <Divider />
+                            <Stack>
+                                <FormControl variant='standard' fullWidth size='medium'>
+                                    <Input
+                                        error={!filterValid}
+                                        placeholder='Filter'
+                                        startAdornment={
+                                            <InputAdornment position='start'>
+                                                <FilterList />
+                                            </InputAdornment>
+                                        }
+                                        endAdornment={
+                                            <InputAdornment position='end'>
+                                                <IconButton onClick={() => setFilter('')}>
+                                                    <Clear />
+                                                </IconButton>
+                                            </InputAdornment>
+                                        }
+                                        value={filter}
+                                        onChange={(e) => setFilter(e.currentTarget.value)}></Input>
+                                </FormControl>
                             </Stack>
-                        </Stack>
-                        <Divider />
-                        <Stack>
-                            <FormControl variant='standard' fullWidth size='medium'>
-                                <Input
-                                    error={!filterValid}
-                                    placeholder='Filter'
-                                    startAdornment={
-                                        <InputAdornment position='start'>
-                                            <FilterList />
-                                        </InputAdornment>
-                                    }
-                                    endAdornment={
-                                        <InputAdornment position='end'>
-                                            <IconButton onClick={() => setFilter('')}>
-                                                <Clear />
-                                            </IconButton>
-                                        </InputAdornment>
-                                    }
-                                    value={filter}
-                                    onChange={(e) => setFilter(e.currentTarget.value)}></Input>
-                            </FormControl>
-                        </Stack>
-                        <Divider />
-                    </Grid>
-                    <Grid item sx={{ flexGrow: 1, width: '100%', position: 'relative' }}>
-                        <TableVirtuoso
-                            ref={virtuosoRef}
-                            data={displayPackets}
-                            context={{
-                                selected: selectedPacket,
-                                setSelected: (id: number) => {
-                                    setSelectionBounds(null);
-                                    setSelectedPacket(id);
-                                },
-                            }}
-                            components={VirtuosoTableComponents}
-                            fixedHeaderContent={FixedHeaderContent}
-                            itemContent={RowContent}
-                            atBottomStateChange={setAtBottom}
-                            followOutput='auto'
-                        />
-                        {!atBottom ? (
-                            <Fab
-                                color='primary'
-                                aria-label='Scroll to bottom'
-                                sx={{
-                                    position: 'absolute',
-                                    bottom: '16px',
-                                    right: '16px',
-                                    zIndex: 9999,
-                                }}
-                                onClick={() => {
-                                    if (virtuosoRef !== null && virtuosoRef.current !== null)
-                                        virtuosoRef.current.scrollToIndex({
-                                            index: packets.length - 1,
-                                            behavior: 'smooth',
-                                        });
-                                }}
-                                size='small'>
-                                <ArrowDownward />
-                            </Fab>
-                        ) : (
-                            <></>
-                        )}
-                    </Grid>
-                </Grid>
-            </Panel>
-            {selectedPacket !== null ? (
-                <>
-                    <HorizontalDivider />
-                    <Panel>
-                        <Grid container style={{ height: '100%' }}>
-                            <Grid item style={{ display: 'flex', overflow: 'auto', flexGrow: 1, height: '100%' }}>
-                                <TreeView
-                                    style={{ width: '100%' }}
-                                    defaultCollapseIcon={<ExpandMore />}
-                                    defaultExpandIcon={<ChevronRight />}
-                                    onNodeSelect={handleNodeSelect}>
-                                    <TreeRenderer id='0' item={packets[selectedPacket].tree} />
-                                </TreeView>
-                            </Grid>
-                            <Grid item>
-                                <Divider orientation='vertical' />
-                            </Grid>
-                            <Grid item style={{ overflow: 'auto', height: '100%', marginLeft: 8 }}>
-                                <HexDumpRenderer
-                                    buffer={packets[selectedPacket].data}
-                                    space={8}
-                                    newline={16}
-                                    selection={selectionBounds}
-                                />
-                            </Grid>
+                            <Divider />
                         </Grid>
-                    </Panel>
-                </>
-            ) : (
-                <></>
-            )}
-        </PanelGroup>
+                        <Grid item sx={{ flexGrow: 1, width: '100%', position: 'relative' }}>
+                            <TableVirtuoso
+                                ref={virtuosoRef}
+                                data={displayPackets}
+                                context={{
+                                    selected: selectedPacket,
+                                    setSelected: (id: number) => {
+                                        setSelectionBounds(null);
+                                        setSelectedPacket(id);
+                                    },
+                                }}
+                                components={VirtuosoTableComponents}
+                                fixedHeaderContent={FixedHeaderContent}
+                                itemContent={RowContent}
+                                atBottomStateChange={setAtBottom}
+                                followOutput='auto'
+                            />
+                            {!atBottom ? (
+                                <Fab
+                                    color='primary'
+                                    aria-label='Scroll to bottom'
+                                    sx={{
+                                        position: 'absolute',
+                                        bottom: '16px',
+                                        right: '16px',
+                                        zIndex: 9999,
+                                    }}
+                                    onClick={() => {
+                                        if (virtuosoRef !== null && virtuosoRef.current !== null)
+                                            virtuosoRef.current.scrollToIndex({
+                                                index: packets.length - 1,
+                                                behavior: 'smooth',
+                                            });
+                                    }}
+                                    size='small'>
+                                    <ArrowDownward />
+                                </Fab>
+                            ) : (
+                                <></>
+                            )}
+                        </Grid>
+                    </Grid>
+                </Panel>
+                {selectedPacket !== null ? (
+                    <>
+                        <HorizontalDivider />
+                        <Panel>
+                            <Grid container style={{ height: '100%' }}>
+                                <Grid item style={{ display: 'flex', overflow: 'auto', flexGrow: 1, height: '100%' }}>
+                                    <TreeView
+                                        style={{ width: '100%' }}
+                                        defaultCollapseIcon={<ExpandMore />}
+                                        defaultExpandIcon={<ChevronRight />}
+                                        onNodeSelect={handleNodeSelect}>
+                                        <TreeRenderer id='0' item={packets[selectedPacket].tree} />
+                                    </TreeView>
+                                </Grid>
+                                <Grid item>
+                                    <Divider orientation='vertical' />
+                                </Grid>
+                                <Grid item style={{ overflow: 'auto', height: '100%', marginLeft: 8 }}>
+                                    <HexDumpRenderer
+                                        buffer={packets[selectedPacket].data}
+                                        space={8}
+                                        newline={16}
+                                        selection={selectionBounds}
+                                    />
+                                </Grid>
+                            </Grid>
+                        </Panel>
+                    </>
+                ) : (
+                    <></>
+                )}
+            </PanelGroup>
+        </>
     );
 };
