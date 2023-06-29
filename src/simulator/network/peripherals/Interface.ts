@@ -1,3 +1,4 @@
+import { Mac } from '../../utils/Mac';
 import { PacketEventData } from '../Network';
 import { Device } from './Device';
 
@@ -65,14 +66,6 @@ export class NotConnectedException extends InterfaceException {
 export class DisconnectedException extends InterfaceException {
     constructor(iface: Interface) {
         super('Interface is disconnected.', iface);
-    }
-}
-
-const macRegexp = new RegExp('^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$');
-
-export class InvalidMACException extends Error {
-    constructor(mac: string) {
-        super('Invalid mac address ' + mac + '.');
     }
 }
 
@@ -162,51 +155,10 @@ export class Interface<T extends Device = Device<any>> extends EventTarget {
      */
     public setMac(mac: string) {
         if (this.mac !== mac) {
-            if (macRegexp.test(mac) && (parseInt(mac.split(':')[0], 16) & 1) === 0) {
+            if (Mac.isValid(mac, true, true)) {
                 this.mac = mac;
                 this.getOwner().dispatchEvent(new Event('changed'));
-            } else {
-                throw new InvalidMACException(mac);
             }
-        }
-    }
-
-    public static macToInt(mac: string): bigint {
-        if (macRegexp.test(mac)) {
-            const bytes = mac.split(':');
-            let out = 0n;
-
-            for (let i = 0; i < 6; i++) {
-                out |= BigInt(parseInt(bytes[i], 16)) << (40n - 8n * BigInt(i));
-            }
-
-            return out;
-        } else {
-            throw new InvalidMACException(mac);
-        }
-    }
-
-    public static intToMac(mac: bigint): string {
-        return mac
-            .toString(16)
-            .padStart(12, '0')
-            .match(/.{1,2}/g)
-            .join(':');
-    }
-
-    public static isMacValid(mac: string) {
-        return macRegexp.test(mac);
-    }
-
-    public static incrementMac(mac: string, toAdd = 1): string {
-        if (macRegexp.test(mac) && (parseInt(mac.split(':')[0], 16) & 1) === 0) {
-            const mac_num = Interface.macToInt(mac);
-            if (mac_num + BigInt(toAdd) > 0xffffffffffffn || mac_num + BigInt(toAdd) < 0) {
-                throw new InvalidMACException(mac + ' + ' + toAdd);
-            }
-            return Interface.intToMac(mac_num + BigInt(toAdd));
-        } else {
-            throw new InvalidMACException(mac);
         }
     }
 

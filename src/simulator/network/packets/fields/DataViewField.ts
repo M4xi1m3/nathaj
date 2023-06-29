@@ -1,3 +1,4 @@
+import { Buffers } from '../../../utils/Buffers';
 import { Field } from '../Field';
 import { _Packet } from '../Packet';
 
@@ -20,7 +21,7 @@ export class DataViewField extends Field {
         const arr = new ArrayBuffer(this.length);
         const dw = new DataView(arr);
         this.write.bind(dw)(0, (packet as { [key: string]: any })[this.name]);
-        return Field.concatenate(data, arr);
+        return Buffers.concatenate(data, arr);
     }
 
     repr(value: any): string {

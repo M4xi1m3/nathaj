@@ -1,5 +1,6 @@
 import HubImg from '../../../assets/hub.png';
 import { Vector2D } from '../../drawing/Vector2D';
+import { Mac } from '../../utils/Mac';
 import { Network } from '../Network';
 import { Device, isSavedDevice, SavedDevice } from './Device';
 import { Interface } from './Interface';
@@ -23,7 +24,7 @@ export class Hub<T extends Interface = Interface> extends Device<T> {
 
         if (ports !== undefined && base_mac !== undefined) {
             for (let i = 0; i < ports; i++) {
-                this.addInterface('eth' + i, Interface.incrementMac(base_mac, i));
+                this.addInterface('eth' + i, Mac.increment(base_mac, i));
             }
         }
     }

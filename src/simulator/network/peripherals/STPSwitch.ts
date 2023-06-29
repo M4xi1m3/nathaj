@@ -1,5 +1,6 @@
 import STPSwitchImg from '../../../assets/stp-switch.png';
 import { Vector2D } from '../../drawing/Vector2D';
+import { Mac } from '../../utils/Mac';
 import { Network } from '../Network';
 import { BPDU as BPDUPacket } from '../packets/definitions/BPDU';
 import { Ethernet } from '../packets/definitions/Ethernet';
@@ -493,9 +494,9 @@ export class STPSwitch extends Switch<STPInterface> {
         if (this.getInterfaces().length === 0) {
             return '00:00:00:00:00:00';
         } else {
-            return Interface.intToMac(
+            return Mac.fromInt(
                 this.getInterfaces()
-                    .map((i) => Interface.macToInt(i.getMac()))
+                    .map((i) => Mac.toInt(i.getMac()))
                     .reduce((m, e) => (e < m ? e : m))
             );
         }

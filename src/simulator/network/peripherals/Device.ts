@@ -1,5 +1,6 @@
 import { Drawable } from '../../drawing/Drawable';
 import { Vector2D } from '../../drawing/Vector2D';
+import { Mac } from '../../utils/Mac';
 import { Network } from '../Network';
 import { Interface, isSavedInterface, ReceivedPacketEventData, SavedInterface } from './Interface';
 
@@ -136,9 +137,9 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
      */
     public generateNextMacAddress(): string {
         if (this.getInterfaces().length === 0) return '';
-        return Interface.intToMac(
+        return Mac.fromInt(
             this.getInterfaces()
-                .map((i) => Interface.macToInt(i.getMac()))
+                .map((i) => Mac.toInt(i.getMac()))
                 .reduce((m, e) => (e > m ? e : m)) + 1n
         );
     }
