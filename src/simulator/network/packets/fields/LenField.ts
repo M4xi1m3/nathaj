@@ -20,7 +20,13 @@ export class LenField extends Field {
     raw(data: ArrayBuffer, packet: _Packet<any>): ArrayBuffer {
         const d = new ArrayBuffer(2);
         const dw = new DataView(d);
-        dw.setUint16(0, packet.getNext().raw().byteLength);
+        const next = packet.getNext();
+
+        if (next === undefined) {
+            dw.setUint16(0, 0);
+        } else {
+            dw.setUint16(0, next.raw().byteLength);
+        }
 
         return Buffers.concatenate(data, d);
     }
