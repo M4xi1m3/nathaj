@@ -1,5 +1,5 @@
 import { Box, Paper } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Panel, PanelGroup } from 'react-resizable-panels';
 import { HorizontalDivider, VerticalDivider } from './components/Dividers';
 import { AddMenu } from './components/menus/AddMenu';
@@ -11,6 +11,7 @@ import { NetowrkProperties } from './components/panels/NetworkProperties';
 import { NetworkRenderer } from './components/panels/NetworkRenderer';
 import { NoPanels } from './components/panels/NoPanels';
 import { TopBar } from './components/TopBar';
+import { NetworkContext } from './NetworkContext';
 
 const App: React.FC = () => {
     const [viewNetwork, setViewNetwork] = useState<boolean>(true);
@@ -20,6 +21,33 @@ const App: React.FC = () => {
     const [selected, setSelected] = useState<string | null>(null);
 
     const noPanel = !(viewNetwork || viewProperties || viewAnalyzer);
+
+    const net = useContext(NetworkContext);
+
+    const handleUnload = (e: BeforeUnloadEvent) => {
+        localStorage.setItem('workspace', JSON.stringify(net.save()));
+    };
+
+    const handleLoad = (e: Event) => {
+        const workspace = localStorage.getItem('workspace');
+        if (workspace !== null) {
+            try {
+                net.load(JSON.parse(workspace));
+            } catch (e: any) {
+                //
+            }
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener('beforeunload', handleUnload);
+        window.addEventListener('load', handleLoad);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleUnload);
+            window.removeEventListener('load', handleLoad);
+        };
+    }, [handleUnload]);
 
     return (
         <>
