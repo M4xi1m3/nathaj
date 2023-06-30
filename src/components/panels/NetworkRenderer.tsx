@@ -1,7 +1,7 @@
 import { AddLink, CenterFocusStrong, GridOn, Hub, Label, LinkOff } from '@mui/icons-material';
 import { Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { useSnackbar } from 'notistack';
-import React, { Touch, useContext, useState } from 'react';
+import React, { Touch, useContext, useRef, useState } from 'react';
 import { CloseNetwork } from '../../icons/CloseNetwork';
 import { SnapToGrid } from '../../icons/SnapToGrid';
 import { NetworkContext } from '../../NetworkContext';
@@ -21,22 +21,19 @@ export const NetworkRenderer: React.FC<{
 
     const { enqueueSnackbar } = useSnackbar();
 
-    const [moved, setMoved] = useState(false);
-    const [dragging, setDragging] = useState(false);
-    const [panning, setPanning] = useState(false);
-    const [offset, setOffset] = useState(new Vector2D());
-    const [mousePos, setMousePos] = useState(new Vector2D());
-    const [dragged, setDragged] = useState<string | null>(null);
-
-    const [scale, setScale] = useState<number>(1);
-    const [startScale, setStartScale] = useState<number>(1);
+    const offset = useRef(new Vector2D());
+    const mousePos = useRef(new Vector2D());
+    const scale = useRef(1);
+    const startScale = useRef(1);
+    const moved = useRef(false);
+    const dragging = useRef(false);
+    const panning = useRef(false);
+    const dragged = useRef<string | null>(null);
 
     const [addingLink, setAddingLink] = useState<boolean>(false);
     const [removingLink, setRemovingLink] = useState<boolean>(false);
     const [selectedDev1, setSelectedDev1] = useState<string | null>(null);
-
     const [removingDevice, setRemovingDevice] = useState<boolean>(false);
-
     const [showLabel, setShowLabel] = useState(false);
     const [showGrid, setShowGrid] = useState(false);
     const [snapGrid, setSnapGrid] = useState(false);
@@ -82,7 +79,7 @@ export const NetworkRenderer: React.FC<{
 
     let tmpTouches: SavedTouch[] = touches;
 
-    const GRID_SIZE = scale >= 1 ? 25 : scale >= 0.3 ? 50 : 100;
+    const GRID_SIZE = scale.current >= 1 ? 25 : scale.current >= 0.3 ? 50 : 100;
 
     return (
         <Grid container direction='column' flexWrap='nowrap' sx={{ height: '100%' }}>
@@ -132,7 +129,7 @@ export const NetworkRenderer: React.FC<{
                             </IconButton>
                         </Tooltip>
                         <Tooltip title='Center view'>
-                            <IconButton onClick={() => setOffset(new Vector2D(0, 0))} size='small'>
+                            <IconButton onClick={() => (offset.current = new Vector2D(0, 0))} size='small'>
                                 <CenterFocusStrong />
                             </IconButton>
                         </Tooltip>
@@ -186,19 +183,19 @@ export const NetworkRenderer: React.FC<{
                         if (tmpTouches.length === 1) {
                             const pointer = tmpTouches[0];
 
-                            setMousePos(new Vector2D(pointer.pageX, pointer.pageY).div(scale));
+                            mousePos.current = new Vector2D(pointer.pageX, pointer.pageY).div(scale.current);
                             const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height)
                                 .mul(-0.5)
-                                .div(scale);
+                                .div(scale.current);
 
                             const touch = tmpTouches[0];
-                            const page = new Vector2D(touch.pageX, touch.pageY).div(scale);
+                            const page = new Vector2D(touch.pageX, touch.pageY).div(scale.current);
                             // Handle dragging devices
                             for (const dev of network.getDevices()) {
-                                if (dev.collision(page.sub(offset).add(centerOffset))) {
+                                if (dev.collision(page.sub(offset.current).add(centerOffset))) {
                                     e.currentTarget.style.cursor = 'grab';
-                                    setDragging(true);
-                                    setDragged(dev.getName());
+                                    dragging.current = true;
+                                    dragged.current = dev.getName();
                                     return;
                                 }
                             }
@@ -218,27 +215,29 @@ export const NetworkRenderer: React.FC<{
 
                         if (tmpTouches.length === 1) {
                             const pointer = tmpTouches[0];
-                            setMousePos(new Vector2D(pointer.pageX, pointer.pageY).div(scale));
+                            mousePos.current = new Vector2D(pointer.pageX, pointer.pageY).div(scale.current);
 
-                            if (dragging && dragged !== null) {
+                            if (dragging.current && dragged.current !== null) {
                                 // Drag a device
                                 const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height)
                                     .mul(-0.5)
-                                    .div(scale);
+                                    .div(scale.current);
 
                                 e.currentTarget.style.cursor = 'grab';
                                 network
-                                    .getDevice(dragged)
-                                    .setPosition(mousePos.sub(offset).add(centerOffset).align(GRID_SIZE, snapGrid));
+                                    .getDevice(dragged.current)
+                                    .setPosition(
+                                        mousePos.current
+                                            .sub(offset.current)
+                                            .add(centerOffset)
+                                            .align(GRID_SIZE, snapGrid)
+                                    );
                                 return;
                             }
 
-                            setOffset(
-                                offset.add(
-                                    new Vector2D(
-                                        pointer.pageX - pointer.previousX,
-                                        pointer.pageY - pointer.previousY
-                                    ).div(scale)
+                            offset.current = offset.current.add(
+                                new Vector2D(pointer.pageX - pointer.previousX, pointer.pageY - pointer.previousY).div(
+                                    scale.current
                                 )
                             );
                         }
@@ -249,13 +248,13 @@ export const NetworkRenderer: React.FC<{
                             const currentDist = new Vector2D(a.pageX, a.pageY).dist(new Vector2D(b.pageX, b.pageY));
 
                             const diff = currentDist - startDist;
-                            let tmpScale = startScale + diff / 100;
+                            let tmpScale = startScale.current + diff / 200;
                             if (tmpScale < 0.1) tmpScale = 0.1;
                             if (tmpScale > 4) tmpScale = 4;
 
-                            setScale(tmpScale);
+                            scale.current = tmpScale;
                         } else {
-                            setStartScale(scale);
+                            startScale.current = scale.current;
                         }
                     }}
                     onTouchEnd={(e) => {
@@ -272,21 +271,23 @@ export const NetworkRenderer: React.FC<{
                             const start = new Vector2D(pointer.startX, pointer.startY);
                             const page = new Vector2D(pointer.pageX, pointer.pageY);
 
-                            if (dragging && dragged !== null) {
-                                setDragging(false);
-                                setDragged(null);
+                            if (dragging.current && dragged.current !== null) {
+                                dragging.current = false;
+                                dragged.current = null;
                             }
 
                             if (start.sqdist(page) < 100) {
                                 // We clicked on an element
                                 const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height)
                                     .mul(-0.5)
-                                    .div(scale);
+                                    .div(scale.current);
 
                                 // Handle adding or removing links
                                 if (addingLink || removingLink) {
                                     for (const dev of network.getDevices()) {
-                                        if (dev.collision(page.div(scale).sub(offset).add(centerOffset))) {
+                                        if (
+                                            dev.collision(page.div(scale.current).sub(offset.current).add(centerOffset))
+                                        ) {
                                             if (selectedDev1 === null) {
                                                 setSelectedDev1(dev.getName());
                                             } else {
@@ -312,7 +313,9 @@ export const NetworkRenderer: React.FC<{
                                 // Handle removing devices
                                 if (removingDevice) {
                                     for (const dev of network.getDevices()) {
-                                        if (dev.collision(page.div(scale).sub(offset).add(centerOffset))) {
+                                        if (
+                                            dev.collision(page.div(scale.current).sub(offset.current).add(centerOffset))
+                                        ) {
                                             try {
                                                 network.removeDevice(dev.getName());
                                                 e.currentTarget.style.cursor = 'default';
@@ -328,17 +331,17 @@ export const NetworkRenderer: React.FC<{
 
                                 // Handle selecting
                                 for (const dev of network.getDevices()) {
-                                    if (dev.collision(page.div(scale).sub(offset).add(centerOffset))) {
+                                    if (dev.collision(page.div(scale.current).sub(offset.current).add(centerOffset))) {
                                         setSelected(dev.getName());
-                                        setDragging(false);
-                                        setDragged(null);
+                                        dragging.current = false;
+                                        dragged.current = null;
                                         return;
                                     }
                                 }
                             }
                         }
                         if (tmpTouches.length !== 2) {
-                            setStartScale(scale);
+                            startScale.current = scale.current;
                         }
                     }}
                     onTouchCancel={(e) => {
@@ -350,20 +353,18 @@ export const NetworkRenderer: React.FC<{
                     onMouseDown={(e) => {
                         const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height)
                             .mul(-0.5)
-                            .div(scale);
+                            .div(scale.current);
 
-                        setMousePos(
-                            new Vector2D(
-                                e.pageX - e.currentTarget.getBoundingClientRect().left,
-                                e.pageY - e.currentTarget.getBoundingClientRect().top
-                            ).div(scale)
-                        );
-                        setMoved(false);
+                        mousePos.current = new Vector2D(
+                            e.pageX - e.currentTarget.getBoundingClientRect().left,
+                            e.pageY - e.currentTarget.getBoundingClientRect().top
+                        ).div(scale.current);
+                        moved.current = false;
 
                         // Handle adding or removing links
                         if (addingLink || removingLink) {
                             for (const dev of network.getDevices()) {
-                                if (dev.collision(mousePos.sub(offset).add(centerOffset))) {
+                                if (dev.collision(mousePos.current.sub(offset.current).add(centerOffset))) {
                                     if (selectedDev1 === null) {
                                         setSelectedDev1(dev.getName());
                                     } else {
@@ -389,7 +390,7 @@ export const NetworkRenderer: React.FC<{
                         // Handle removing devices
                         if (removingDevice) {
                             for (const dev of network.getDevices()) {
-                                if (dev.collision(mousePos.sub(offset).add(centerOffset))) {
+                                if (dev.collision(mousePos.current.sub(offset.current).add(centerOffset))) {
                                     try {
                                         network.removeDevice(dev.getName());
                                         e.currentTarget.style.cursor = 'default';
@@ -405,74 +406,76 @@ export const NetworkRenderer: React.FC<{
 
                         // Handle dragging devices
                         for (const dev of network.getDevices()) {
-                            if (dev.collision(mousePos.sub(offset).add(centerOffset))) {
+                            if (dev.collision(mousePos.current.sub(offset.current).add(centerOffset))) {
                                 e.currentTarget.style.cursor = 'grab';
-                                setDragging(true);
-                                setDragged(dev.getName());
+                                dragging.current = true;
+                                dragged.current = dev.getName();
                                 return;
                             }
                         }
 
                         // Handle panning the view
-                        setPanning(true);
+                        panning.current = true;
                     }}
                     onMouseUp={(e) => {
                         const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height)
                             .div(2)
-                            .div(scale);
+                            .div(scale.current);
 
-                        if (dragging && dragged !== null && !moved) {
-                            setSelected(dragged);
-                            setDragging(false);
-                            setDragged(null);
+                        if (dragging.current && dragged.current !== null && !moved.current) {
+                            setSelected(dragged.current);
+                            dragging.current = false;
+                            dragged.current = null;
                             return;
                         }
 
-                        setMousePos(
-                            new Vector2D(
-                                e.pageX - e.currentTarget.getBoundingClientRect().left,
-                                e.pageY - e.currentTarget.getBoundingClientRect().top
-                            ).div(scale)
-                        );
+                        mousePos.current = new Vector2D(
+                            e.pageX - e.currentTarget.getBoundingClientRect().left,
+                            e.pageY - e.currentTarget.getBoundingClientRect().top
+                        ).div(scale.current);
 
-                        if (dragging && dragged !== null) {
+                        if (dragging.current && dragged.current !== null) {
                             e.currentTarget.style.cursor = 'pointer';
                             network
-                                .getDevice(dragged)
-                                .setPosition(mousePos.sub(offset.add(centerOffset)).align(GRID_SIZE, snapGrid));
-                        } else if (panning) {
+                                .getDevice(dragged.current)
+                                .setPosition(
+                                    mousePos.current.sub(offset.current.add(centerOffset)).align(GRID_SIZE, snapGrid)
+                                );
+                        } else if (panning.current) {
                             e.currentTarget.style.cursor = 'default';
                         }
 
-                        setPanning(false);
-                        setDragging(false);
-                        setDragged(null);
+                        panning.current = false;
+                        dragging.current = false;
+                        dragged.current = null;
                     }}
                     onMouseMove={(e) => {
                         const centerOffset = new Vector2D(e.currentTarget.width, e.currentTarget.height)
                             .div(2)
-                            .div(scale);
-                        setMousePos(
-                            new Vector2D(
-                                e.pageX - e.currentTarget.getBoundingClientRect().left,
-                                e.pageY - e.currentTarget.getBoundingClientRect().top
-                            ).div(scale)
-                        );
-                        setMoved(true);
+                            .div(scale.current);
+                        mousePos.current = new Vector2D(
+                            e.pageX - e.currentTarget.getBoundingClientRect().left,
+                            e.pageY - e.currentTarget.getBoundingClientRect().top
+                        ).div(scale.current);
+                        moved.current = true;
 
-                        if (dragging && dragged !== null) {
+                        if (dragging.current && dragged.current !== null) {
                             // Drag a device
                             e.currentTarget.style.cursor = 'grab';
                             network
-                                .getDevice(dragged)
-                                .setPosition(mousePos.sub(offset.add(centerOffset)).align(GRID_SIZE, snapGrid));
-                        } else if (panning) {
+                                .getDevice(dragged.current)
+                                .setPosition(
+                                    mousePos.current.sub(offset.current.add(centerOffset)).align(GRID_SIZE, snapGrid)
+                                );
+                        } else if (panning.current) {
                             // Pan the view
                             e.currentTarget.style.cursor = 'grab';
-                            setOffset(offset.add(new Vector2D(e.movementX, e.movementY).div(scale)));
+                            offset.current = offset.current.add(
+                                new Vector2D(e.movementX, e.movementY).div(scale.current)
+                            );
                         } else {
                             for (const dev of network.getDevices()) {
-                                if (dev.collision(mousePos.sub(offset.add(centerOffset)))) {
+                                if (dev.collision(mousePos.current.sub(offset.current.add(centerOffset)))) {
                                     e.currentTarget.style.cursor = 'pointer';
                                     return;
                                 }
@@ -483,17 +486,19 @@ export const NetworkRenderer: React.FC<{
                     onWheel={(e) => {
                         // Handle zooming using the scroll wheel
                         if (e.deltaY > 0) {
-                            if (scale > 0.2) {
-                                setScale(scale - 0.1);
+                            if (scale.current > 0.2) {
+                                scale.current = scale.current - 0.1;
                             }
                         } else if (e.deltaY < 0) {
-                            if (scale < 4) {
-                                setScale(scale + 0.1);
+                            if (scale.current < 4) {
+                                scale.current = scale.current + 0.1;
                             }
                         }
                     }}
                     draw={(ctx) => {
-                        const centerOffset = new Vector2D(ctx.canvas.width, ctx.canvas.height).div(2).div(scale);
+                        const centerOffset = new Vector2D(ctx.canvas.width, ctx.canvas.height)
+                            .div(2)
+                            .div(scale.current);
                         /**
                          * Utility method to draw text on a gray background
                          *
@@ -526,7 +531,7 @@ export const NetworkRenderer: React.FC<{
                         ctx.fillStyle = '#ffffff';
                         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-                        ctx.scale(scale, scale);
+                        ctx.scale(scale.current, scale.current);
 
                         ctx.fillStyle = '#000000';
 
@@ -534,7 +539,7 @@ export const NetworkRenderer: React.FC<{
                         if (showGrid) {
                             for (
                                 let i =
-                                    (offset.x % GRID_SIZE) +
+                                    (offset.current.x % GRID_SIZE) +
                                     centerOffset.x -
                                     Math.ceil(centerOffset.x / GRID_SIZE) * GRID_SIZE;
                                 i < centerOffset.x * 2;
@@ -542,7 +547,7 @@ export const NetworkRenderer: React.FC<{
                             ) {
                                 for (
                                     let j =
-                                        (offset.y % GRID_SIZE) +
+                                        (offset.current.y % GRID_SIZE) +
                                         centerOffset.y -
                                         Math.ceil(centerOffset.y / GRID_SIZE) * GRID_SIZE;
                                     j < centerOffset.y * 2;
@@ -559,13 +564,13 @@ export const NetworkRenderer: React.FC<{
                                 if (intf.getConnection() !== null) {
                                     ctx.lineWidth = 2;
                                     ctx.beginPath();
-                                    ctx.moveTo(...dev.getPosition().add(offset.add(centerOffset)).array());
+                                    ctx.moveTo(...dev.getPosition().add(offset.current.add(centerOffset)).array());
                                     ctx.lineTo(
                                         ...(intf
                                             .getConnection()
                                             ?.getOwner()
                                             ?.getPosition()
-                                            ?.add(offset.add(centerOffset))
+                                            ?.add(offset.current.add(centerOffset))
                                             ?.array() ?? [0, 0])
                                     );
                                     ctx.stroke();
@@ -580,15 +585,15 @@ export const NetworkRenderer: React.FC<{
                             ctx.lineWidth = 2;
                             ctx.setLineDash([5, 5]);
                             ctx.beginPath();
-                            ctx.moveTo(...dev.getPosition().add(offset.add(centerOffset)).array());
-                            ctx.lineTo(...mousePos.array());
+                            ctx.moveTo(...dev.getPosition().add(offset.current.add(centerOffset)).array());
+                            ctx.lineTo(...mousePos.current.array());
                             ctx.stroke();
                             ctx.setLineDash([]);
                         }
 
                         for (const dev of network.getDevices()) {
                             // Draw the devices
-                            dev.draw(ctx, offset.add(centerOffset));
+                            dev.draw(ctx, offset.current.add(centerOffset));
 
                             // And their labels
                             ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -598,26 +603,35 @@ export const NetworkRenderer: React.FC<{
                                     text,
                                     dev
                                         .getPosition()
-                                        .add(offset.add(centerOffset))
+                                        .add(offset.current.add(centerOffset))
                                         .add(new Vector2D(0, -24))
-                                        .mul(scale),
+                                        .mul(scale.current),
                                     true,
                                     true,
                                     16
                                 );
                             } else {
-                                if (dev.collision(mousePos.sub(offset.add(centerOffset)))) {
+                                if (dev.collision(mousePos.current.sub(offset.current.add(centerOffset)))) {
                                     const text = dev.getText();
-                                    showText(text, mousePos.mul(scale).add(new Vector2D(0, -24)), true, false, 16);
+                                    showText(
+                                        text,
+                                        mousePos.current.mul(scale.current).add(new Vector2D(0, -24)),
+                                        true,
+                                        false,
+                                        16
+                                    );
                                 }
                             }
-                            ctx.scale(scale, scale);
+                            ctx.scale(scale.current, scale.current);
                         }
 
                         // Draw the top-left info text
                         ctx.setTransform(1, 0, 0, 1, 0, 0);
-                        showText('Offset: ' + offset.x.toFixed(2) + ';' + offset.y.toFixed(2), new Vector2D(0, 0));
-                        showText('Scale: ' + scale.toFixed(2), new Vector2D(0, 21));
+                        showText(
+                            'Offset: ' + offset.current.x.toFixed(2) + ';' + offset.current.y.toFixed(2),
+                            new Vector2D(0, 0)
+                        );
+                        showText('Scale: ' + scale.current.toFixed(2), new Vector2D(0, 21));
                         showText('Time: ' + network.time().toFixed(4), new Vector2D(0, 42));
                     }}
                     style={{ width: '100%', height: '100%', borderRadius: '0 0 4px 4px' }}></Canvas>
