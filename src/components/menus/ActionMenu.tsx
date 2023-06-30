@@ -1,13 +1,75 @@
-import { Button, Divider, IconButton, ListItemText, Menu, MenuItem, Tooltip } from '@mui/material';
-import { bindMenu, bindTrigger, usePopupState } from 'material-ui-popup-state/hooks';
+import { NavigateNext } from '@mui/icons-material';
+import { Button, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip } from '@mui/material';
+import { bindMenu, bindTrigger, PopupState, usePopupState } from 'material-ui-popup-state/hooks';
 import React from 'react';
 
-type ActionElement =
+export type ActionElement =
     | {
           name: string;
-          action: () => void;
+          action?: () => void;
+          elements?: ActionElement[];
       }
     | 'separator';
+
+const ActionSubMenu: React.FC<{
+    name: string;
+    elements: ActionElement[];
+    rootPopupState: PopupState;
+    parentPopupState: PopupState;
+}> = ({ name, elements, rootPopupState, parentPopupState }) => {
+    const popupState = usePopupState({ parentPopupState, variant: 'popover' });
+
+    return (
+        <>
+            <MenuItem {...bindTrigger(popupState)}>
+                <ListItemText>{name}</ListItemText>
+                <ListItemIcon sx={{ display: 'flex', justifyContent: 'end', marginRight: '-12px' }}>
+                    <NavigateNext />
+                </ListItemIcon>
+            </MenuItem>
+            <Menu
+                MenuListProps={{ dense: true }}
+                {...bindMenu(popupState)}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'left' }}>
+                {elements.map((element, key) => (
+                    <MenuElement element={element} key={key} popupState={popupState} rootPopupState={rootPopupState} />
+                ))}
+            </Menu>
+        </>
+    );
+};
+
+const MenuElement: React.FC<{
+    element: ActionElement;
+    popupState: PopupState;
+    rootPopupState: PopupState;
+}> = ({ element, popupState, rootPopupState }) => {
+    if (element === 'separator') {
+        return <Divider />;
+    } else if (element.elements !== undefined) {
+        return (
+            <ActionSubMenu
+                name={element.name}
+                elements={element.elements}
+                parentPopupState={popupState}
+                rootPopupState={rootPopupState}
+            />
+        );
+    } else {
+        return (
+            <MenuItem
+                onClick={() => {
+                    if (element.action !== undefined) {
+                        element.action();
+                        rootPopupState.close();
+                    }
+                }}>
+                <ListItemText>{element.name}</ListItemText>
+            </MenuItem>
+        );
+    }
+};
 
 export const ActionMenu: React.FC<{
     elements: ActionElement[];
@@ -32,22 +94,9 @@ export const ActionMenu: React.FC<{
                 </Button>
             )}
             <Menu MenuListProps={{ dense: true }} {...bindMenu(popupState)}>
-                {elements.map((element, key) => {
-                    if (element === 'separator') {
-                        return <Divider key={key} />;
-                    } else {
-                        return (
-                            <MenuItem
-                                key={key}
-                                onClick={() => {
-                                    element.action();
-                                    popupState.close();
-                                }}>
-                                <ListItemText>{element.name}</ListItemText>
-                            </MenuItem>
-                        );
-                    }
-                })}
+                {elements.map((element, key) => (
+                    <MenuElement element={element} key={key} popupState={popupState} rootPopupState={popupState} />
+                ))}
             </Menu>
         </>
     );

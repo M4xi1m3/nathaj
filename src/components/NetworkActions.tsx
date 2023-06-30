@@ -1,14 +1,16 @@
 import { Pause, PlayArrow, RestartAlt } from '@mui/icons-material';
 import { IconButton, Tooltip } from '@mui/material';
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { NetworkContext } from '../NetworkContext';
 
 /**
  * Network actions component
  */
-export const NetworkActions: React.FC = () => {
+export const NetworkActions: React.FC<{
+    playing: boolean;
+    setPlaying: (playing: boolean) => void;
+}> = ({ playing, setPlaying }) => {
     const network = useContext(NetworkContext);
-    const [playing, setPlaying] = useState(false);
 
     const handlePlay = () => {
         if (network.isRunning()) network.stop();

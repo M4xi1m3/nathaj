@@ -4,15 +4,32 @@ import { selectFile } from '../../hooks/selectFile';
 import { NetworkContext } from '../../NetworkContext';
 import { SaveDialog } from '../dialogs/SaveDialog';
 import { ActionMenu } from './ActionMenu';
+import { ExampleSubMenu } from './ExampleSubMenu';
 
 export const FileMenu: React.FC<{
     selected: string | null;
     setSelected: (name: string | null) => void;
-}> = ({ setSelected }) => {
+    playing: boolean;
+    setPlaying: (playing: boolean) => void;
+}> = ({ setSelected, setPlaying }) => {
     const [saveOpened, setSaveOpened] = useState<boolean>(false);
 
     const net = useContext(NetworkContext);
     const { enqueueSnackbar } = useSnackbar();
+
+    const loadString = (data: string) => {
+        try {
+            net.reset();
+            setPlaying(false);
+            net.load(JSON.parse(data));
+            setSelected(null);
+            enqueueSnackbar('Loaded successfully');
+        } catch (e: any) {
+            enqueueSnackbar((e as Error).message, {
+                variant: 'error',
+            });
+        }
+    };
 
     return (
         <>
@@ -34,18 +51,15 @@ export const FileMenu: React.FC<{
                                 if (file instanceof File) {
                                     file.arrayBuffer().then((buffer) => {
                                         const dec = new TextDecoder('utf-8');
-                                        try {
-                                            net.load(JSON.parse(dec.decode(buffer)));
-                                            setSelected(null);
-                                        } catch (e: any) {
-                                            enqueueSnackbar((e as Error).message, {
-                                                variant: 'error',
-                                            });
-                                        }
+                                        loadString(dec.decode(buffer));
                                     });
                                 }
                             });
                         },
+                    },
+                    {
+                        name: 'Load example',
+                        elements: ExampleSubMenu(loadString),
                     },
                     {
                         name: 'Clear',

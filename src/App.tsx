@@ -19,6 +19,7 @@ const App: React.FC = () => {
     const [viewAnalyzer, setViewAnalyzer] = useState<boolean>(true);
 
     const [selected, setSelected] = useState<string | null>(null);
+    const [playing, setPlaying] = useState(false);
 
     const noPanel = !(viewNetwork || viewProperties || viewAnalyzer);
 
@@ -53,8 +54,13 @@ const App: React.FC = () => {
         <>
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', wudth: '100%' }}>
                 <Box sx={{ flexGrow: 1 }}>
-                    <TopBar>
-                        <FileMenu selected={selected} setSelected={setSelected} />
+                    <TopBar playing={playing} setPlaying={setPlaying}>
+                        <FileMenu
+                            selected={selected}
+                            setSelected={setSelected}
+                            playing={playing}
+                            setPlaying={setPlaying}
+                        />
                         <AddMenu />
                         <RemoveMenu selected={selected} setSelected={setSelected} />
                         <ViewMenu

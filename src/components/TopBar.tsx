@@ -5,7 +5,11 @@ import { NetworkActions } from './NetworkActions';
 import { ReactComponent as Logo } from '../assets/logo/logo.svg';
 import { LightDarkSwitch } from './Theme';
 
-export const TopBar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const TopBar: React.FC<{
+    children: React.ReactNode;
+    playing: boolean;
+    setPlaying: (playing: boolean) => void;
+}> = ({ children, playing, setPlaying }) => {
     return (
         <AppBar position='static' enableColorOnDark>
             <Toolbar variant='dense'>
@@ -22,7 +26,7 @@ export const TopBar: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     Näthaj
                 </Typography>
                 <Box sx={{ flexGrow: 1, display: 'flex' }}>{children}</Box>
-                <NetworkActions />
+                <NetworkActions playing={playing} setPlaying={setPlaying} />
                 <LightDarkSwitch />
             </Toolbar>
         </AppBar>
