@@ -49,4 +49,4 @@ export class LLC extends Packet<LLCFields> {
     };
 }
 
-Layer.bind(Dot3, LLC, (p) => true);
+Layer.bind(Dot3, LLC, () => true);

@@ -34,9 +34,9 @@ export const NetworkRenderer: React.FC<{
     const [removingLink, setRemovingLink] = useState<boolean>(false);
     const [selectedDev1, setSelectedDev1] = useState<string | null>(null);
     const [removingDevice, setRemovingDevice] = useState<boolean>(false);
-    const [showLabel, setShowLabel] = useState(false);
-    const [showGrid, setShowGrid] = useState(false);
-    const [snapGrid, setSnapGrid] = useState(false);
+    const [showLabel, setShowLabel] = useState(true);
+    const [showGrid, setShowGrid] = useState(true);
+    const [snapGrid, setSnapGrid] = useState(true);
 
     const allActionsOff = () => {
         setRemovingDevice(false);

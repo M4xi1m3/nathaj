@@ -10,22 +10,16 @@ import './assets/index.d';
 import { Theme } from './components/Theme';
 import './index.css';
 import { NetworkContext } from './NetworkContext';
-import { Vector2D } from './simulator/drawing/Vector2D';
 import { Network } from './simulator/network/Network';
-import { STPSwitch } from './simulator/network/peripherals/STPSwitch';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
 const net = new Network();
 
+/**
+ * Trick to allow accessing the network from the js console
+ */
 (window as any)['net'] = net;
-
-new STPSwitch(net, 's1', 4, '00:0b:00:00:01:01');
-new STPSwitch(net, 's2', 5, '00:0b:00:00:02:01');
-
-net.addLink('s1', 's2');
-net.getDevice('s1').setPosition(new Vector2D(0, 0));
-net.getDevice('s2').setPosition(new Vector2D(200, 0));
 
 root.render(
     <React.StrictMode>
