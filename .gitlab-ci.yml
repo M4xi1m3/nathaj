@@ -50,10 +50,15 @@ pages:
   variables:
     GIT_STRATEGY: none
   script:
-    - mv dist public
-    - mv docs public/docs
+    - mkdir -p public/$CI_COMMIT_BRANCH/docs/
+    - mv dist/* "public/$CI_COMMIT_BRANCH"
+    - mv docs/* "public/$CI_COMMIT_BRANCH/docs"
+  cache:
+    paths:
+      - public
   artifacts:
+    name: "$CI_COMMIT_BRANCH"
     paths:
       - public
   only:
-    - develop
+    - branches
