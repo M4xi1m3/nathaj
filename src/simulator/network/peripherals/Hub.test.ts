@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Network } from '../Network';
+import { Ethernet } from '../packets/definitions/Ethernet';
 import { Host } from './Host';
 import { Hub } from './Hub';
 
@@ -18,7 +19,13 @@ describe('Hub', () => {
         net.addLink('hub1', 'h2');
         net.addLink('hub1', 'h3');
 
-        h1.getInterface('eth0').send(new ArrayBuffer(0));
+        const packet = new Ethernet({
+            src: '00:00:00:00:00:01',
+            dst: '00:00:00:00:00:02',
+            type: 0,
+        });
+
+        h1.getInterface('eth0').send(packet.raw());
 
         const h1PacketReveivedSpy = vi.spyOn(h1, 'onPacketReceived');
         const h2PacketReveivedSpy = vi.spyOn(h2, 'onPacketReceived');
