@@ -35,7 +35,7 @@ export class LLC extends Packet<LLCFields> {
     static dissector: Dissector<LLCFields> = (packet, analyzed) => {
         analyzed.protocol = 'LLC';
         analyzed.info =
-            (packet.control === 0xe3 ? 'TEST ' : ' ') +
+            (packet.control === 0xe3 ? 'TEST Request ' : packet.control === 0xf3 ? 'TEST Reply ' : ' ') +
             '(DSAP: ' +
             LLC.fields[0].repr(packet.dsap) +
             ', SSAP: ' +

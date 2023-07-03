@@ -24,12 +24,14 @@ export class Host extends Device {
     constructor(network: Network, name: string, mac?: string) {
         super(network, name);
         if (mac !== undefined) this.addInterface('eth0', mac);
+        this.LLCTestTimer = null;
+        this.expectingLLCFrom = null;
     }
 
     private LLCTestTimer: number | null = null;
     private expectingLLCFrom: string | null = null;
 
-    public sendLLCTest(mac: string, iface: string, expect_reply = true) {
+    public sendLLCTest(mac: string, iface: string, reply = false) {
         if (this.LLCTestTimer !== null) {
             this.dispatchEvent(new Event('llc_test_running'));
             return;
@@ -46,11 +48,11 @@ export class Host extends Device {
             new LLC({
                 ssap: 0,
                 dsap: 0,
-                control: 0xe3,
+                control: reply ? 0xf3 : 0xe3,
             })
         );
 
-        if (expect_reply) {
+        if (!reply) {
             this.LLCTestTimer = this.getNetwork().time() + 5;
             this.expectingLLCFrom = mac;
         }
@@ -64,15 +66,18 @@ export class Host extends Device {
         if (this.isDeviceMac(p.dst) && p instanceof Dot3) {
             const llc = p.getNext();
             if (llc instanceof LLC) {
-                if (llc.ssap === 0 && llc.dsap === 0 && llc.control === 0xe3) {
-                    if (p.src === this.expectingLLCFrom) {
-                        // We are expecting a LLC TEST from that address, don't reply.
-                        this.LLCTestTimer = null;
-                        this.expectingLLCFrom = null;
-                        this.dispatchEvent(new Event('llc_test_success'));
-                    } else {
-                        // We are not expecting a LLC TEST from that address, reply.
-                        this.sendLLCTest(p.src, iface.getName(), false);
+                if (llc.ssap === 0 && llc.dsap === 0) {
+                    if (llc.control === 0xe3) {
+                        // We received a LLC TEST request, reply
+                        this.sendLLCTest(p.src, iface.getName(), true);
+                    } else if (llc.control === 0xf3) {
+                        // We received a LLC TEST reply
+                        if (this.LLCTestTimer !== null && p.src === this.expectingLLCFrom) {
+                            // We were axpecting a reply, trigger the event.
+                            this.LLCTestTimer = null;
+                            this.expectingLLCFrom = null;
+                            this.dispatchEvent(new Event('llc_test_success'));
+                        }
                     }
                 }
             }
@@ -88,7 +93,8 @@ export class Host extends Device {
     }
 
     public reset(): void {
-        //
+        this.LLCTestTimer = null;
+        this.expectingLLCFrom = null;
     }
 
     public getType(): string {
