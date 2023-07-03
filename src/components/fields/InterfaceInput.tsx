@@ -1,6 +1,7 @@
 import { FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import React, { useContext, useEffect } from 'react';
 import { NetworkContext } from '../../NetworkContext';
+import { Device } from '../../simulator/network/peripherals/Device';
 
 interface PortsInputProps {
     device: string | null;
@@ -21,6 +22,7 @@ interface PortsInputProps {
     ];
     free?: boolean;
     connected?: boolean;
+    devFilter?: (dev: Device) => boolean;
 }
 
 export const InterfaceInput: React.FC<PortsInputProps> = ({
@@ -32,6 +34,7 @@ export const InterfaceInput: React.FC<PortsInputProps> = ({
     connectedTo,
     free,
     connected,
+    devFilter,
 }) => {
     const network = useContext(NetworkContext);
 
@@ -57,17 +60,19 @@ export const InterfaceInput: React.FC<PortsInputProps> = ({
                 <FormControl fullWidth variant='standard'>
                     <InputLabel>Device</InputLabel>
                     <Select label='Device' onChange={handleDeviceChange} value={device === null ? '' : device}>
-                        {network.getDevices().map((dev, key) => (
-                            <MenuItem
-                                value={dev.getName()}
-                                disabled={
-                                    (free === true ? !dev.hasFreeInterface() : false) ||
-                                    (connected === true ? !dev.hasConnectedInterface() : false)
-                                }
-                                key={key}>
-                                {dev.getName()}
-                            </MenuItem>
-                        ))}
+                        {(devFilter === undefined ? network.getDevices() : network.getDevices().filter(devFilter)).map(
+                            (dev, key) => (
+                                <MenuItem
+                                    value={dev.getName()}
+                                    disabled={
+                                        (free === true ? !dev.hasFreeInterface() : false) ||
+                                        (connected === true ? !dev.hasConnectedInterface() : false)
+                                    }
+                                    key={key}>
+                                    {dev.getName()}
+                                </MenuItem>
+                            )
+                        )}
                     </Select>
                 </FormControl>
             </Grid>

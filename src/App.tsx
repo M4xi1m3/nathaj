@@ -25,11 +25,11 @@ const App: React.FC = () => {
 
     const net = useContext(NetworkContext);
 
-    const handleUnload = (e: BeforeUnloadEvent) => {
+    const handleUnload = () => {
         localStorage.setItem('workspace', JSON.stringify(net.save()));
     };
 
-    const handleLoad = (e: Event) => {
+    const handleLoad = () => {
         const workspace = localStorage.getItem('workspace');
         if (workspace !== null) {
             try {

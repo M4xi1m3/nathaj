@@ -1,4 +1,3 @@
-import { ToggleOff, ToggleOn } from '@mui/icons-material';
 import { Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { NicPlus } from '../../icons/NicPlus';
@@ -6,13 +5,14 @@ import { NetworkContext } from '../../NetworkContext';
 import { Device } from '../../simulator/network/peripherals/Device';
 import { Host } from '../../simulator/network/peripherals/Host';
 import { Hub } from '../../simulator/network/peripherals/Hub';
-import { PortRole, PortState, STPInterface, STPSwitch } from '../../simulator/network/peripherals/STPSwitch';
+import { STPSwitch } from '../../simulator/network/peripherals/STPSwitch';
 import { Switch } from '../../simulator/network/peripherals/Switch';
 import { AddInterfaceDialog } from '../dialogs/AddInterfaceDialog';
-import { IntProperty } from '../properties/IntProperty';
-import { MACAddressTableProperty } from '../properties/MACAddressTableProperty';
-import { DeviceProperties, InterfaceProperties, Properties } from '../properties/Properties';
-import { Property } from '../properties/Property';
+import { BaseProperties } from '../properties/devs/BaseProperties';
+import { HostProperties } from '../properties/devs/HostProperties';
+import { HubProperties } from '../properties/devs/HubProperties';
+import { StpSwitchProperties } from '../properties/devs/StpSwitchProperties';
+import { SwitchProperties } from '../properties/devs/SwitchProperties';
 
 export const NetowrkProperties: React.FC<{
     selected: string | null;
@@ -81,79 +81,15 @@ export const NetowrkProperties: React.FC<{
                             No device selected
                         </Typography>
                     ) : dev instanceof Host ? (
-                        <>
-                            <Properties>
-                                <DeviceProperties dev={dev} />
-                            </Properties>
-                            <InterfaceProperties dev={dev} />
-                        </>
+                        <HostProperties dev={dev} />
                     ) : dev instanceof STPSwitch ? (
-                        <>
-                            <Properties>
-                                <DeviceProperties dev={dev}>
-                                    <IntProperty
-                                        label='Priority'
-                                        value={dev.getPriority()}
-                                        setValue={(v) => (dev as STPSwitch).setPriority(v)}
-                                        min={0}
-                                        max={65536}
-                                    />
-                                </DeviceProperties>
-                            </Properties>
-                            <MACAddressTableProperty dev={dev} />
-                            <InterfaceProperties
-                                dev={dev}
-                                properties={(intf: STPInterface) => (
-                                    <>
-                                        <Property label='Role' value={PortRole[intf.role]} />
-                                        <Property label='State' value={PortState[intf.state]} />
-                                        <IntProperty
-                                            label='Cost'
-                                            value={intf.path_cost}
-                                            setValue={(v) => intf.setCost(v)}
-                                            min={0}
-                                        />
-                                    </>
-                                )}
-                                actions={(intf: STPInterface) =>
-                                    intf.state === PortState.Disabled ? (
-                                        <Tooltip title='Enable'>
-                                            <IconButton onClick={() => intf.enable()}>
-                                                <ToggleOff color='error' sx={{ fontSize: '16px' }} />
-                                            </IconButton>
-                                        </Tooltip>
-                                    ) : (
-                                        <Tooltip title='Disable'>
-                                            <IconButton onClick={() => intf.disable()}>
-                                                <ToggleOn color='primary' sx={{ fontSize: '16px' }} />
-                                            </IconButton>
-                                        </Tooltip>
-                                    )
-                                }
-                            />
-                        </>
+                        <StpSwitchProperties dev={dev} />
                     ) : dev instanceof Switch ? (
-                        <>
-                            <Properties>
-                                <DeviceProperties dev={dev} />
-                            </Properties>
-                            <MACAddressTableProperty dev={dev} />
-                            <InterfaceProperties dev={dev} />
-                        </>
+                        <SwitchProperties dev={dev} />
                     ) : dev instanceof Hub ? (
-                        <>
-                            <Properties>
-                                <DeviceProperties dev={dev} />
-                            </Properties>
-                            <InterfaceProperties dev={dev} />
-                        </>
+                        <HubProperties dev={dev} />
                     ) : (
-                        <>
-                            <Properties>
-                                <DeviceProperties dev={dev} />
-                            </Properties>
-                            <InterfaceProperties dev={dev} />
-                        </>
+                        <BaseProperties dev={dev} />
                     )}
                 </Grid>
             </Grid>
