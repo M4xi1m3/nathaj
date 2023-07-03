@@ -2,6 +2,7 @@ import { useSnackbar } from 'notistack';
 import React, { useContext, useState } from 'react';
 import { selectFile } from '../../hooks/selectFile';
 import { NetworkContext } from '../../NetworkContext';
+import { AboutDialog } from '../dialogs/AboutDialog';
 import { SaveDialog } from '../dialogs/SaveDialog';
 import { ActionMenu } from './ActionMenu';
 import { ExampleSubMenu } from './ExampleSubMenu';
@@ -13,6 +14,7 @@ export const FileMenu: React.FC<{
     setPlaying: (playing: boolean) => void;
 }> = ({ setSelected, setPlaying }) => {
     const [saveOpened, setSaveOpened] = useState<boolean>(false);
+    const [aboutOpened, setAboutOpened] = useState<boolean>(false);
 
     const net = useContext(NetworkContext);
     const { enqueueSnackbar } = useSnackbar();
@@ -34,6 +36,7 @@ export const FileMenu: React.FC<{
     return (
         <>
             <SaveDialog opened={saveOpened} close={() => setSaveOpened(false)} />
+            <AboutDialog opened={aboutOpened} close={() => setAboutOpened(false)} />
 
             <ActionMenu
                 title='File'
@@ -66,6 +69,13 @@ export const FileMenu: React.FC<{
                         action: () => {
                             net.clear();
                             setSelected(null);
+                        },
+                    },
+                    'separator',
+                    {
+                        name: 'About',
+                        action: () => {
+                            setAboutOpened(true);
                         },
                     },
                 ]}

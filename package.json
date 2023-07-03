@@ -1,7 +1,17 @@
 {
   "name": "nathaj",
+  "description": "A web-based network simulator written in TypeScript using the React library",
   "version": "0.1.0",
   "private": true,
+  "author": {
+    "name": "Maxime FRIESS",
+    "email": "M4x1me@protonmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.unistra.fr/maxime.friess/nathaj.git"
+  },
+  "contributors": [],
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
