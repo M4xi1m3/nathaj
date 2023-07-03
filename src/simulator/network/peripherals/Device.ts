@@ -236,11 +236,15 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
      * @returns {Interface} The new interface
      */
     public addInterface(name: string, mac: string): T {
-        return this.createInterface(
+        const intf = this.createInterface(
             name,
             mac,
             Interface as unknown as new (dev: Device<Interface>, name: string, mac: string) => T
         );
+
+        this.changed();
+
+        return intf;
     }
 
     public removeAllInterfaces(): void {
@@ -272,7 +276,7 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
      * @param {string} name Name of the interface to get
      * @returns {Interface} The interface
      */
-    public getInterface(name: string): T {
+    public getInterface(name: string): T | undefined {
         return this.interfaces[name];
     }
 
@@ -388,6 +392,10 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
     public setPosition(position: Vector2D) {
         super.setPosition(position);
         this.posChanged();
+    }
+
+    public isDeviceMac(mac: string) {
+        return this.getInterfaces().find((i) => i.getMac() === mac) !== undefined;
     }
 
     // TODO: Find a better way to make the class extend Drawable and also

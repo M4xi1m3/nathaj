@@ -1,5 +1,8 @@
 import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
+import { Dot3 } from '../packets/definitions/Dot3';
+import { Ethernet } from '../packets/definitions/Ethernet';
+import { LLC } from '../packets/definitions/LLC';
 import { Device, isSavedDevice, SavedDevice } from './Device';
 import { Interface } from './Interface';
 
@@ -23,13 +26,65 @@ export class Host extends Device {
         if (mac !== undefined) this.addInterface('eth0', mac);
     }
 
+    private LLCTestTimer: number | null = null;
+    private expectingLLCFrom: string | null = null;
+
+    public sendLLCTest(mac: string, iface: string, expect_reply = true) {
+        if (this.LLCTestTimer !== null) {
+            this.dispatchEvent(new Event('llc_test_running'));
+            return;
+        }
+
+        const intf = this.getInterface(iface);
+
+        const packet = new Dot3({
+            src: intf.getMac(),
+            dst: mac,
+        });
+
+        packet.setNext(
+            new LLC({
+                ssap: 0,
+                dsap: 0,
+                control: 0xe3,
+            })
+        );
+
+        if (expect_reply) {
+            this.LLCTestTimer = this.getNetwork().time() + 5;
+            this.expectingLLCFrom = mac;
+        }
+
+        intf.send(packet.raw());
+        this.dispatchEvent(new Event('llc_test_sent'));
+    }
+
     public onPacketReceived(iface: Interface, data: ArrayBuffer): void {
-        iface;
-        data;
+        const p = Ethernet.ethernet(data);
+        if (this.isDeviceMac(p.dst) && p instanceof Dot3) {
+            const llc = p.getNext();
+            if (llc instanceof LLC) {
+                if (llc.ssap === 0 && llc.dsap === 0 && llc.control === 0xe3) {
+                    if (p.src === this.expectingLLCFrom) {
+                        // We are expecting a LLC TEST from that address, don't reply.
+                        this.LLCTestTimer = null;
+                        this.expectingLLCFrom = null;
+                        this.dispatchEvent(new Event('llc_test_success'));
+                    } else {
+                        // We are not expecting a LLC TEST from that address, reply.
+                        this.sendLLCTest(p.src, iface.getName(), false);
+                    }
+                }
+            }
+        }
     }
 
     public tick(): void {
-        //
+        if (this.LLCTestTimer !== null && this.getNetwork().time() > this.LLCTestTimer) {
+            this.LLCTestTimer = null;
+            this.expectingLLCFrom = null;
+            this.dispatchEvent(new Event('llc_test_timeout'));
+        }
     }
 
     public reset(): void {

@@ -34,7 +34,15 @@ export class LLC extends Packet<LLCFields> {
 
     static dissector: Dissector<LLCFields> = (packet, analyzed) => {
         analyzed.protocol = 'LLC';
-        analyzed.info = 'DSAP: ' + packet.dsap + ', SSAP: ' + packet.ssap;
+        analyzed.info =
+            (packet.control === 0xe3 ? 'TEST ' : ' ') +
+            '(DSAP: ' +
+            LLC.fields[0].repr(packet.dsap) +
+            ', SSAP: ' +
+            LLC.fields[1].repr(packet.ssap) +
+            ', Control: ' +
+            LLC.fields[2].repr(packet.control) +
+            ')';
 
         const sub = analyzed.tree.addSubTree('LLC', 0, 3);
         sub?.addItem('DSAP: ' + LLC.fields[0].repr(packet.dsap), 0, 1);
