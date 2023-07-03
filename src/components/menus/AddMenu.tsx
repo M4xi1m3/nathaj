@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PlusNetwork } from '../../icons/PlusNetwork';
 import { AddHostDialog } from '../dialogs/AddHostDialog';
 import { AddHubDialog } from '../dialogs/AddHubDialog';
@@ -10,6 +11,7 @@ import { ActionMenu } from './ActionMenu';
 export const AddMenu: React.FC<{
     icon?: boolean;
 }> = ({ icon }) => {
+    const { t } = useTranslation();
     const [addHostOpened, setAddHostOpened] = useState<boolean>(false);
     const [addHubOpened, setAddHubOpened] = useState<boolean>(false);
     const [addSwitchOpened, setAddSwitchOpened] = useState<boolean>(false);
@@ -27,36 +29,36 @@ export const AddMenu: React.FC<{
             <ActionMenu
                 icon={icon}
                 iconElement={<PlusNetwork />}
-                iconTooltip='Add device'
-                title='Add'
+                iconTooltip={t('menu.add.tooltip')}
+                title={t('menu.add.title')}
                 elements={[
                     {
-                        name: 'Host',
+                        name: t('menu.common.host'),
                         action: () => {
                             setAddHostOpened(true);
                         },
                     },
                     {
-                        name: 'Hub',
+                        name: t('menu.common.hub'),
                         action: () => {
                             setAddHubOpened(true);
                         },
                     },
                     {
-                        name: 'Switch',
+                        name: t('menu.common.switch'),
                         action: () => {
                             setAddSwitchOpened(true);
                         },
                     },
                     {
-                        name: 'STP Switch',
+                        name: t('menu.common.stpswitch'),
                         action: () => {
                             setAddStpSwitchOpened(true);
                         },
                     },
                     'separator',
                     {
-                        name: 'Link',
+                        name: t('menu.common.link'),
                         action: () => {
                             setAddLinkDialogOpened(true);
                         },

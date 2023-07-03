@@ -11,7 +11,6 @@ import {
 } from '@mui/icons-material';
 import TreeView from '@mui/lab/TreeView';
 import {
-    alpha,
     Divider,
     Fab,
     FormControl,
@@ -31,7 +30,9 @@ import {
     useTheme,
 } from '@mui/material';
 import { compileExpression } from 'filtrex';
+import { TFunction } from 'i18next';
 import React, { SyntheticEvent, useContext, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Panel, PanelGroup } from 'react-resizable-panels';
 import { ItemProps, TableComponents, TableVirtuoso, TableVirtuosoHandle } from 'react-virtuoso';
 import { NetworkContext } from '../../NetworkContext';
@@ -40,11 +41,13 @@ import { Ethernet } from '../../simulator/network/packets/definitions/Ethernet';
 import { AnalysisItem, AnalysisTree, AnalyzedPacket } from '../../simulator/network/packets/Packet';
 import { PcapDialog } from '../dialogs/PcapDialog';
 import { HorizontalDivider } from '../Dividers';
+import { HexDumpRenderer } from '../HexDumpRenderer';
 import { CustomTreeItem } from '../IconExpansionTreeView';
 
 interface RowContext {
     selected: null | number;
     setSelected: (id: number) => void;
+    t: TFunction;
 }
 
 const CustomScroller = React.forwardRef<HTMLDivElement>((props, ref) => <TableContainer {...props} ref={ref} />);
@@ -68,22 +71,25 @@ const CustomTableRow: React.FC<
 
 const CustomEmptyPlaceholder: React.FC<{
     context?: RowContext;
-}> = () => (
-    <TableBody>
-        <TableRow>
-            <TableCell colSpan={8} sx={{ border: 'none', textAlign: 'center', padding: '8px' }}>
-                <Typography
-                    sx={{
-                        fontStyle: 'italic',
-                        color: 'text.secondary',
-                    }}
-                    variant='caption'>
-                    No packets to display
-                </Typography>
-            </TableCell>
-        </TableRow>
-    </TableBody>
-);
+}> = () => {
+    const { t } = useTranslation();
+    return (
+        <TableBody>
+            <TableRow>
+                <TableCell colSpan={8} sx={{ border: 'none', textAlign: 'center', padding: '8px' }}>
+                    <Typography
+                        sx={{
+                            fontStyle: 'italic',
+                            color: 'text.secondary',
+                        }}
+                        variant='caption'>
+                        {t('panel.analyzer.nopackets')}
+                    </Typography>
+                </TableCell>
+            </TableRow>
+        </TableBody>
+    );
+};
 
 const VirtuosoTableComponents: TableComponents<AnalyzedPacket, RowContext> = {
     Scroller: CustomScroller,
@@ -107,6 +113,7 @@ const monoSX = {
 
 const FixedHeaderContent = () => {
     const theme = useTheme();
+    const { t } = useTranslation();
 
     return (
         <TableRow
@@ -116,19 +123,19 @@ const FixedHeaderContent = () => {
                     backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))',
                 }),
             }}>
-            <TableCell sx={{ ...commonSX, width: '60px' }}>#</TableCell>
-            <TableCell sx={{ ...commonSX, width: '60px' }}>Time</TableCell>
-            <TableCell sx={{ ...commonSX, width: '60px' }}>Origin</TableCell>
-            <TableCell sx={{ ...commonSX, width: '80px' }}>Direction</TableCell>
-            <TableCell sx={{ ...commonSX, width: '100px' }}>Source</TableCell>
-            <TableCell sx={{ ...commonSX, width: '100px' }}>Destination</TableCell>
-            <TableCell sx={{ ...commonSX, width: '80px' }}>Protocol</TableCell>
-            <TableCell sx={{ ...commonSX, width: '320px' }}>Info</TableCell>
+            <TableCell sx={{ ...commonSX, width: '60px' }}>{t('panel.analyzer.columns.id')}</TableCell>
+            <TableCell sx={{ ...commonSX, width: '60px' }}>{t('panel.analyzer.columns.time')}</TableCell>
+            <TableCell sx={{ ...commonSX, width: '60px' }}>{t('panel.analyzer.columns.origin')}</TableCell>
+            <TableCell sx={{ ...commonSX, width: '80px' }}>{t('panel.analyzer.columns.direction')}</TableCell>
+            <TableCell sx={{ ...commonSX, width: '100px' }}>{t('panel.analyzer.columns.source')}</TableCell>
+            <TableCell sx={{ ...commonSX, width: '100px' }}>{t('panel.analyzer.columns.destination')}</TableCell>
+            <TableCell sx={{ ...commonSX, width: '80px' }}>{t('panel.analyzer.columns.protocol')}</TableCell>
+            <TableCell sx={{ ...commonSX, width: '320px' }}>{t('panel.analyzer.columns.info')}</TableCell>
         </TableRow>
     );
 };
 
-const RowContent = (i: number, v: AnalyzedPacket) => (
+const RowContent = (i: number, v: AnalyzedPacket, { t }: RowContext) => (
     <React.Fragment>
         <TableCell sx={{ ...monoSX }}>{v.id}</TableCell>
         <TableCell sx={{ ...monoSX }}>{v.time.toFixed(4)}</TableCell>
@@ -139,7 +146,7 @@ const RowContent = (i: number, v: AnalyzedPacket) => (
             ) : (
                 <CallMade sx={{ fontSize: 16, mr: 1 }} />
             )}
-            {v.direction}
+            {v.direction === 'ingoing' ? t('panel.analyzer.direction.ingoing') : t('panel.analyzer.direction.outgoing')}
         </TableCell>
         <TableCell sx={{ ...monoSX }}>{v.source}</TableCell>
         <TableCell sx={{ ...monoSX }}>{v.destination}</TableCell>
@@ -163,133 +170,12 @@ const TreeRenderer: React.FC<{ id: string; item: AnalysisItem }> = ({ id, item }
     }
 };
 
-function divideInChunks<T>(arr: T[], size: number): T[][] {
-    return arr.reduce((resultArray: T[][], item: T, index: number) => {
-        const chunkIndex = Math.floor(index / size);
-
-        if (!resultArray[chunkIndex]) {
-            resultArray[chunkIndex] = []; // start a new chunk
-        }
-
-        resultArray[chunkIndex].push(item);
-
-        return resultArray;
-    }, []);
-}
-
-const numberToPrintableChar = (num: number): string => {
-    if (num >= 32 && num < 127) return String.fromCharCode(num);
-    return '.';
-};
-
-/**
- * Render an hex dump
- */
-export const HexDumpRenderer: React.FC<{
-    buffer: ArrayBuffer;
-    space: number;
-    newline: number;
-    selection: null | [number, number][];
-}> = ({ buffer, space, newline, selection }) => {
-    const theme = useTheme();
-
-    const arr: number[] = Array.from(new Uint8Array(buffer).values());
-
-    const data = divideInChunks(arr, newline).map((v: number[]) => divideInChunks(v, space));
-
-    return (
-        <Grid container spacing={2}>
-            <Grid item>
-                {data.map((line, line_no) => (
-                    <Typography
-                        sx={{
-                            fontFamily: 'Roboto Mono',
-                            fontSize: '0.75em',
-                            whiteSpace: 'pre',
-                        }}
-                        key={line_no}>
-                        {line.map((group, group_no) => (
-                            <React.Fragment key={group_no}>
-                                {group.map((v, byte_no) => {
-                                    const index = line_no * newline + group_no * space + byte_no;
-
-                                    let inside = false;
-
-                                    if (selection !== null) {
-                                        for (const [start, end] of selection) {
-                                            if (index >= start && index <= end) {
-                                                inside = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if (inside)
-                                        return (
-                                            <span
-                                                key={byte_no}
-                                                style={{ backgroundColor: alpha(theme.palette.primary.main, 0.2) }}>
-                                                {v.toString(16).padStart(2, '0')}
-                                            </span>
-                                        );
-                                    else return <span key={byte_no}>{v.toString(16).padStart(2, '0')}</span>;
-                                })}
-                                <span> </span>
-                            </React.Fragment>
-                        ))}
-                    </Typography>
-                ))}
-            </Grid>
-            <Grid item>
-                {data.map((line, line_no) => (
-                    <Typography
-                        sx={{
-                            fontFamily: 'Roboto Mono',
-                            fontSize: '0.75em',
-                            whiteSpace: 'pre',
-                        }}
-                        key={line_no}>
-                        {line.map((group, group_no) => (
-                            <React.Fragment key={group_no}>
-                                {group.map((v, byte_no) => {
-                                    const index = line_no * newline + group_no * space + byte_no;
-
-                                    let inside = false;
-
-                                    if (selection !== null) {
-                                        for (const [start, end] of selection) {
-                                            if (index >= start && index <= end) {
-                                                inside = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if (inside)
-                                        return (
-                                            <span
-                                                key={byte_no}
-                                                style={{ backgroundColor: alpha(theme.palette.primary.main, 0.2) }}>
-                                                {numberToPrintableChar(v)}
-                                            </span>
-                                        );
-                                    else return <span key={byte_no}>{numberToPrintableChar(v)}</span>;
-                                })}
-                                <span> </span>
-                            </React.Fragment>
-                        ))}
-                    </Typography>
-                ))}
-            </Grid>
-        </Grid>
-    );
-};
-
 /**
  * Network analyzer component
  */
 export const NetworkAnalyzer: React.FC = () => {
     const network = useContext(NetworkContext);
+    const { t } = useTranslation();
 
     const [filter, setFilter] = useState('');
     const [lastId, setLastId] = useState(0);
@@ -387,16 +273,16 @@ export const NetworkAnalyzer: React.FC = () => {
                             <Stack sx={{ padding: '0px 8px', height: '32px' }} direction='row'>
                                 <Stack direction='row' flexGrow={1}>
                                     <Typography component='h2' variant='h6'>
-                                        Packet analyzer
+                                        {t('panel.analyzer.title')}
                                     </Typography>
                                 </Stack>
                                 <Stack direction='row'>
-                                    <Tooltip title='Save packets'>
+                                    <Tooltip title={t('panel.analyzer.action.save')}>
                                         <IconButton onClick={() => setExportOpen(true)} size='small'>
                                             <Download />
                                         </IconButton>
                                     </Tooltip>
-                                    <Tooltip title='Clear history'>
+                                    <Tooltip title={t('panel.analyzer.action.clear')}>
                                         <IconButton onClick={handleDelete} size='small' color='error'>
                                             <Delete />
                                         </IconButton>
@@ -408,7 +294,7 @@ export const NetworkAnalyzer: React.FC = () => {
                                 <FormControl variant='standard' fullWidth size='medium'>
                                     <Input
                                         error={!filterValid}
-                                        placeholder='Filter'
+                                        placeholder={t('panel.analyzer.action.filter')}
                                         startAdornment={
                                             <InputAdornment position='start'>
                                                 <FilterList />
@@ -437,6 +323,7 @@ export const NetworkAnalyzer: React.FC = () => {
                                         setSelectionBounds(null);
                                         setSelectedPacket(id);
                                     },
+                                    t: t,
                                 }}
                                 components={VirtuosoTableComponents}
                                 fixedHeaderContent={FixedHeaderContent}
@@ -447,7 +334,7 @@ export const NetworkAnalyzer: React.FC = () => {
                             {!atBottom ? (
                                 <Fab
                                     color='primary'
-                                    aria-label='Scroll to bottom'
+                                    aria-label={t('panel.analyzer.action.gobottom')}
                                     sx={{
                                         position: 'absolute',
                                         bottom: '16px',

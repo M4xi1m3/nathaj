@@ -11,7 +11,9 @@ import {
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import React, { useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { saveBin } from '../../hooks/saveBin';
+import { useEnqueueError } from '../../hooks/useEnqueueError';
 import { NetworkContext } from '../../NetworkContext';
 import { AnalyzedPacket } from '../../simulator/network/packets/Packet';
 import { PcapngWriter } from '../../simulator/pcapng/PcapngWriter';
@@ -24,8 +26,10 @@ interface PcapDialogProps {
 
 export const PcapDialog: React.FC<PcapDialogProps> = ({ opened, close, packets }) => {
     const network = useContext(NetworkContext);
+    const { t } = useTranslation();
 
     const { enqueueSnackbar } = useSnackbar();
+    const enqueueError = useEnqueueError();
 
     const [name, setName] = useState<string>('');
     const nameError = name === '';
@@ -40,10 +44,10 @@ export const PcapDialog: React.FC<PcapDialogProps> = ({ opened, close, packets }
 
     return (
         <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
-            <DialogTitle>Save packets</DialogTitle>
+            <DialogTitle>{t('dialog.pcap.title')}</DialogTitle>
             <DialogContent>
                 <FormControl fullWidth margin='dense' error={nameError} variant='standard'>
-                    <InputLabel>File name</InputLabel>
+                    <InputLabel>{t('dialog.common.filename')}</InputLabel>
                     <Input
                         type='text'
                         value={name}
@@ -53,20 +57,20 @@ export const PcapDialog: React.FC<PcapDialogProps> = ({ opened, close, packets }
                 </FormControl>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => close()}>Cancel</Button>
+                <Button onClick={() => close()}>{t('dialog.common.cancel')}</Button>
                 <Button
                     onClick={() => {
                         try {
                             const data = PcapngWriter.write(network, packets);
                             saveBin(data, name + '.pcapng');
-                            enqueueSnackbar('Network saved as ' + name + '.pcapng');
+                            enqueueSnackbar(t('dialog.pcap.success', { name: name + '.pcapng' }));
                         } catch (e: any) {
-                            enqueueSnackbar((e as Error).message, { variant: 'error' });
+                            enqueueError(e);
                         }
                         close();
                     }}
                     disabled={nameError}>
-                    Save
+                    {t('dialog.common.save')}
                 </Button>
             </DialogActions>
         </Dialog>

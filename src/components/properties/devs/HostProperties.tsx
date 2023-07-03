@@ -1,6 +1,7 @@
 import { IconButton, Tooltip } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LANPending } from '../../../icons/LANPending';
 import { Host } from '../../../simulator/network/peripherals/Host';
 import { Interface } from '../../../simulator/network/peripherals/Interface';
@@ -10,11 +11,12 @@ import { DeviceProperties, InterfaceProperties, Properties } from '../Properties
 const IntfActions: React.FC<{
     intf: Interface;
 }> = ({ intf }) => {
+    const { t } = useTranslation();
     const [llcTestOpened, setLlcTestOpened] = useState(false);
     return (
         <>
             <LLCTestDialog intf={intf} opened={llcTestOpened} close={() => setLlcTestOpened(false)} />
-            <Tooltip title='Send LLC TEST'>
+            <Tooltip title={t('panel.properties.host.action.llctest')}>
                 <IconButton onClick={() => setLlcTestOpened(true)}>
                     <LANPending sx={{ fontSize: '16px' }} />
                 </IconButton>
@@ -26,25 +28,26 @@ const IntfActions: React.FC<{
 export const HostProperties: React.FC<{
     dev: Host;
 }> = ({ dev }) => {
+    const { t } = useTranslation();
     const { enqueueSnackbar } = useSnackbar();
 
     const llcTestSent = () => {
-        enqueueSnackbar('LLC TEST Sent', {
+        enqueueSnackbar(t('panel.properties.host.snack.llcsent'), {
             variant: 'info',
         });
     };
     const llcTestRunning = () => {
-        enqueueSnackbar('LLC TEST Already running', {
+        enqueueSnackbar(t('panel.properties.host.snack.llcrunning'), {
             variant: 'warning',
         });
     };
     const llcTestSuccess = () => {
-        enqueueSnackbar('LLC TEST Success', {
+        enqueueSnackbar(t('panel.properties.host.snack.llcsuccess'), {
             variant: 'success',
         });
     };
     const llcTestTimeout = () => {
-        enqueueSnackbar('LLC TEST Timed out', {
+        enqueueSnackbar(t('panel.properties.host.snack.llctimeout'), {
             variant: 'warning',
         });
     };

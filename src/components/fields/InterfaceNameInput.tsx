@@ -1,5 +1,6 @@
 import { TextField } from '@mui/material';
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Device } from '../../simulator/network/peripherals/Device';
 
 interface NameInputProps {
@@ -11,6 +12,7 @@ interface NameInputProps {
 }
 
 export const InterfaceNameInput: React.FC<NameInputProps> = ({ name, setName, setNameError, nameError, device }) => {
+    const { t } = useTranslation();
     useEffect(() => {
         setNameError(name === '' || device === null || device.hasInterface(name));
     }, [setNameError, device, name]);
@@ -19,7 +21,7 @@ export const InterfaceNameInput: React.FC<NameInputProps> = ({ name, setName, se
         <TextField
             variant='standard'
             type='text'
-            label='Name'
+            label={t('field.interfacename.label')}
             fullWidth
             margin='dense'
             value={name}

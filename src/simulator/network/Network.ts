@@ -11,10 +11,14 @@ import { isSavedSwitch, Switch } from './peripherals/Switch';
  */
 export class NetworkException extends Error {
     network: Network;
+    i18n: string;
+    i18nargs: any;
 
-    constructor(description: string, network: Network) {
+    constructor(description: string, network: Network, i18n: string, i18nargs: any) {
         super(description);
         this.network = network;
+        this.i18n = i18n;
+        this.i18nargs = i18nargs;
     }
 }
 
@@ -23,7 +27,9 @@ export class NetworkException extends Error {
  */
 export class DeviceNameTaken extends NetworkException {
     constructor(network: Network, name: string) {
-        super('Device ' + name + ' already exists in network!', network);
+        super('Device ' + name + ' already exists in network!', network, 'exception.network.devicenametaken', {
+            name: name,
+        });
     }
 }
 
@@ -32,7 +38,9 @@ export class DeviceNameTaken extends NetworkException {
  */
 export class DeviceNotFound extends NetworkException {
     constructor(network: Network, name: string) {
-        super('Device ' + name + ' does net exist!', network);
+        super('Device ' + name + ' does net exist!', network, 'exception.network.devicenotfound', {
+            name: name,
+        });
     }
 }
 
@@ -41,7 +49,7 @@ export class DeviceNotFound extends NetworkException {
  */
 export class NetworkAlreadyRunningException extends NetworkException {
     constructor(network: Network) {
-        super('Network is already running', network);
+        super('Network is already running', network, 'exception.network.alreadyrunning', {});
     }
 }
 
@@ -50,11 +58,14 @@ export class NetworkAlreadyRunningException extends NetworkException {
  */
 export class NetworkNotRunningException extends NetworkException {
     constructor(network: Network) {
-        super('Network is not running', network);
+        super('Network is not running', network, 'exception.network.notrunning', {});
     }
 }
 
 export class InvalidNetwork extends Error {
+    i18n = 'exception.network.invalid';
+    i18nargs: any = {};
+
     constructor() {
         super('Invalid network');
     }
@@ -440,5 +451,7 @@ export class Network extends EventTarget {
                     );
             });
         });
+
+        this.reset();
     }
 }

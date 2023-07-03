@@ -8,6 +8,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './assets/index.d';
 import { Theme } from './components/Theme';
+import './i18n';
 import './index.css';
 import { NetworkContext } from './NetworkContext';
 import { Network } from './simulator/network/Network';

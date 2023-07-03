@@ -1,6 +1,8 @@
 import { useSnackbar } from 'notistack';
 import React, { useContext, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { selectFile } from '../../hooks/selectFile';
+import { useEnqueueError } from '../../hooks/useEnqueueError';
 import { NetworkContext } from '../../NetworkContext';
 import { AboutDialog } from '../dialogs/AboutDialog';
 import { SaveDialog } from '../dialogs/SaveDialog';
@@ -13,11 +15,13 @@ export const FileMenu: React.FC<{
     playing: boolean;
     setPlaying: (playing: boolean) => void;
 }> = ({ setSelected, setPlaying }) => {
+    const { t } = useTranslation();
     const [saveOpened, setSaveOpened] = useState<boolean>(false);
     const [aboutOpened, setAboutOpened] = useState<boolean>(false);
 
     const net = useContext(NetworkContext);
     const { enqueueSnackbar } = useSnackbar();
+    const enqueueError = useEnqueueError();
 
     const loadString = (data: string) => {
         try {
@@ -27,9 +31,7 @@ export const FileMenu: React.FC<{
             setSelected(null);
             enqueueSnackbar('Loaded successfully');
         } catch (e: any) {
-            enqueueSnackbar((e as Error).message, {
-                variant: 'error',
-            });
+            enqueueError(e);
         }
     };
 
@@ -39,16 +41,16 @@ export const FileMenu: React.FC<{
             <AboutDialog opened={aboutOpened} close={() => setAboutOpened(false)} />
 
             <ActionMenu
-                title='File'
+                title={t('menu.file.title')}
                 elements={[
                     {
-                        name: 'Save',
+                        name: t('menu.file.save'),
                         action: () => {
                             setSaveOpened(true);
                         },
                     },
                     {
-                        name: 'Load',
+                        name: t('menu.file.load'),
                         action: () => {
                             selectFile('application/json', false).then((file: File | File[]) => {
                                 if (file instanceof File) {
@@ -61,11 +63,11 @@ export const FileMenu: React.FC<{
                         },
                     },
                     {
-                        name: 'Load example',
-                        elements: ExampleSubMenu(loadString),
+                        name: t('menu.file.example.title'),
+                        elements: ExampleSubMenu(loadString, t),
                     },
                     {
-                        name: 'Clear',
+                        name: t('menu.file.clear'),
                         action: () => {
                             net.clear();
                             setSelected(null);
@@ -73,7 +75,7 @@ export const FileMenu: React.FC<{
                     },
                     'separator',
                     {
-                        name: 'About',
+                        name: t('menu.file.about'),
                         action: () => {
                             setAboutOpened(true);
                         },

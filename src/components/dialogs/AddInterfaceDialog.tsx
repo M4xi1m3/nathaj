@@ -1,6 +1,8 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useEnqueueError } from '../../hooks/useEnqueueError';
 import { Device } from '../../simulator/network/peripherals/Device';
 import { InterfaceNameInput } from '../fields/InterfaceNameInput';
 import { MacInput } from '../fields/MacInput';
@@ -13,6 +15,9 @@ interface AddInterfaceDialogProps {
 
 export const AddInterfaceDialog: React.FC<AddInterfaceDialogProps> = ({ opened, close, device }) => {
     const { enqueueSnackbar } = useSnackbar();
+    const enqueueError = useEnqueueError();
+
+    const { t } = useTranslation();
 
     const [name, setName] = useState<string>('');
     const [nameError, setNameError] = useState<boolean>(false);
@@ -28,7 +33,7 @@ export const AddInterfaceDialog: React.FC<AddInterfaceDialogProps> = ({ opened, 
 
     return (
         <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
-            <DialogTitle>Add Interface</DialogTitle>
+            <DialogTitle>{t('dialog.addinterface.title')}</DialogTitle>
             <DialogContent>
                 <InterfaceNameInput
                     name={name}
@@ -40,19 +45,19 @@ export const AddInterfaceDialog: React.FC<AddInterfaceDialogProps> = ({ opened, 
                 <MacInput mac={mac} setMac={setMac} setMacError={setMacError} macError={macError} />
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => close()}>Cancel</Button>
+                <Button onClick={() => close()}>{t('dialog.common.cancel')}</Button>
                 <Button
                     onClick={() => {
                         try {
                             device.addInterface(name, mac);
-                            enqueueSnackbar('Interface ' + name + ' added');
+                            enqueueSnackbar(t('dialog.addinterface.success', { name }));
                         } catch (e: any) {
-                            enqueueSnackbar((e as Error).message, { variant: 'error' });
+                            enqueueError(e);
                         }
                         close();
                     }}
                     disabled={nameError || macError}>
-                    Add
+                    {t('dialog.common.add')}
                 </Button>
             </DialogActions>
         </Dialog>

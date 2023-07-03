@@ -1,5 +1,6 @@
 import { FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import React, { useContext, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NetworkContext } from '../../NetworkContext';
 import { Device } from '../../simulator/network/peripherals/Device';
 
@@ -37,6 +38,7 @@ export const InterfaceInput: React.FC<PortsInputProps> = ({
     devFilter,
 }) => {
     const network = useContext(NetworkContext);
+    const { t } = useTranslation();
 
     const handleDeviceChange = (event: SelectChangeEvent) => {
         const val = event.target.value as string;
@@ -58,8 +60,11 @@ export const InterfaceInput: React.FC<PortsInputProps> = ({
         <Grid container columnSpacing={2}>
             <Grid item xs={6}>
                 <FormControl fullWidth variant='standard'>
-                    <InputLabel>Device</InputLabel>
-                    <Select label='Device' onChange={handleDeviceChange} value={device === null ? '' : device}>
+                    <InputLabel>{t('field.device.label')}</InputLabel>
+                    <Select
+                        label={t('field.device.label')}
+                        onChange={handleDeviceChange}
+                        value={device === null ? '' : device}>
                         {(devFilter === undefined ? network.getDevices() : network.getDevices().filter(devFilter)).map(
                             (dev, key) => (
                                 <MenuItem
@@ -78,9 +83,9 @@ export const InterfaceInput: React.FC<PortsInputProps> = ({
             </Grid>
             <Grid item xs={6}>
                 <FormControl fullWidth variant='standard'>
-                    <InputLabel>Interface</InputLabel>
+                    <InputLabel>{t('field.interface.label')}</InputLabel>
                     <Select
-                        label='Interface'
+                        label={t('field.interface.label')}
                         onChange={handleIntfChange}
                         value={intf === null ? '' : intf}
                         disabled={device === null}>

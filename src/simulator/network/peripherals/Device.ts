@@ -9,10 +9,14 @@ import { Interface, isSavedInterface, ReceivedPacketEventData, SavedInterface } 
  */
 export class DeviceException extends Error {
     device: Device;
+    i18n: string;
+    i18nargs: any;
 
-    constructor(description: string, device: Device) {
+    constructor(description: string, device: Device, i18n: string, i18nargs: any) {
         super(description);
         this.device = device;
+        this.i18n = i18n;
+        this.i18nargs = i18nargs;
     }
 }
 
@@ -21,7 +25,15 @@ export class DeviceException extends Error {
  */
 export class InterfaceNameTaken extends DeviceException {
     constructor(device: Device, name: string) {
-        super('Device ' + device.getName() + ' already has an interface named ' + name + '.', device);
+        super(
+            'Device ' + device.getName() + ' already has an interface named ' + name + '.',
+            device,
+            'exception.device.interfacenametaken',
+            {
+                name: device.getName(),
+                interface: name,
+            }
+        );
     }
 }
 
@@ -30,7 +42,15 @@ export class InterfaceNameTaken extends DeviceException {
  */
 export class InterfaceNotFound extends DeviceException {
     constructor(device: Device, name: string) {
-        super('Device ' + device.getName() + ' has no interface named ' + name + '.', device);
+        super(
+            'Device ' + device.getName() + ' has no interface named ' + name + '.',
+            device,
+            'exception.device.interfacenotfound',
+            {
+                name: device.getName(),
+                interface: name,
+            }
+        );
     }
 }
 
@@ -39,7 +59,14 @@ export class InterfaceNotFound extends DeviceException {
  */
 export class NoFreeInterfaces extends DeviceException {
     constructor(device: Device) {
-        super('No free interfaces available on device ' + device.getName() + '.', device);
+        super(
+            'No free interfaces available on device ' + device.getName() + '.',
+            device,
+            'exception.device.nofreeinterface',
+            {
+                name: device.getName(),
+            }
+        );
     }
 }
 
@@ -48,7 +75,9 @@ export class NoFreeInterfaces extends DeviceException {
  */
 export class DeviceRemoved extends DeviceException {
     constructor(device: Device) {
-        super('Device ' + device.getName() + ' has been removed.', device);
+        super('Device ' + device.getName() + ' has been removed.', device, 'exception.device.deviceremoved', {
+            name: device.getName(),
+        });
     }
 }
 

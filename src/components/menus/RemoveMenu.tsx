@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RemoveDeviceDialog } from '../dialogs/RemoveDeviceDialog';
 import { RemoveLinkDialog } from '../dialogs/RemoveLinkDialog';
 import { ActionMenu } from './ActionMenu';
@@ -7,6 +8,7 @@ export const RemoveMenu: React.FC<{
     selected: string | null;
     setSelected: (name: string | null) => void;
 }> = ({ selected, setSelected }) => {
+    const { t } = useTranslation();
     const [removeDeviceOpened, setRemoveDeviceOpened] = useState<boolean>(false);
     const [removeLinkOpened, setRemoveLinkOpened] = useState<boolean>(false);
 
@@ -21,16 +23,16 @@ export const RemoveMenu: React.FC<{
             <RemoveLinkDialog opened={removeLinkOpened} close={() => setRemoveLinkOpened(false)} />
 
             <ActionMenu
-                title='Remove'
+                title={t('menu.remove.title')}
                 elements={[
                     {
-                        name: 'Device',
+                        name: t('menu.common.device'),
                         action: () => {
                             setRemoveDeviceOpened(true);
                         },
                     },
                     {
-                        name: 'Link',
+                        name: t('menu.common.link'),
                         action: () => {
                             setRemoveLinkOpened(true);
                         },
