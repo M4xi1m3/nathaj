@@ -23,6 +23,7 @@ build:
         - yarn.lock
     paths:
       - node_modules/
+  needs: []
 
 test:
   image: node:latest
@@ -43,6 +44,7 @@ test:
       coverage_report:
         coverage_format: cobertura
         path: coverage/clover.xml
+  needs: []
 
 pages:
   image: alpine:latest
@@ -50,15 +52,15 @@ pages:
   variables:
     GIT_STRATEGY: none
   script:
-    - mkdir -p public/$CI_COMMIT_BRANCH/docs/
-    - mv dist/* "public/$CI_COMMIT_BRANCH"
-    - mv docs/* "public/$CI_COMMIT_BRANCH/docs"
+    - mkdir -p public/docs/
+    - mv dist/* "public"
+    - mv docs/* "public/docs"
   cache:
     paths:
       - public
   artifacts:
-    name: "$CI_COMMIT_BRANCH"
     paths:
       - public
   only:
-    - branches
+    - develop
+  needs: ['build']
