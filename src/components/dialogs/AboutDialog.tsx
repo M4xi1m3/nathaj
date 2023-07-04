@@ -34,6 +34,26 @@ const LogoPart: React.FC = () => {
     );
 };
 
+export const CopyrightText: React.FC = () => {
+    const { t } = useTranslation();
+    return (
+        <>
+            {t('dialog.about.copyright')}
+            {' 2023 ' + packageJson.author.name}
+            {packageJson.contributors.length > 0 ? ' et al.' : ''}
+            <br />
+            <Trans
+                t={t}
+                i18nKey='dialog.about.notice'
+                components={{
+                    license: <Link href='COPYING' />,
+                    repo: <Link href={packageJson.repository.url} />,
+                }}
+            />
+        </>
+    );
+};
+
 export const AboutDialog: React.FC<AboutDialogProps> = ({ opened, close }) => {
     const { t } = useTranslation();
 
@@ -51,18 +71,7 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ opened, close }) => {
                         flexGrow: 1,
                     }}>
                     <Typography gutterBottom variant='caption' sx={{ textAlign: 'center' }}>
-                        {t('dialog.about.copyright')}
-                        {' 2023 ' + packageJson.author.name}
-                        {packageJson.contributors.length > 0 ? ' et al.' : ''}
-                        <br />
-                        <Trans
-                            t={t}
-                            i18nKey='dialog.about.notice'
-                            components={{
-                                license: <Link href='/COPYING' />,
-                                repo: <Link href={packageJson.repository.url} />,
-                            }}
-                        />
+                        <CopyrightText />
                     </Typography>
                 </Box>
             </DialogContent>

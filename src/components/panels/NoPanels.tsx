@@ -1,10 +1,11 @@
-import { Box, Link, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import React from 'react';
 
 import { ReactComponent as LogoLight } from '../../assets/logo/light.svg';
 
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import packageJson from '../../../package.json';
+import { CopyrightText } from '../dialogs/AboutDialog';
 
 export const NoPanels: React.FC = () => {
     const { t } = useTranslation();
@@ -30,18 +31,7 @@ export const NoPanels: React.FC = () => {
             </Box>
             <Box sx={{ width: '100%', textAlign: 'center', paddingBottom: '16px' }}>
                 <Typography gutterBottom variant='caption' sx={{ textAlign: 'center', filter: 'opacity(60%)' }}>
-                    {t('dialog.about.copyright')}
-                    {' 2023 ' + packageJson.author.name}
-                    {packageJson.contributors.length > 0 ? ' et al.' : ''}
-                    <br />
-                    <Trans
-                        t={t}
-                        i18nKey='dialog.about.notice'
-                        components={{
-                            license: <Link href='/COPYING' />,
-                            repo: <Link href={packageJson.repository.url} />,
-                        }}
-                    />
+                    <CopyrightText />
                 </Typography>
             </Box>
         </Stack>
