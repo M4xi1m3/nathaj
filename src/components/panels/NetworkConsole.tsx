@@ -2,6 +2,7 @@ import { Delete } from '@mui/icons-material';
 import { Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Terminal } from '../terminal/Terminal';
 
 /**
  * Network console component
@@ -28,7 +29,42 @@ export const NetworkConsole: React.FC = () => {
                 </Stack>
                 <Divider />
             </Grid>
-            <Grid item></Grid>
+            {/* TODO: Find a way to do that without using calc with a fixed height */}
+            {/*
+                Command list:
+                 - start
+                 - stop
+                 - reset
+                 - destroy
+                 - save <filename>
+                 - load
+                 - example load <path>
+                 - example list
+                 - show <panel>
+                 - hide <panel>
+                 - dev add <type> <name> <mac>
+                 - dev remove <name>
+                 - dev link <a> <b>
+                 - dev unlink <a> <b>
+                 - dev set <name> <prop> <value>
+                 - dev get <name> <prop>
+                 - dev info <name>
+                 - dev intf add <name> <intf> <mac>
+                 - dev intf remove <name> <intf>
+                 - dev intf link <a> <intfa> <b> <intfb>
+                 - dev intf unlink <a> <intfa> <b> <intfb>
+                 - dev intf get <name> <intf> <prop>
+                 - dev intf set <name> <intf> <prop> <value>
+                 - dev intf info <name> <intf>
+            */}
+            <Grid item sx={{ height: '100%', overflow: 'hidden' }}>
+                <Terminal
+                    commands={{
+                        clear: (c, { clear }) => clear(),
+                        print: ({ args }, { print }) => print(args.join(' ')),
+                    }}
+                />
+            </Grid>
         </Grid>
     );
 };
