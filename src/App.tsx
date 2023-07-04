@@ -1,5 +1,6 @@
 import { Box, Paper } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Panel, PanelGroup } from 'react-resizable-panels';
 import { HorizontalDivider, VerticalDivider } from './components/Dividers';
 import { AddMenu } from './components/menus/AddMenu';
@@ -14,6 +15,9 @@ import { TopBar } from './components/TopBar';
 import { NetworkContext } from './NetworkContext';
 
 const App: React.FC = () => {
+    const { t } = useTranslation();
+
+    // View attributes for the different panels
     const [viewNetwork, setViewNetwork] = useState<boolean>(true);
     const [viewProperties, setViewProperties] = useState<boolean>(true);
     const [viewAnalyzer, setViewAnalyzer] = useState<boolean>(true);
@@ -25,10 +29,12 @@ const App: React.FC = () => {
 
     const net = useContext(NetworkContext);
 
+    // Save the workspace to local storage when pags unloads
     const handleUnload = () => {
         localStorage.setItem('workspace', JSON.stringify(net.save()));
     };
 
+    // Load from local storage when page loads
     const handleLoad = () => {
         const workspace = localStorage.getItem('workspace');
         if (workspace !== null) {
@@ -40,6 +46,7 @@ const App: React.FC = () => {
         }
     };
 
+    // Bin load and unload events
     useEffect(() => {
         window.addEventListener('beforeunload', handleUnload);
         window.addEventListener('load', handleLoad);
@@ -65,9 +72,9 @@ const App: React.FC = () => {
                         <RemoveMenu selected={selected} setSelected={setSelected} />
                         <ViewMenu
                             elements={[
-                                { name: 'Network', view: viewNetwork, setView: setViewNetwork },
-                                { name: 'Properties', view: viewProperties, setView: setViewProperties },
-                                { name: 'Packet analyzer', view: viewAnalyzer, setView: setViewAnalyzer },
+                                { name: t('panel.network.title'), view: viewNetwork, setView: setViewNetwork },
+                                { name: t('panel.properties.title'), view: viewProperties, setView: setViewProperties },
+                                { name: t('panel.analyzer.title'), view: viewAnalyzer, setView: setViewAnalyzer },
                             ]}
                         />
                     </TopBar>

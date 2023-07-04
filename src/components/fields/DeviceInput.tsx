@@ -1,5 +1,6 @@
 import { FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import React, { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NetworkContext } from '../../NetworkContext';
 
 interface PortsInputProps {
@@ -9,6 +10,7 @@ interface PortsInputProps {
 
 export const DeviceInput: React.FC<PortsInputProps> = ({ device, setDevice }) => {
     const network = useContext(NetworkContext);
+    const { t } = useTranslation();
 
     const handleChange = (event: SelectChangeEvent) => {
         const val = event.target.value as string;
@@ -18,8 +20,8 @@ export const DeviceInput: React.FC<PortsInputProps> = ({ device, setDevice }) =>
 
     return (
         <FormControl fullWidth variant='standard'>
-            <InputLabel>Device</InputLabel>
-            <Select label='Device' onChange={handleChange} value={device === null ? '' : device}>
+            <InputLabel>{t('field.device.label')}</InputLabel>
+            <Select label={t('field.device.label')} onChange={handleChange} value={device === null ? '' : device}>
                 {network.getDevices().map((dev, key) => (
                     <MenuItem value={dev.getName()} key={key}>
                         {dev.getName()}

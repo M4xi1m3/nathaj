@@ -14,10 +14,14 @@ export type ReceivedPacketEventData = {
  */
 export class InterfaceException extends Error {
     iface: Interface;
+    i18n: string;
+    i18nargs: any;
 
-    constructor(description: string, iface: Interface) {
+    constructor(description: string, iface: Interface, i18n: string, i18nargs: any) {
         super(description);
         this.iface = iface;
+        this.i18n = i18n;
+        this.i18nargs = i18nargs;
     }
 }
 
@@ -26,7 +30,14 @@ export class InterfaceException extends Error {
  */
 export class ConnectionToItselfException extends InterfaceException {
     constructor(iface: Interface) {
-        super('Tying to connect interface ' + iface.getFullName() + ' to itself.', iface);
+        super(
+            'Tying to connect interface ' + iface.getFullName() + ' to itself.',
+            iface,
+            'exception.interface.connectiontoself',
+            {
+                name: iface.getFullName(),
+            }
+        );
     }
 }
 
@@ -35,7 +46,14 @@ export class ConnectionToItselfException extends InterfaceException {
  */
 export class AlreadyConnectedException extends InterfaceException {
     constructor(iface: Interface) {
-        super('Interface ' + iface.getFullName() + ' is already connected.', iface);
+        super(
+            'Interface ' + iface.getFullName() + ' is already connected.',
+            iface,
+            'exception.interface.alreadyconnected',
+            {
+                name: iface.getFullName(),
+            }
+        );
     }
 }
 
@@ -46,7 +64,12 @@ export class NotInSameNetworkException extends InterfaceException {
     constructor(iface: Interface, other: Interface) {
         super(
             'Interface ' + iface.getFullName() + ' and ' + other.getFullName() + ' are not in the same network.',
-            iface
+            iface,
+            'exception.interface.notinsamenetwork',
+            {
+                name: iface.getFullName(),
+                other: other.getFullName(),
+            }
         );
     }
 }
@@ -56,7 +79,9 @@ export class NotInSameNetworkException extends InterfaceException {
  */
 export class NotConnectedException extends InterfaceException {
     constructor(iface: Interface) {
-        super('Interface ' + iface.getFullName() + ' is not connected.', iface);
+        super('Interface ' + iface.getFullName() + ' is not connected.', iface, 'exception.interface.notconnected', {
+            name: iface.getFullName(),
+        });
     }
 }
 
@@ -65,7 +90,7 @@ export class NotConnectedException extends InterfaceException {
  */
 export class DisconnectedException extends InterfaceException {
     constructor(iface: Interface) {
-        super('Interface is disconnected.', iface);
+        super('Interface is disconnected.', iface, 'exception.interface.disconnected', {});
     }
 }
 

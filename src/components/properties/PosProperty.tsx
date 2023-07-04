@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Vector2D } from '../../simulator/drawing/Vector2D';
 import { Device } from '../../simulator/network/peripherals/Device';
 import { FloatProperty } from './FloatProperty';
@@ -6,6 +7,8 @@ import { FloatProperty } from './FloatProperty';
 export const PosProperty: React.FC<{
     dev: Device;
 }> = ({ dev }) => {
+    const { t } = useTranslation();
+
     // TODO: Envie de crever
     const [chg, setChg] = useState(0);
     useEffect(() => {
@@ -27,12 +30,12 @@ export const PosProperty: React.FC<{
     return (
         <>
             <FloatProperty
-                label='X'
+                label={t('panel.properties.pos.x')}
                 value={dev.getPosition().x}
                 setValue={(v) => dev.setPosition(new Vector2D(v, dev.getPosition().y))}
             />
             <FloatProperty
-                label='Y'
+                label={t('panel.properties.pos.y')}
                 value={dev.getPosition().y}
                 setValue={(v) => dev.setPosition(new Vector2D(dev.getPosition().x, v))}
             />

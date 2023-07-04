@@ -1,8 +1,14 @@
 const macRegexp = new RegExp('^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$');
 
 export class InvalidMACException extends Error {
+    i18n: string;
+    i18nargs: any;
+
     constructor(mac: string) {
         super('Invalid mac address ' + mac + '.');
+
+        this.i18n = 'exception.mac.invalid';
+        this.i18nargs = { address: mac };
     }
 }
 

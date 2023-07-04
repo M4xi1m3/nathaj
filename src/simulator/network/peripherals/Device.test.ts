@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { InvalidMACException } from '../../utils/Mac';
 import { Network } from '../Network';
 import { Device, InterfaceNameTaken, NoFreeInterfaces, SavedDevice } from './Device';
-import { Interface, InvalidMACException } from './Interface';
+import { Interface } from './Interface';
 
 describe('Device', () => {
     /**

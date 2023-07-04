@@ -1,5 +1,6 @@
 import { Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NicPlus } from '../../icons/NicPlus';
 import { NetworkContext } from '../../NetworkContext';
 import { Device } from '../../simulator/network/peripherals/Device';
@@ -17,6 +18,7 @@ import { SwitchProperties } from '../properties/devs/SwitchProperties';
 export const NetowrkProperties: React.FC<{
     selected: string | null;
 }> = ({ selected }) => {
+    const { t } = useTranslation();
     const network = useContext(NetworkContext);
     const [addInterfaceOpened, setAddInterfaceOpened] = useState(false);
 
@@ -52,12 +54,14 @@ export const NetowrkProperties: React.FC<{
                     <Stack sx={{ padding: '0px 8px', height: '32px' }} direction='row'>
                         <Stack direction='row' flexGrow={1}>
                             <Typography component='h2' variant='h6' sx={{ whiteSpace: 'nowrap' }}>
-                                {dev === null ? 'Properties' : 'Properties of ' + dev.getName()}
+                                {dev === null
+                                    ? t('panel.properties.title')
+                                    : t('panel.properties.titleof', { name: dev.getName() })}
                             </Typography>
                         </Stack>
                         <Stack direction='row'>
                             {dev === null ? null : (
-                                <Tooltip title='Add interface'>
+                                <Tooltip title={t('panel.properties.action.addintf')}>
                                     <IconButton size='small' edge='end' onClick={() => setAddInterfaceOpened(true)}>
                                         <NicPlus color='action' />
                                     </IconButton>
@@ -78,7 +82,7 @@ export const NetowrkProperties: React.FC<{
                                 marginTop: '8px',
                             }}
                             variant='caption'>
-                            No device selected
+                            {t('panel.properties.nodevice')}
                         </Typography>
                     ) : dev instanceof Host ? (
                         <HostProperties dev={dev} />

@@ -2,6 +2,8 @@ import { AddLink, CenterFocusStrong, GridOn, Hub, Label, LinkOff } from '@mui/ic
 import { Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import React, { Touch, useContext, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useEnqueueError } from '../../hooks/useEnqueueError';
 import { CloseNetwork } from '../../icons/CloseNetwork';
 import { SnapToGrid } from '../../icons/SnapToGrid';
 import { NetworkContext } from '../../NetworkContext';
@@ -18,8 +20,10 @@ export const NetworkRenderer: React.FC<{
     selected: string | null;
 }> = ({ setSelected, selected }) => {
     const network = useContext(NetworkContext);
+    const { t } = useTranslation();
 
     const { enqueueSnackbar } = useSnackbar();
+    const enqueueError = useEnqueueError();
 
     const offset = useRef(new Vector2D());
     const mousePos = useRef(new Vector2D());
@@ -87,12 +91,12 @@ export const NetworkRenderer: React.FC<{
                 <Stack sx={{ padding: '0px 8px', height: '32px' }} direction='row'>
                     <Stack direction='row' flexGrow={1}>
                         <Typography component='h2' variant='h6'>
-                            Network
+                            {t('panel.network.title')}
                         </Typography>
                     </Stack>
                     <Stack direction='row'>
                         <AddMenu icon />
-                        <Tooltip title='Remove device'>
+                        <Tooltip title={t('panel.network.action.removedev')}>
                             <IconButton
                                 size='small'
                                 onClick={() => {
@@ -102,7 +106,7 @@ export const NetworkRenderer: React.FC<{
                                 <CloseNetwork color={removingDevice ? 'error' : 'action'} />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title='Add link'>
+                        <Tooltip title={t('panel.network.action.addlink')}>
                             <IconButton
                                 size='small'
                                 onClick={() => {
@@ -112,7 +116,7 @@ export const NetworkRenderer: React.FC<{
                                 <AddLink color={addingLink ? 'primary' : 'action'} />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title='Remove link'>
+                        <Tooltip title={t('panel.network.action.removelink')}>
                             <IconButton
                                 size='small'
                                 onClick={() => {
@@ -123,18 +127,18 @@ export const NetworkRenderer: React.FC<{
                             </IconButton>
                         </Tooltip>
                         <Divider orientation='vertical' />
-                        <Tooltip title='Automatic layout'>
+                        <Tooltip title={t('panel.network.action.autolayout')}>
                             <IconButton onClick={() => Layout.spring_layout(network, GRID_SIZE, snapGrid)} size='small'>
                                 <Hub />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title='Center view'>
+                        <Tooltip title={t('panel.network.action.centerview')}>
                             <IconButton onClick={() => (offset.current = new Vector2D(0, 0))} size='small'>
                                 <CenterFocusStrong />
                             </IconButton>
                         </Tooltip>
                         <Divider orientation='vertical' />
-                        <Tooltip title='Toggle labels'>
+                        <Tooltip title={t('panel.network.action.labels')}>
                             <IconButton
                                 onClick={() => setShowLabel(!showLabel)}
                                 size='small'
@@ -143,7 +147,7 @@ export const NetworkRenderer: React.FC<{
                                 <Label />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title='Toggle snap to grid'>
+                        <Tooltip title={t('panel.network.action.snap')}>
                             <IconButton
                                 onClick={() => setSnapGrid(!snapGrid)}
                                 size='small'
@@ -152,7 +156,7 @@ export const NetworkRenderer: React.FC<{
                                 <SnapToGrid />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title='Toggle grid'>
+                        <Tooltip title={t('panel.network.action.grid')}>
                             <IconButton
                                 onClick={() => setShowGrid(!showGrid)}
                                 size='small'
@@ -295,14 +299,14 @@ export const NetworkRenderer: React.FC<{
                                                     if (addingLink) {
                                                         network.addLink(selectedDev1, dev.getName());
                                                         setSelectedDev1(null);
-                                                        enqueueSnackbar('Link added');
+                                                        enqueueSnackbar(t('panel.network.snack.linkadded'));
                                                     } else if (removingLink) {
                                                         network.removeLink(selectedDev1, dev.getName());
                                                         setSelectedDev1(null);
-                                                        enqueueSnackbar('Link removed');
+                                                        enqueueSnackbar(t('panel.network.snack.linkremoved'));
                                                     }
                                                 } catch (e: any) {
-                                                    enqueueSnackbar((e as Error).message, { variant: 'error' });
+                                                    enqueueError(e);
                                                 }
                                             }
                                             return;
@@ -320,9 +324,11 @@ export const NetworkRenderer: React.FC<{
                                                 network.removeDevice(dev.getName());
                                                 e.currentTarget.style.cursor = 'default';
                                                 if (dev.getName() === selected) setSelected(null);
-                                                enqueueSnackbar('Device ' + dev.getName() + ' removed');
+                                                enqueueSnackbar(
+                                                    t('panel.network.snack.deviceremoved', { name: dev.getName() })
+                                                );
                                             } catch (e: any) {
-                                                enqueueSnackbar((e as Error).message, { variant: 'error' });
+                                                enqueueError(e);
                                             }
                                             return;
                                         }
@@ -372,14 +378,14 @@ export const NetworkRenderer: React.FC<{
                                             if (addingLink) {
                                                 network.addLink(selectedDev1, dev.getName());
                                                 setSelectedDev1(null);
-                                                enqueueSnackbar('Link added');
+                                                enqueueSnackbar(t('panel.network.snack.linkadded'));
                                             } else if (removingLink) {
                                                 network.removeLink(selectedDev1, dev.getName());
                                                 setSelectedDev1(null);
-                                                enqueueSnackbar('Link removed');
+                                                enqueueSnackbar(t('panel.network.snack.linkremoved'));
                                             }
                                         } catch (e: any) {
-                                            enqueueSnackbar((e as Error).message, { variant: 'error' });
+                                            enqueueError(e);
                                         }
                                     }
                                     return;
@@ -395,9 +401,11 @@ export const NetworkRenderer: React.FC<{
                                         network.removeDevice(dev.getName());
                                         e.currentTarget.style.cursor = 'default';
                                         if (dev.getName() === selected) setSelected(null);
-                                        enqueueSnackbar('Device ' + dev.getName() + ' removed');
+                                        enqueueSnackbar(
+                                            t('panel.network.snack.deviceremoved', { name: dev.getName() })
+                                        );
                                     } catch (e: any) {
-                                        enqueueSnackbar((e as Error).message, { variant: 'error' });
+                                        enqueueError(e);
                                     }
                                     return;
                                 }
@@ -628,11 +636,24 @@ export const NetworkRenderer: React.FC<{
                         // Draw the top-left info text
                         ctx.setTransform(1, 0, 0, 1, 0, 0);
                         showText(
-                            'Offset: ' + offset.current.x.toFixed(2) + ';' + offset.current.y.toFixed(2),
+                            t('panel.network.render.offset', {
+                                x: offset.current.x.toFixed(2),
+                                y: offset.current.y.toFixed(2),
+                            }),
                             new Vector2D(0, 0)
                         );
-                        showText('Scale: ' + scale.current.toFixed(2), new Vector2D(0, 21));
-                        showText('Time: ' + network.time().toFixed(4), new Vector2D(0, 42));
+                        showText(
+                            t('panel.network.render.scale', {
+                                scale: scale.current.toFixed(2),
+                            }),
+                            new Vector2D(0, 21)
+                        );
+                        showText(
+                            t('panel.network.render.time', {
+                                time: network.time().toFixed(4),
+                            }),
+                            new Vector2D(0, 42)
+                        );
                     }}
                     style={{ width: '100%', height: '100%', borderRadius: '0 0 4px 4px' }}></Canvas>
             </Grid>

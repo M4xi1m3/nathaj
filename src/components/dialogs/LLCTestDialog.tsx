@@ -1,5 +1,6 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NetworkContext } from '../../NetworkContext';
 import { Host } from '../../simulator/network/peripherals/Host';
 import { Interface } from '../../simulator/network/peripherals/Interface';
@@ -13,6 +14,7 @@ interface LLCTestDialogProps {
 
 export const LLCTestDialog: React.FC<LLCTestDialogProps> = ({ opened, close, intf: srcIntf }) => {
     const network = useContext(NetworkContext);
+    const { t } = useTranslation();
 
     const [device, setDevice] = useState<string | null>(null);
     const [intf, setIntf] = useState<string | null>(null);
@@ -24,7 +26,7 @@ export const LLCTestDialog: React.FC<LLCTestDialogProps> = ({ opened, close, int
 
     return (
         <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
-            <DialogTitle>Send LLC Test</DialogTitle>
+            <DialogTitle>{t('dialog.llctest.title')}</DialogTitle>
             <DialogContent>
                 <InterfaceInput
                     device={device}
@@ -35,7 +37,7 @@ export const LLCTestDialog: React.FC<LLCTestDialogProps> = ({ opened, close, int
                 />
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => close()}>Cancel</Button>
+                <Button onClick={() => close()}>{t('dialog.common.cancel')}</Button>
                 <Button
                     onClick={() => {
                         const host = srcIntf.getOwner();
@@ -45,7 +47,7 @@ export const LLCTestDialog: React.FC<LLCTestDialogProps> = ({ opened, close, int
                         close();
                     }}
                     disabled={device === null || intf === null}>
-                    Send
+                    {t('dialog.common.send')}
                 </Button>
             </DialogActions>
         </Dialog>

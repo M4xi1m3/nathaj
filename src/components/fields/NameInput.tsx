@@ -1,5 +1,6 @@
 import { TextField } from '@mui/material';
 import React, { useContext, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NetworkContext } from '../../NetworkContext';
 
 interface NameInputProps {
@@ -11,6 +12,7 @@ interface NameInputProps {
 
 export const NameInput: React.FC<NameInputProps> = ({ name, setName, setNameError, nameError }) => {
     const network = useContext(NetworkContext);
+    const { t } = useTranslation();
 
     useEffect(() => {
         setNameError(name === '' || network.hasDevice(name));
@@ -20,7 +22,7 @@ export const NameInput: React.FC<NameInputProps> = ({ name, setName, setNameErro
         <TextField
             variant='standard'
             type='text'
-            label='Name'
+            label={t('field.name.label')}
             fullWidth
             margin='dense'
             value={name}

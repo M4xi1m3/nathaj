@@ -1,5 +1,6 @@
 import { TextField } from '@mui/material';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface PortsInputProps {
     ports: number;
@@ -7,11 +8,13 @@ interface PortsInputProps {
 }
 
 export const PortsInput: React.FC<PortsInputProps> = ({ ports, setPorts }) => {
+    const { t } = useTranslation();
+
     return (
         <TextField
             variant='standard'
             type='number'
-            label='Ports'
+            label={t('field.ports.label')}
             fullWidth
             margin='dense'
             value={ports}

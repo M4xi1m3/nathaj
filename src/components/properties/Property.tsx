@@ -11,6 +11,7 @@ import {
     Tooltip,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const PropCell = styled(TableCell)<TableCellProps>(() => ({
     '&.MuiTableCell-root': {
@@ -50,6 +51,7 @@ export const EditableProperty: React.FC<{
     setValue: (value: string) => void;
     validator: (value: string) => boolean;
 }> = ({ label, value, setValue, validator }) => {
+    const { t } = useTranslation();
     const [val, setVal] = useState<string>(value);
     const [edited, setEdited] = useState<boolean>(false);
 
@@ -81,7 +83,7 @@ export const EditableProperty: React.FC<{
                         endAdornment={
                             edited ? (
                                 <InputAdornment position='end'>
-                                    <Tooltip title='Save'>
+                                    <Tooltip title={t('panel.properties.save')}>
                                         <span>
                                             <IconButton
                                                 edge='end'
@@ -97,7 +99,7 @@ export const EditableProperty: React.FC<{
                                             </IconButton>
                                         </span>
                                     </Tooltip>
-                                    <Tooltip title='Cancel'>
+                                    <Tooltip title={t('panel.properties.cancel')}>
                                         <IconButton
                                             onClick={() => {
                                                 setVal(value);

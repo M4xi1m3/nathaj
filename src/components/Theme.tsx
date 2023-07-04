@@ -2,6 +2,7 @@ import { ThemeProvider } from '@emotion/react';
 import { DarkMode, LightMode } from '@mui/icons-material';
 import { createTheme, IconButton, Tooltip, useTheme } from '@mui/material';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const ColorModeContext = React.createContext<{
     toggleColorMode: () => void;
@@ -12,11 +13,12 @@ export const ColorModeContext = React.createContext<{
 });
 
 export const LightDarkSwitch: React.FC = () => {
+    const { t } = useTranslation();
     const theme = useTheme();
     const colorMode = React.useContext(ColorModeContext);
 
     return (
-        <Tooltip title={theme.palette.mode === 'dark' ? 'Light mode' : 'Dark mode'}>
+        <Tooltip title={t(theme.palette.mode === 'dark' ? 'action.light' : 'action.dark')}>
             <IconButton size='large' onClick={colorMode.toggleColorMode} color='inherit'>
                 {theme.palette.mode === 'dark' ? <LightMode /> : <DarkMode />}
             </IconButton>

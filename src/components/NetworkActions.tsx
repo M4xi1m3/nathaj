@@ -1,6 +1,7 @@
 import { Pause, PlayArrow, RestartAlt } from '@mui/icons-material';
 import { IconButton, Tooltip } from '@mui/material';
 import React, { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NetworkContext } from '../NetworkContext';
 
 /**
@@ -10,6 +11,7 @@ export const NetworkActions: React.FC<{
     playing: boolean;
     setPlaying: (playing: boolean) => void;
 }> = ({ playing, setPlaying }) => {
+    const { t } = useTranslation();
     const network = useContext(NetworkContext);
 
     const handlePlay = () => {
@@ -25,12 +27,12 @@ export const NetworkActions: React.FC<{
 
     return (
         <div>
-            <Tooltip title='Restart simulation'>
+            <Tooltip title={t('action.restart')}>
                 <IconButton size='large' onClick={handleReset} color='inherit'>
                     <RestartAlt />
                 </IconButton>
             </Tooltip>
-            <Tooltip title={playing ? 'Pause simulation' : 'Start simulation'}>
+            <Tooltip title={t(playing ? 'action.pause' : 'action.play')}>
                 <IconButton size='large' onClick={handlePlay} color='inherit'>
                     {playing ? <Pause /> : <PlayArrow />}
                 </IconButton>

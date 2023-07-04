@@ -3,8 +3,14 @@ const ipv4Regexp = new RegExp(
 );
 
 export class InvalidIPV4Exception extends Error {
+    i18n: string;
+    i18nargs: any;
+
     constructor(ipv4: string) {
         super('Invalid ipv4 address ' + ipv4 + '.');
+
+        this.i18n = 'exception.ipv4.invalid';
+        this.i18nargs = { address: ipv4 };
     }
 }
 
