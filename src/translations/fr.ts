@@ -118,6 +118,12 @@ export const fr = {
                     gobottom: 'Défiler vers le bas',
                 },
             },
+            console: {
+                title: 'Console',
+                action: {
+                    clear: 'Effacer la console',
+                },
+            },
         },
         dialog: {
             common: {
@@ -191,6 +197,7 @@ export const fr = {
                     network: 'Afficher le Réseau',
                     properties: 'Afficher les propriétés',
                     analyzer: "Afficher l'Analyseur de paquets",
+                    console: 'Afficher la console',
                 },
                 simulation: {
                     title: 'Simulation',

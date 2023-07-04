@@ -76,6 +76,7 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({ opened, close 
                 <Shortcut name='dialog.shortcuts.view.network' shortcut='ctrl+alt+shift+n' />
                 <Shortcut name='dialog.shortcuts.view.properties' shortcut='ctrl+alt+shift+p' />
                 <Shortcut name='dialog.shortcuts.view.analyzer' shortcut='ctrl+alt+shift+a' />
+                <Shortcut name='dialog.shortcuts.view.console' shortcut='ctrl+alt+shift+c' />
             </DialogContent>
             <DialogActions sx={{ paddingTop: 0 }}>
                 <Button onClick={() => close()}>{t('dialog.common.close')}</Button>

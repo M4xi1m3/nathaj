@@ -10,6 +10,7 @@ import { HelpMenu } from './components/menus/HelpMenu';
 import { RemoveMenu } from './components/menus/RemoveMenu';
 import { ViewMenu } from './components/menus/ViewMenu';
 import { NetworkAnalyzer } from './components/panels/NetworkAnalyzer';
+import { NetworkConsole } from './components/panels/NetworkConsole';
 import { NetowrkProperties } from './components/panels/NetworkProperties';
 import { NetworkRenderer } from './components/panels/NetworkRenderer';
 import { NoPanels } from './components/panels/NoPanels';
@@ -23,11 +24,12 @@ const App: React.FC = () => {
     const [viewNetwork, setViewNetwork] = useState<boolean>(true);
     const [viewProperties, setViewProperties] = useState<boolean>(true);
     const [viewAnalyzer, setViewAnalyzer] = useState<boolean>(true);
+    const [viewConsole, setViewConsole] = useState<boolean>(true);
 
     const [selected, setSelected] = useState<string | null>(null);
     const [playing, setPlaying] = useState(false);
 
-    const noPanel = !(viewNetwork || viewProperties || viewAnalyzer);
+    const noPanel = !(viewNetwork || viewProperties || viewAnalyzer || viewConsole);
 
     const net = useContext(NetworkContext);
 
@@ -74,6 +76,11 @@ const App: React.FC = () => {
         setViewAnalyzer(!viewAnalyzer);
     });
 
+    useMousetrap('ctrl+alt+shift+c', (e: KeyboardEvent) => {
+        e.preventDefault();
+        setViewConsole(!viewConsole);
+    });
+
     return (
         <>
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', wudth: '100%' }}>
@@ -106,6 +113,12 @@ const App: React.FC = () => {
                                     view: viewAnalyzer,
                                     setView: setViewAnalyzer,
                                     shortcut: 'Ctrl+Alt+Shift+A',
+                                },
+                                {
+                                    name: t('panel.console.title'),
+                                    view: viewConsole,
+                                    setView: setViewConsole,
+                                    shortcut: 'Ctrl+Alt+Shift+C',
                                 },
                             ]}
                         />
@@ -141,12 +154,34 @@ const App: React.FC = () => {
                         ) : (
                             <></>
                         )}
-                        {(viewProperties || viewNetwork) && viewAnalyzer ? <HorizontalDivider /> : <></>}
-                        {viewAnalyzer ? (
+                        {(viewProperties || viewNetwork) && (viewAnalyzer || viewConsole) ? (
+                            <HorizontalDivider />
+                        ) : (
+                            <></>
+                        )}
+                        {viewAnalyzer || viewConsole ? (
                             <Panel style={{ display: 'flex' }} order={2}>
-                                <Paper sx={{ flexGrow: 1, maxWidth: '100%', overflowX: 'auto', margin: 1 }}>
-                                    <NetworkAnalyzer />
-                                </Paper>
+                                <PanelGroup direction='horizontal'>
+                                    {viewAnalyzer ? (
+                                        <Panel style={{ display: 'flex' }} order={1}>
+                                            <Paper sx={{ flexGrow: 1, maxWidth: '100%', overflowX: 'auto', margin: 1 }}>
+                                                <NetworkAnalyzer />
+                                            </Paper>
+                                        </Panel>
+                                    ) : (
+                                        <></>
+                                    )}
+                                    {viewAnalyzer && viewConsole ? <VerticalDivider /> : <></>}
+                                    {viewConsole ? (
+                                        <Panel style={{ display: 'flex' }} order={2}>
+                                            <Paper sx={{ flexGrow: 1, maxWidth: '100%', overflowX: 'auto', margin: 1 }}>
+                                                <NetworkConsole />
+                                            </Paper>
+                                        </Panel>
+                                    ) : (
+                                        <></>
+                                    )}
+                                </PanelGroup>
                             </Panel>
                         ) : (
                             <></>
