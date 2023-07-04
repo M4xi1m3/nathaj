@@ -1,5 +1,6 @@
 export const en = {
     translation: {
+        lang: '🇺🇸 English',
         app: {
             name: 'Näthaj',
             namever: '$t(app.name) {{version}}',
@@ -132,7 +133,6 @@ export const en = {
                 title: 'About',
                 copyright: 'Copyright ©',
                 notice: '$t(app.name) is released under the terms of the <license>GNU General Public License Affero version 3</license>.<br/>A copy of the source code is available <repo>here</repo>.',
-                close: 'Close',
             },
             addhost: {
                 title: 'Add Host',
@@ -247,6 +247,7 @@ export const en = {
             play: 'Start simulation',
             dark: 'Dark mode',
             light: 'Light mode',
+            language: 'Set language',
         },
         exception: {
             device: {

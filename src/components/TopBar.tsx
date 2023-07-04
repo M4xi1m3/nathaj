@@ -4,6 +4,7 @@ import { NetworkActions } from './NetworkActions';
 
 import { useTranslation } from 'react-i18next';
 import { ReactComponent as Logo } from '../assets/logo/logo.svg';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { LightDarkSwitch } from './Theme';
 
 export const TopBar: React.FC<{
@@ -30,6 +31,7 @@ export const TopBar: React.FC<{
                 <Box sx={{ flexGrow: 1, display: 'flex' }}>{children}</Box>
                 <NetworkActions playing={playing} setPlaying={setPlaying} />
                 <LightDarkSwitch />
+                <LanguageSwitcher />
             </Toolbar>
         </AppBar>
     );
