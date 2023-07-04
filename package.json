@@ -83,6 +83,9 @@
     "vitest": "^0.32.2"
   },
   "lint-staged": {
-    "src/**/*": "prettier --write --ignore-unknown"
+    "src/**/*": [
+      "eslint --fix",
+      "prettier --write --ignore-unknown"
+    ]
   }
 }
