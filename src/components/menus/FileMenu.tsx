@@ -1,10 +1,10 @@
 import { useSnackbar } from 'notistack';
 import React, { useContext, useState } from 'react';
+import useMousetrap from 'react-hook-mousetrap';
 import { useTranslation } from 'react-i18next';
 import { selectFile } from '../../hooks/selectFile';
 import { useEnqueueError } from '../../hooks/useEnqueueError';
 import { NetworkContext } from '../../NetworkContext';
-import { AboutDialog } from '../dialogs/AboutDialog';
 import { SaveDialog } from '../dialogs/SaveDialog';
 import { ActionMenu } from './ActionMenu';
 import { ExampleSubMenu } from './ExampleSubMenu';
@@ -17,7 +17,6 @@ export const FileMenu: React.FC<{
 }> = ({ setSelected, setPlaying }) => {
     const { t } = useTranslation();
     const [saveOpened, setSaveOpened] = useState<boolean>(false);
-    const [aboutOpened, setAboutOpened] = useState<boolean>(false);
 
     const net = useContext(NetworkContext);
     const { enqueueSnackbar } = useSnackbar();
@@ -29,16 +28,46 @@ export const FileMenu: React.FC<{
             setPlaying(false);
             net.load(JSON.parse(data));
             setSelected(null);
-            enqueueSnackbar('Loaded successfully');
+            enqueueSnackbar(t('menu.file.loaded'));
         } catch (e: any) {
             enqueueError(e);
         }
     };
 
+    const loadFile = () => {
+        selectFile('application/json', false).then((file: File | File[]) => {
+            if (file instanceof File) {
+                file.arrayBuffer().then((buffer) => {
+                    const dec = new TextDecoder('utf-8');
+                    loadString(dec.decode(buffer));
+                });
+            }
+        });
+    };
+
+    const clear = () => {
+        net.clear();
+        setSelected(null);
+    };
+
+    useMousetrap('ctrl+s', (e: KeyboardEvent) => {
+        e.preventDefault();
+        setSaveOpened(true);
+    });
+
+    useMousetrap('ctrl+o', (e: KeyboardEvent) => {
+        e.preventDefault();
+        loadFile();
+    });
+
+    useMousetrap('ctrl+shift+d', (e: KeyboardEvent) => {
+        e.preventDefault();
+        clear();
+    });
+
     return (
         <>
             <SaveDialog opened={saveOpened} close={() => setSaveOpened(false)} />
-            <AboutDialog opened={aboutOpened} close={() => setAboutOpened(false)} />
 
             <ActionMenu
                 title={t('menu.file.title')}
@@ -48,19 +77,12 @@ export const FileMenu: React.FC<{
                         action: () => {
                             setSaveOpened(true);
                         },
+                        shortcut: 'Ctrl+S',
                     },
                     {
                         name: t('menu.file.load'),
-                        action: () => {
-                            selectFile('application/json', false).then((file: File | File[]) => {
-                                if (file instanceof File) {
-                                    file.arrayBuffer().then((buffer) => {
-                                        const dec = new TextDecoder('utf-8');
-                                        loadString(dec.decode(buffer));
-                                    });
-                                }
-                            });
-                        },
+                        action: loadFile,
+                        shortcut: 'Ctrl+O',
                     },
                     {
                         name: t('menu.file.example.title'),
@@ -68,17 +90,7 @@ export const FileMenu: React.FC<{
                     },
                     {
                         name: t('menu.file.clear'),
-                        action: () => {
-                            net.clear();
-                            setSelected(null);
-                        },
-                    },
-                    'separator',
-                    {
-                        name: t('menu.file.about'),
-                        action: () => {
-                            setAboutOpened(true);
-                        },
+                        action: clear,
                     },
                 ]}
             />

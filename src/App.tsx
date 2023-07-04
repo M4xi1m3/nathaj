@@ -1,10 +1,12 @@
 import { Box, Paper } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
+import useMousetrap from 'react-hook-mousetrap';
 import { useTranslation } from 'react-i18next';
 import { Panel, PanelGroup } from 'react-resizable-panels';
 import { HorizontalDivider, VerticalDivider } from './components/Dividers';
 import { AddMenu } from './components/menus/AddMenu';
 import { FileMenu } from './components/menus/FileMenu';
+import { HelpMenu } from './components/menus/HelpMenu';
 import { RemoveMenu } from './components/menus/RemoveMenu';
 import { ViewMenu } from './components/menus/ViewMenu';
 import { NetworkAnalyzer } from './components/panels/NetworkAnalyzer';
@@ -57,6 +59,21 @@ const App: React.FC = () => {
         };
     }, [handleUnload]);
 
+    useMousetrap('ctrl+alt+shift+n', (e: KeyboardEvent) => {
+        e.preventDefault();
+        setViewNetwork(!viewNetwork);
+    });
+
+    useMousetrap('ctrl+alt+shift+p', (e: KeyboardEvent) => {
+        e.preventDefault();
+        setViewProperties(!viewProperties);
+    });
+
+    useMousetrap('ctrl+alt+shift+a', (e: KeyboardEvent) => {
+        e.preventDefault();
+        setViewAnalyzer(!viewAnalyzer);
+    });
+
     return (
         <>
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', wudth: '100%' }}>
@@ -72,11 +89,27 @@ const App: React.FC = () => {
                         <RemoveMenu selected={selected} setSelected={setSelected} />
                         <ViewMenu
                             elements={[
-                                { name: t('panel.network.title'), view: viewNetwork, setView: setViewNetwork },
-                                { name: t('panel.properties.title'), view: viewProperties, setView: setViewProperties },
-                                { name: t('panel.analyzer.title'), view: viewAnalyzer, setView: setViewAnalyzer },
+                                {
+                                    name: t('panel.network.title'),
+                                    view: viewNetwork,
+                                    setView: setViewNetwork,
+                                    shortcut: 'Ctrl+Alt+Shift+N',
+                                },
+                                {
+                                    name: t('panel.properties.title'),
+                                    view: viewProperties,
+                                    setView: setViewProperties,
+                                    shortcut: 'Ctrl+Alt+Shift+P',
+                                },
+                                {
+                                    name: t('panel.analyzer.title'),
+                                    view: viewAnalyzer,
+                                    setView: setViewAnalyzer,
+                                    shortcut: 'Ctrl+Alt+Shift+A',
+                                },
                             ]}
                         />
+                        <HelpMenu />
                     </TopBar>
                 </Box>
                 {!noPanel ? (

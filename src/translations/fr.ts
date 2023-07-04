@@ -177,6 +177,27 @@ export const fr = {
                 title: 'Sauvegarder',
                 success: 'Réseau enregistré sous {{name}}',
             },
+            shortcuts: {
+                space: 'espace',
+                title: 'Raccourcis Clavier',
+                open: "Ouvrir l'aide des Raccourcis Clavier",
+                files: {
+                    title: 'Fichiers',
+                    save: 'Sauvegarder',
+                    load: 'Charger',
+                },
+                view: {
+                    title: 'Affichage',
+                    network: 'Afficher le Réseau',
+                    properties: 'Afficher les propriétés',
+                    analyzer: "Afficher l'Analyseur de paquets",
+                },
+                simulation: {
+                    title: 'Simulation',
+                    play: 'Démarrer / Mettre en pause la simulation',
+                    restart: 'Réinitialiser la simulation',
+                },
+            },
         },
         field: {
             device: {
@@ -219,6 +240,7 @@ export const fr = {
                 title: 'Fichier',
                 save: 'Sauvegarder',
                 load: 'Charger',
+                loaded: 'Chargement réussi',
                 example: {
                     title: 'Charger un exemple',
                     simple: {
@@ -235,16 +257,20 @@ export const fr = {
                     },
                 },
                 clear: 'Effacer',
-                about: 'À propos',
             },
             view: {
                 title: 'Affichage',
             },
+            help: {
+                title: 'Aide',
+                about: 'À propos',
+                shortcuts: 'Raccourcis Clavier',
+            },
         },
         action: {
-            restart: 'Redémarrer la simulation',
-            pause: 'Mettre la simulation en pause',
-            play: 'Démarrer simulation',
+            restart: 'Redémarrer la simulation (S)',
+            pause: 'Mettre la simulation en pause (Espace)',
+            play: 'Démarrer simulation (Espace)',
             dark: 'Mode sombre',
             light: 'Mode clair',
         },

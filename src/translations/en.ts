@@ -177,6 +177,27 @@ export const en = {
                 title: 'Save',
                 success: 'Network saved as {{name}}',
             },
+            shortcuts: {
+                space: 'space',
+                title: 'Keyboard Shortcuts',
+                open: 'Open Keyboard Shortcuts',
+                files: {
+                    title: 'Files',
+                    save: 'Save',
+                    load: 'Load',
+                },
+                view: {
+                    title: 'View',
+                    network: 'Show Network',
+                    properties: 'Show Properties',
+                    analyzer: 'Show Packet Analyzer',
+                },
+                simulation: {
+                    title: 'Simulation',
+                    play: 'Play / Pause simulation',
+                    restart: 'Reset simulation',
+                },
+            },
         },
         field: {
             device: {
@@ -219,6 +240,7 @@ export const en = {
                 title: 'File',
                 save: 'Save',
                 load: 'Load',
+                loaded: 'Loaded successfully',
                 example: {
                     title: 'Load example',
                     simple: {
@@ -235,16 +257,20 @@ export const en = {
                     },
                 },
                 clear: 'Clear',
-                about: 'About',
             },
             view: {
                 title: 'View',
             },
+            help: {
+                title: 'Help',
+                about: 'About',
+                shortcuts: 'Keyboard Shortcuts',
+            },
         },
         action: {
-            restart: 'Restart simulation',
-            pause: 'Pause simulation',
-            play: 'Start simulation',
+            restart: 'Restart simulation (S)',
+            pause: 'Pause simulation (Space)',
+            play: 'Start simulation (Space)',
             dark: 'Dark mode',
             light: 'Light mode',
             language: 'Set language',

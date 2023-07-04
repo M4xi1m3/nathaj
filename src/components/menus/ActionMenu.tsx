@@ -1,5 +1,15 @@
 import { NavigateNext } from '@mui/icons-material';
-import { Button, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip } from '@mui/material';
+import {
+    Button,
+    Divider,
+    IconButton,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem,
+    Tooltip,
+    Typography,
+} from '@mui/material';
 import { bindMenu, bindTrigger, PopupState, usePopupState } from 'material-ui-popup-state/hooks';
 import React from 'react';
 
@@ -8,6 +18,7 @@ export type ActionElement =
           name: string;
           action?: () => void;
           elements?: ActionElement[];
+          shortcut?: string;
       }
     | 'separator';
 
@@ -66,6 +77,11 @@ const MenuElement: React.FC<{
                     }
                 }}>
                 <ListItemText>{element.name}</ListItemText>
+                {element.shortcut !== undefined ? (
+                    <Typography variant='body2' color='text.secondary' sx={{ paddingLeft: '8px' }}>
+                        {element.shortcut}
+                    </Typography>
+                ) : null}
             </MenuItem>
         );
     }

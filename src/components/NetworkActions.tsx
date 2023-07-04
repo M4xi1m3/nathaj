@@ -1,6 +1,7 @@
 import { Pause, PlayArrow, RestartAlt } from '@mui/icons-material';
 import { IconButton, Tooltip } from '@mui/material';
 import React, { useContext } from 'react';
+import useMousetrap from 'react-hook-mousetrap';
 import { useTranslation } from 'react-i18next';
 import { NetworkContext } from '../NetworkContext';
 
@@ -24,6 +25,16 @@ export const NetworkActions: React.FC<{
         network.reset();
         setPlaying(network.isRunning());
     };
+
+    useMousetrap('space', (e: KeyboardEvent) => {
+        e.preventDefault();
+        handlePlay();
+    });
+
+    useMousetrap('s', (e: KeyboardEvent) => {
+        e.preventDefault();
+        handleReset();
+    });
 
     return (
         <div>
