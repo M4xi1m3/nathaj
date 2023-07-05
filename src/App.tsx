@@ -27,7 +27,6 @@ const App: React.FC = () => {
     const [viewConsole, setViewConsole] = useState<boolean>(true);
 
     const [selected, setSelected] = useState<string | null>(null);
-    const [playing, setPlaying] = useState(false);
 
     const noPanel = !(viewNetwork || viewProperties || viewAnalyzer || viewConsole);
 
@@ -85,13 +84,8 @@ const App: React.FC = () => {
         <>
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', wudth: '100%' }}>
                 <Box sx={{ flexGrow: 1 }}>
-                    <TopBar playing={playing} setPlaying={setPlaying}>
-                        <FileMenu
-                            selected={selected}
-                            setSelected={setSelected}
-                            playing={playing}
-                            setPlaying={setPlaying}
-                        />
+                    <TopBar>
+                        <FileMenu selected={selected} setSelected={setSelected} />
                         <AddMenu />
                         <RemoveMenu selected={selected} setSelected={setSelected} />
                         <ViewMenu
@@ -175,7 +169,7 @@ const App: React.FC = () => {
                                     {viewConsole ? (
                                         <Panel style={{ display: 'flex' }} order={2}>
                                             <Paper sx={{ flexGrow: 1, maxWidth: '100%', overflowX: 'auto', margin: 1 }}>
-                                                <NetworkConsole />
+                                                <NetworkConsole selected={selected} setSelected={setSelected} />
                                             </Paper>
                                         </Panel>
                                     ) : (

@@ -356,6 +356,7 @@ export class Network extends EventTarget {
             // by setInterval
             this.tick();
         }, 0);
+        this.dispatchEvent(new Event('changed'));
     }
 
     /**
@@ -370,6 +371,7 @@ export class Network extends EventTarget {
         this.time_elapsed += performance.now() - this.time_offset;
 
         this.interval = null;
+        this.dispatchEvent(new Event('changed'));
     }
 
     /**
@@ -388,6 +390,7 @@ export class Network extends EventTarget {
                 intf.reset();
             });
         });
+        this.dispatchEvent(new Event('changed'));
     }
 
     /**
@@ -396,6 +399,7 @@ export class Network extends EventTarget {
     public clear(): void {
         this.reset();
         this.devices = {};
+        this.dispatchEvent(new Event('changed'));
     }
 
     /**

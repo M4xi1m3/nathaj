@@ -1,14 +1,21 @@
 import { Delete } from '@mui/icons-material';
 import { Divider, Grid, IconButton, Stack, Tooltip, Typography, useTheme } from '@mui/material';
-import React from 'react';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+import { saveJson } from '../../hooks/saveJson';
+import { selectFile } from '../../hooks/selectFile';
+import { NetworkContext } from '../../NetworkContext';
 import { Terminal } from '../terminal/Terminal';
 
 /**
  * Network console component
  */
-export const NetworkConsole: React.FC = () => {
+export const NetworkConsole: React.FC<{
+    selected: string | null;
+    setSelected: (name: string | null) => void;
+}> = ({ selected, setSelected }) => {
     const { t } = useTranslation();
+    const network = useContext(NetworkContext);
     const theme = useTheme();
 
     return (
@@ -33,12 +40,6 @@ export const NetworkConsole: React.FC = () => {
             {/* TODO: Find a way to do that without using calc with a fixed height */}
             {/*
                 Command list:
-                 - start
-                 - stop
-                 - reset
-                 - destroy
-                 - save <filename>
-                 - load
                  - example load <path>
                  - example list
                  - show <panel>
@@ -61,8 +62,100 @@ export const NetworkConsole: React.FC = () => {
             <Grid item sx={{ height: '100%', overflow: 'hidden' }}>
                 <Terminal
                     commands={{
-                        clear: (c, { clear }) => clear(),
+                        clear: ({ command, args }, { clear, print }) => {
+                            if (args.length !== 0) {
+                                print(`Usage: ${command}`, 'error');
+                                return;
+                            }
+                            clear();
+                        },
                         print: ({ args }, { print }) => print(args.join(' ')),
+                        start: ({ command, args }, { print }) => {
+                            if (args.length !== 0) {
+                                print(`Usage: ${command}`, 'error');
+                                return;
+                            }
+                            try {
+                                network.start();
+                                print('Network started', 'success');
+                            } catch (e: any) {
+                                print((e as Error).message, 'error');
+                            }
+                        },
+                        stop: ({ command, args }, { print }) => {
+                            if (args.length !== 0) {
+                                print(`Usage: ${command}`, 'error');
+                                return;
+                            }
+                            try {
+                                network.stop();
+                                print('Network stopped', 'success');
+                            } catch (e: any) {
+                                print((e as Error).message, 'error');
+                            }
+                        },
+                        reset: ({ command, args }, { print }) => {
+                            if (args.length !== 0) {
+                                print(`Usage: ${command}`, 'error');
+                                return;
+                            }
+                            try {
+                                network.reset();
+                                print('Network reset', 'success');
+                            } catch (e: any) {
+                                print((e as Error).message, 'error');
+                            }
+                        },
+                        destroy: ({ command, args }, { print }) => {
+                            if (args.length !== 0) {
+                                print(`Usage: ${command}`, 'error');
+                                return;
+                            }
+                            try {
+                                network.clear();
+                                print('Network destroyed', 'success');
+                            } catch (e: any) {
+                                print((e as Error).message, 'error');
+                            }
+                        },
+                        save: ({ command, args }, { print }) => {
+                            if (args.length !== 1) {
+                                print(`Usage: ${command} filename`, 'error');
+                                return;
+                            }
+                            try {
+                                saveJson(network.save(), args[0]);
+                                print(`Network saved as ${args[0]}`, 'success');
+                            } catch (e: any) {
+                                print((e as Error).message, 'error');
+                            }
+                        },
+                        load: ({ command, args }, { print }) => {
+                            if (args.length !== 0) {
+                                print(`Usage: ${command}`, 'error');
+                                return;
+                            }
+
+                            const loadString = (data: string) => {
+                                try {
+                                    network.reset();
+                                    network.load(JSON.parse(data));
+                                    setSelected(null);
+                                    print('Network loaded', 'success');
+                                } catch (e: any) {
+                                    print((e as Error).message, 'error');
+                                }
+                            };
+
+                            selectFile('application/json', false).then((file: File | File[]) => {
+                                if (file instanceof File) {
+                                    file.arrayBuffer().then((buffer) => {
+                                        const dec = new TextDecoder('utf-8');
+                                        loadString(dec.decode(buffer));
+                                    });
+                                }
+                            });
+                        },
                     }}
                     theme={{
                         background: 'rgba(0, 0, 0, 0)',

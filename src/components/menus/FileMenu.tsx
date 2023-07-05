@@ -12,9 +12,7 @@ import { ExampleSubMenu } from './ExampleSubMenu';
 export const FileMenu: React.FC<{
     selected: string | null;
     setSelected: (name: string | null) => void;
-    playing: boolean;
-    setPlaying: (playing: boolean) => void;
-}> = ({ setSelected, setPlaying }) => {
+}> = ({ setSelected }) => {
     const { t } = useTranslation();
     const [saveOpened, setSaveOpened] = useState<boolean>(false);
 
@@ -25,7 +23,6 @@ export const FileMenu: React.FC<{
     const loadString = (data: string) => {
         try {
             net.reset();
-            setPlaying(false);
             net.load(JSON.parse(data));
             setSelected(null);
             enqueueSnackbar(t('menu.file.loaded'));

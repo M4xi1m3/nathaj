@@ -57,6 +57,7 @@ export const Terminal: React.FC<{
                         }[type],
                     }}>
                     {text}
+                    {'\n'}
                 </span>
             </>
         );
@@ -112,7 +113,7 @@ export const Terminal: React.FC<{
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                                 e.preventDefault();
-                                print(prompt + input + '\n');
+                                print(prompt + input);
                                 setInput('');
                                 const cmd = parse(input);
                                 if (cmd.command in commands) commands[cmd.command](cmd, f);

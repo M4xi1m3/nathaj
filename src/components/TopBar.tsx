@@ -9,9 +9,7 @@ import { LightDarkSwitch } from './Theme';
 
 export const TopBar: React.FC<{
     children: React.ReactNode;
-    playing: boolean;
-    setPlaying: (playing: boolean) => void;
-}> = ({ children, playing, setPlaying }) => {
+}> = ({ children }) => {
     const { t } = useTranslation();
     return (
         <AppBar position='static' enableColorOnDark>
@@ -29,7 +27,7 @@ export const TopBar: React.FC<{
                     {t('app.name')}
                 </Typography>
                 <Box sx={{ flexGrow: 1, display: 'flex' }}>{children}</Box>
-                <NetworkActions playing={playing} setPlaying={setPlaying} />
+                <NetworkActions />
                 <LightDarkSwitch />
                 <LanguageSwitcher />
             </Toolbar>
