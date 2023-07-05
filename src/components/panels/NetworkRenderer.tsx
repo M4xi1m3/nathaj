@@ -1,5 +1,5 @@
 import { AddLink, CenterFocusStrong, GridOn, Hub, Label, LinkOff } from '@mui/icons-material';
-import { Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Divider, Grid, IconButton, Stack, Tooltip, Typography, useTheme } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import React, { Touch, useContext, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +21,7 @@ export const NetworkRenderer: React.FC<{
 }> = ({ setSelected, selected }) => {
     const network = useContext(NetworkContext);
     const { t } = useTranslation();
+    const theme = useTheme();
 
     const { enqueueSnackbar } = useSnackbar();
     const enqueueError = useEnqueueError();
@@ -536,12 +537,12 @@ export const NetworkRenderer: React.FC<{
                             ctx.fillText(text, textPos.x, textPos.y - (verticalCenter ? height / 2 : 0));
                         };
 
-                        ctx.fillStyle = '#ffffff';
-                        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
                         ctx.scale(scale.current, scale.current);
 
-                        ctx.fillStyle = '#000000';
+                        ctx.fillStyle = theme.palette.text.primary;
+                        ctx.strokeStyle = theme.palette.text.primary;
 
                         // Drazw the grid
                         if (showGrid) {
@@ -600,8 +601,11 @@ export const NetworkRenderer: React.FC<{
                         }
 
                         for (const dev of network.getDevices()) {
+                            // If we are in adrk mode, we invert the color of the device
+                            ctx.filter = theme.palette.mode === 'dark' ? 'invert(1)' : 'none';
                             // Draw the devices
                             dev.draw(ctx, offset.current.add(centerOffset));
+                            ctx.filter = 'none';
 
                             // And their labels
                             ctx.setTransform(1, 0, 0, 1, 0, 0);

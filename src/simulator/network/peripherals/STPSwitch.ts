@@ -777,6 +777,8 @@ export class STPSwitch extends Switch<STPInterface> {
 
     draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
         this.drawSquareImage(ctx, this.getPosition().add(offset), STPSwitchImage, 12);
+        const old = ctx.filter;
+        ctx.filter = 'none';
         this.drawInterfaces(
             ctx,
             this.getPosition().add(offset),
@@ -785,6 +787,7 @@ export class STPSwitch extends Switch<STPInterface> {
             this.intfPositionSquare,
             this.drawSTPInterface.bind(this)
         );
+        ctx.filter = old;
     }
 
     tick(): void {

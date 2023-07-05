@@ -1,5 +1,5 @@
 import { Delete } from '@mui/icons-material';
-import { Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Divider, Grid, IconButton, Stack, Tooltip, Typography, useTheme } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Terminal } from '../terminal/Terminal';
@@ -9,6 +9,7 @@ import { Terminal } from '../terminal/Terminal';
  */
 export const NetworkConsole: React.FC = () => {
     const { t } = useTranslation();
+    const theme = useTheme();
 
     return (
         <Grid container direction='column' flexWrap='nowrap' sx={{ height: '100%' }}>
@@ -62,6 +63,13 @@ export const NetworkConsole: React.FC = () => {
                     commands={{
                         clear: (c, { clear }) => clear(),
                         print: ({ args }, { print }) => print(args.join(' ')),
+                    }}
+                    theme={{
+                        background: 'rgba(0, 0, 0, 0)',
+                        text: theme.palette.text.primary,
+                        border: theme.palette.text.primary,
+                        success: theme.palette.success.main,
+                        error: theme.palette.error.main,
                     }}
                 />
             </Grid>

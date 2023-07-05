@@ -152,7 +152,10 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
 
     public draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
         this.drawCircle(ctx, this.getPosition().add(offset), 7);
+        const old = ctx.filter;
+        ctx.filter = 'none';
         this.drawInterfaces(ctx, this.getPosition().add(offset), 7, Object.values(this.interfaces));
+        ctx.filter = old;
     }
 
     public getText(): string {

@@ -41,7 +41,10 @@ export class Hub<T extends Interface = Interface> extends Device<T> {
 
     draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
         this.drawSquareImage(ctx, this.getPosition().add(offset), HubImage, 12);
+        const old = ctx.filter;
+        ctx.filter = 'none';
         this.drawInterfaces(ctx, this.getPosition().add(offset), 12, this.getInterfaces(), this.intfPositionSquare);
+        ctx.filter = old;
     }
 
     tick(): void {
