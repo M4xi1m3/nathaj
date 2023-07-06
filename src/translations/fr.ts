@@ -234,6 +234,8 @@ export const fr = {
                     title: 'Simulation',
                     play: 'Démarrer / Mettre en pause la simulation',
                     restart: 'Réinitialiser la simulation',
+                    slowdown: 'Ralentir la Simulation',
+                    speedup: 'Accélérer la Simulation',
                 },
             },
         },
@@ -311,6 +313,10 @@ export const fr = {
             play: 'Démarrer simulation (Espace)',
             dark: 'Mode sombre',
             light: 'Mode clair',
+            language: 'Définir la langue',
+            slowdown: 'Ralentir la Simulation',
+            speedup: 'Accélérer la Simulation',
+            speed: 'Définir la Vitesse de la Simulation',
         },
         exception: {
             device: {

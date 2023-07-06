@@ -234,6 +234,8 @@ export const en = {
                     title: 'Simulation',
                     play: 'Play / Pause simulation',
                     restart: 'Reset simulation',
+                    slowdown: 'Slow Down Simulation',
+                    speedup: 'Speed Up Simulation',
                 },
             },
         },
@@ -312,6 +314,9 @@ export const en = {
             dark: 'Dark mode',
             light: 'Light mode',
             language: 'Set language',
+            slowdown: 'Slow Down Simulation',
+            speedup: 'Speed Up Simulation',
+            speed: 'Set Simulation Speed',
         },
         exception: {
             device: {
