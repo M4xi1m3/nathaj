@@ -10,10 +10,17 @@ export class Layout {
      *
      * @param {Network} net Network tu run the spring layout on
      */
-    static spring_layout(net: Network) {
+    static spring_layout(net: Network, grid_size = 50, align = false) {
         Layout.random(net);
         Layout.fruchterman_reingold(net);
         Layout.re_center(net);
+        if (align) Layout.align(net, grid_size);
+    }
+
+    private static align(net: Network, grid_size = 50) {
+        net.getDevices().forEach((dev) => {
+            dev.setPosition(dev.getPosition().align(grid_size));
+        });
     }
 
     /**

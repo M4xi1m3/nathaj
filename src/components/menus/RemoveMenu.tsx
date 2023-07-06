@@ -1,40 +1,36 @@
-import { Button, Divider, ListItemText, Menu, MenuItem } from '@mui/material';
-import { bindMenu, bindTrigger, usePopupState } from 'material-ui-popup-state/hooks';
-import React from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { RemoveDeviceDialog } from '../dialogs/RemoveDeviceDialog';
+import { RemoveLinkDialog } from '../dialogs/RemoveLinkDialog';
+import { ActionMenu } from './ActionMenu';
 
-type RemoveElement =
-    | {
-          name: string;
-          remove: () => void;
-      }
-    | 'separator';
-
-export const RemoveMenu: React.FC<{ elements: RemoveElement[] }> = ({ elements }) => {
-    const popupState = usePopupState({ variant: 'popover' });
+export const RemoveMenu: React.FC = () => {
+    const { t } = useTranslation();
+    const [removeDeviceOpened, setRemoveDeviceOpened] = useState<boolean>(false);
+    const [removeLinkOpened, setRemoveLinkOpened] = useState<boolean>(false);
 
     return (
         <>
-            <Button sx={{ color: 'white', display: 'block' }} {...bindTrigger(popupState)}>
-                Remove
-            </Button>
-            <Menu MenuListProps={{ dense: true }} {...bindMenu(popupState)}>
-                {elements.map((element, key) => {
-                    if (element === 'separator') {
-                        return <Divider key={key} />;
-                    } else {
-                        return (
-                            <MenuItem
-                                key={key}
-                                onClick={() => {
-                                    element.remove();
-                                    popupState.close();
-                                }}>
-                                <ListItemText>{element.name}</ListItemText>
-                            </MenuItem>
-                        );
-                    }
-                })}
-            </Menu>
+            <RemoveDeviceDialog opened={removeDeviceOpened} close={() => setRemoveDeviceOpened(false)} />
+            <RemoveLinkDialog opened={removeLinkOpened} close={() => setRemoveLinkOpened(false)} />
+
+            <ActionMenu
+                title={t('menu.remove.title')}
+                elements={[
+                    {
+                        name: t('menu.common.device'),
+                        action: () => {
+                            setRemoveDeviceOpened(true);
+                        },
+                    },
+                    {
+                        name: t('menu.common.link'),
+                        action: () => {
+                            setRemoveLinkOpened(true);
+                        },
+                    },
+                ]}
+            />
         </>
     );
 };

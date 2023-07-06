@@ -1,6 +1,8 @@
 import { FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import React, { useContext, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NetworkContext } from '../../NetworkContext';
+import { Device } from '../../simulator/network/peripherals/Device';
 
 interface PortsInputProps {
     device: string | null;
@@ -13,10 +15,30 @@ interface PortsInputProps {
             intf: string | null;
         }
     ];
+    connectedTo?: [
+        {
+            device: string | null;
+            intf: string | null;
+        }
+    ];
+    free?: boolean;
+    connected?: boolean;
+    devFilter?: (dev: Device) => boolean;
 }
 
-export const InterfaceInput: React.FC<PortsInputProps> = ({ device, setDevice, intf, setIntf, exclude }) => {
+export const InterfaceInput: React.FC<PortsInputProps> = ({
+    device,
+    setDevice,
+    intf,
+    setIntf,
+    exclude,
+    connectedTo,
+    free,
+    connected,
+    devFilter,
+}) => {
     const network = useContext(NetworkContext);
+    const { t } = useTranslation();
 
     const handleDeviceChange = (event: SelectChangeEvent) => {
         const val = event.target.value as string;
@@ -38,21 +60,32 @@ export const InterfaceInput: React.FC<PortsInputProps> = ({ device, setDevice, i
         <Grid container columnSpacing={2}>
             <Grid item xs={6}>
                 <FormControl fullWidth variant='standard'>
-                    <InputLabel>Device</InputLabel>
-                    <Select label='Device' onChange={handleDeviceChange} value={device === null ? '' : device}>
-                        {network.getDevices().map((dev, key) => (
-                            <MenuItem value={dev.getName()} disabled={!dev.hasFreeInterface()} key={key}>
-                                {dev.getName()}
-                            </MenuItem>
-                        ))}
+                    <InputLabel>{t('field.device.label')}</InputLabel>
+                    <Select
+                        label={t('field.device.label')}
+                        onChange={handleDeviceChange}
+                        value={device === null ? '' : device}>
+                        {(devFilter === undefined ? network.getDevices() : network.getDevices().filter(devFilter)).map(
+                            (dev, key) => (
+                                <MenuItem
+                                    value={dev.getName()}
+                                    disabled={
+                                        (free === true ? !dev.hasFreeInterface() : false) ||
+                                        (connected === true ? !dev.hasConnectedInterface() : false)
+                                    }
+                                    key={key}>
+                                    {dev.getName()}
+                                </MenuItem>
+                            )
+                        )}
                     </Select>
                 </FormControl>
             </Grid>
             <Grid item xs={6}>
                 <FormControl fullWidth variant='standard'>
-                    <InputLabel>Interface</InputLabel>
+                    <InputLabel>{t('field.interface.label')}</InputLabel>
                     <Select
-                        label='Interface'
+                        label={t('field.interface.label')}
                         onChange={handleIntfChange}
                         value={intf === null ? '' : intf}
                         disabled={device === null}>
@@ -64,12 +97,23 @@ export const InterfaceInput: React.FC<PortsInputProps> = ({ device, setDevice, i
                                       <MenuItem
                                           value={intf.getName()}
                                           disabled={
-                                              intf.isConnected() ||
+                                              (free === true ? intf.isConnected() : false) ||
+                                              (connected === true ? !intf.isConnected() : false) ||
                                               (exclude !== undefined
                                                   ? exclude.find(
                                                         (value) =>
                                                             value.device === device && value.intf === intf.getName()
                                                     ) !== undefined
+                                                  : false) ||
+                                              (connectedTo !== undefined
+                                                  ? intf.isConnected()
+                                                      ? connectedTo.find(
+                                                            (value) =>
+                                                                value.device ===
+                                                                    intf.getConnection()?.getOwner().getName() &&
+                                                                value.intf === intf.getConnection()?.getName()
+                                                        ) === undefined
+                                                      : true
                                                   : false)
                                           }
                                           key={key}>

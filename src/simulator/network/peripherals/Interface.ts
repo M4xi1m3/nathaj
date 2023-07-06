@@ -1,3 +1,4 @@
+import { Mac } from '../../utils/Mac';
 import { PacketEventData } from '../Network';
 import { Device } from './Device';
 
@@ -13,10 +14,30 @@ export type ReceivedPacketEventData = {
  */
 export class InterfaceException extends Error {
     iface: Interface;
+    i18n: string;
+    i18nargs: any;
 
-    constructor(description: string, iface: Interface) {
+    constructor(description: string, iface: Interface, i18n: string, i18nargs: any) {
         super(description);
         this.iface = iface;
+        this.i18n = i18n;
+        this.i18nargs = i18nargs;
+    }
+}
+
+/**
+ * Eception thrown when tyring to connect an interface to itself
+ */
+export class ConnectionToItselfException extends InterfaceException {
+    constructor(iface: Interface) {
+        super(
+            'Tying to connect interface ' + iface.getFullName() + ' to itself.',
+            iface,
+            'exception.interface.connectiontoself',
+            {
+                name: iface.getFullName(),
+            }
+        );
     }
 }
 
@@ -25,7 +46,14 @@ export class InterfaceException extends Error {
  */
 export class AlreadyConnectedException extends InterfaceException {
     constructor(iface: Interface) {
-        super('Interface ' + iface.getFullName() + ' is already connected.', iface);
+        super(
+            'Interface ' + iface.getFullName() + ' is already connected.',
+            iface,
+            'exception.interface.alreadyconnected',
+            {
+                name: iface.getFullName(),
+            }
+        );
     }
 }
 
@@ -36,7 +64,12 @@ export class NotInSameNetworkException extends InterfaceException {
     constructor(iface: Interface, other: Interface) {
         super(
             'Interface ' + iface.getFullName() + ' and ' + other.getFullName() + ' are not in the same network.',
-            iface
+            iface,
+            'exception.interface.notinsamenetwork',
+            {
+                name: iface.getFullName(),
+                other: other.getFullName(),
+            }
         );
     }
 }
@@ -46,14 +79,51 @@ export class NotInSameNetworkException extends InterfaceException {
  */
 export class NotConnectedException extends InterfaceException {
     constructor(iface: Interface) {
-        super('Interface ' + iface.getFullName() + ' is not connected.', iface);
+        super('Interface ' + iface.getFullName() + ' is not connected.', iface, 'exception.interface.notconnected', {
+            name: iface.getFullName(),
+        });
     }
+}
+
+/**
+ * Exception thrown when the interface isn't connected to a device
+ */
+export class DisconnectedException extends InterfaceException {
+    constructor(iface: Interface) {
+        super('Interface is disconnected.', iface, 'exception.interface.disconnected', {});
+    }
+}
+
+export interface SavedInterface {
+    name: string;
+    mac: string;
+    connected_to?: {
+        device: string;
+        interface: string;
+    };
+}
+
+export function isSavedInterface(arg: any): arg is SavedInterface {
+    return (
+        arg &&
+        arg.name !== undefined &&
+        typeof arg.name === 'string' &&
+        arg.mac !== undefined &&
+        typeof arg.mac === 'string' &&
+        (arg.connected_to !== undefined
+            ? typeof arg.connected_to === 'object' &&
+              arg.connected_to.device !== undefined &&
+              typeof arg.connected_to.device === 'string' &&
+              arg.connected_to.interface !== undefined &&
+              typeof arg.connected_to.interface === 'string'
+            : true)
+    );
 }
 
 /**
  * Network interface, which can send and receive packets
  */
-export class Interface extends EventTarget {
+export class Interface<T extends Device = Device<any>> extends EventTarget {
     /**
      * Name of the interface
      */
@@ -62,7 +132,12 @@ export class Interface extends EventTarget {
     /**
      * Device that owns the interface
      */
-    private owner: Device;
+    private owner?: T;
+
+    /**
+     * MAC address of the interface
+     */
+    private mac = '';
 
     /**
      * Interface to which the interface is connected
@@ -80,12 +155,43 @@ export class Interface extends EventTarget {
      * @param {Device} owner Owner of the interface
      * @param {string} name Name of the interface
      */
-    constructor(owner: Device, name: string) {
+    constructor(owner: T, name: string, mac: string) {
         super();
         this.owner = owner;
         this.name = name;
+        this.setMac(mac);
         this.connected_to = null;
         this.receive_queue = [];
+    }
+
+    /**
+     * Reset the interface
+     */
+    reset() {
+        this.receive_queue = [];
+    }
+
+    /**
+     * Get the MAC address of the host
+     *
+     * @returns {string} MAC address of the host
+     */
+    public getMac(): string {
+        return this.mac;
+    }
+
+    /**
+     * Set the MAC address of the host
+     *
+     * @param {string} mac New mac address
+     */
+    public setMac(mac: string) {
+        if (this.mac !== mac) {
+            if (Mac.isValid(mac, true, true)) {
+                this.mac = mac;
+                this.getOwner().dispatchEvent(new Event('changed'));
+            }
+        }
     }
 
     /**
@@ -93,7 +199,9 @@ export class Interface extends EventTarget {
      *
      * @returns {Device} owner of the interface
      */
-    getOwner(): Device {
+    getOwner(): T {
+        if (this.owner === undefined) throw new DisconnectedException(this);
+
         return this.owner;
     }
 
@@ -139,6 +247,7 @@ export class Interface extends EventTarget {
      * @param {Interface} other Interface to connect to
      */
     connect(other: Interface): void {
+        if (this === other) throw new ConnectionToItselfException(this);
         if (this.connected_to !== null) throw new AlreadyConnectedException(this);
         if (other.connected_to !== null) throw new AlreadyConnectedException(other);
 
@@ -147,6 +256,9 @@ export class Interface extends EventTarget {
 
         this.connected_to = other;
         other.connected_to = this;
+
+        this.getOwner().dispatchEvent(new Event('changed'));
+        other.getOwner().dispatchEvent(new Event('changed'));
     }
 
     /**
@@ -155,8 +267,13 @@ export class Interface extends EventTarget {
     disconnect(): void {
         if (this.connected_to === null) throw new NotConnectedException(this);
 
+        const other = this.connected_to;
+
         this.connected_to.connected_to = null;
         this.connected_to = null;
+
+        this.getOwner().dispatchEvent(new Event('changed'));
+        other.getOwner().dispatchEvent(new Event('changed'));
     }
 
     /**
@@ -222,6 +339,21 @@ export class Interface extends EventTarget {
      * @returns {string} String representation of the interface
      */
     toString(): string {
-        return '<Interface ' + this.owner.getName() + '-' + this.getName() + '>';
+        return '<Interface ' + this.getOwner().getName() + '-' + this.getName() + '>';
+    }
+
+    public save(): SavedInterface {
+        return {
+            name: this.getName(),
+            mac: this.getMac(),
+            ...(this.isConnected()
+                ? {
+                      connected_to: {
+                          device: this.getConnection()?.getOwner().getName() ?? '',
+                          interface: this.getConnection()?.getName() ?? '',
+                      },
+                  }
+                : {}),
+        };
     }
 }

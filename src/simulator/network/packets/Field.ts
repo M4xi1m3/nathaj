@@ -10,26 +10,14 @@ export abstract class Field {
     }
 
     /**
-     * Concatenate two array buffers
-     * @param {ArrayBuffer} a First buffer
-     * @param {ArrayBuffer} b Second buffer
-     * @returns {ArrayBuffer} A concatenated to b
-     */
-    protected static concatenate(a: ArrayBuffer, b: ArrayBuffer): ArrayBuffer {
-        const tmp = new Uint8Array(a.byteLength + b.byteLength);
-        tmp.set(new Uint8Array(a), 0);
-        tmp.set(new Uint8Array(b), a.byteLength);
-        return tmp.buffer;
-    }
-
-    /**
      * Parse the field
      *
      * @param {ArrayBuffer} data Data to parse from
+     * @param {number} position Position in the packet
      * @param {_Packet} packet Packet to write the field to
      * @returns {ArrayBuffer} Remaining data
      */
-    abstract parse(data: ArrayBuffer, packet: _Packet<any>): ArrayBuffer;
+    abstract parse(data: ArrayBuffer, position: number, packet: _Packet<any>): ArrayBuffer;
 
     /**
      * Get the field as binary data

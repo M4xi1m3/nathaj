@@ -1,3 +1,4 @@
+import { Buffers } from '../../../utils/Buffers';
 import { Field } from '../Field';
 import { _Packet } from '../Packet';
 
@@ -10,7 +11,7 @@ export class DataViewField extends Field {
     protected length = 1;
     protected hex = false;
 
-    parse(data: ArrayBuffer, packet: _Packet<object>): ArrayBuffer {
+    parse(data: ArrayBuffer, position: number, packet: _Packet<object>): ArrayBuffer {
         const dw = new DataView(data);
         (packet as { [key: string]: any })[this.name] = this.read.bind(dw)(0);
         return data.slice(this.length);
@@ -20,7 +21,7 @@ export class DataViewField extends Field {
         const arr = new ArrayBuffer(this.length);
         const dw = new DataView(arr);
         this.write.bind(dw)(0, (packet as { [key: string]: any })[this.name]);
-        return Field.concatenate(data, arr);
+        return Buffers.concatenate(data, arr);
     }
 
     repr(value: any): string {

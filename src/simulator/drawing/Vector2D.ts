@@ -137,4 +137,10 @@ export class Vector2D {
     public array(): [number, number] {
         return [this.x, this.y];
     }
+
+    public align(grid_size: number, doAlign = true) {
+        if (doAlign)
+            return new Vector2D(Math.round(this.x / grid_size) * grid_size, Math.round(this.y / grid_size) * grid_size);
+        else return this;
+    }
 }

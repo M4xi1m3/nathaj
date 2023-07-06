@@ -2,10 +2,15 @@ import { AppBar, Box, Toolbar, Typography } from '@mui/material';
 import React from 'react';
 import { NetworkActions } from './NetworkActions';
 
+import { useTranslation } from 'react-i18next';
 import { ReactComponent as Logo } from '../assets/logo/logo.svg';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { LightDarkSwitch } from './Theme';
 
-export const TopBar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const TopBar: React.FC<{
+    children: React.ReactNode;
+}> = ({ children }) => {
+    const { t } = useTranslation();
     return (
         <AppBar position='static' enableColorOnDark>
             <Toolbar variant='dense'>
@@ -19,11 +24,12 @@ export const TopBar: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                         display: 'flex',
                         fontFamily: 'Righteous',
                     }}>
-                    Näthaj
+                    {t('app.name')}
                 </Typography>
                 <Box sx={{ flexGrow: 1, display: 'flex' }}>{children}</Box>
                 <NetworkActions />
                 <LightDarkSwitch />
+                <LanguageSwitcher />
             </Toolbar>
         </AppBar>
     );

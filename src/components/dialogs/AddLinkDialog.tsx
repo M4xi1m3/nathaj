@@ -1,6 +1,8 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import React, { useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useEnqueueError } from '../../hooks/useEnqueueError';
 import { NetworkContext } from '../../NetworkContext';
 import { InterfaceInput } from '../fields/InterfaceInput';
 
@@ -11,8 +13,10 @@ interface AddLinkDialogProps {
 
 export const AddLinkDialog: React.FC<AddLinkDialogProps> = ({ opened, close }) => {
     const network = useContext(NetworkContext);
+    const { t } = useTranslation();
 
     const { enqueueSnackbar } = useSnackbar();
+    const enqueueError = useEnqueueError();
 
     const [device1, setDevice1] = useState<string | null>(null);
     const [intf1, setIntf1] = useState<string | null>(null);
@@ -29,7 +33,7 @@ export const AddLinkDialog: React.FC<AddLinkDialogProps> = ({ opened, close }) =
 
     return (
         <Dialog open={opened} onClose={() => close()} maxWidth='sm' fullWidth={true}>
-            <DialogTitle>Add Link</DialogTitle>
+            <DialogTitle>{t('dialog.addlink.title')}</DialogTitle>
             <DialogContent>
                 <InterfaceInput
                     exclude={[{ device: device2, intf: intf2 }]}
@@ -37,6 +41,7 @@ export const AddLinkDialog: React.FC<AddLinkDialogProps> = ({ opened, close }) =
                     setDevice={setDevice1}
                     intf={intf1}
                     setIntf={setIntf1}
+                    free
                 />
                 <InterfaceInput
                     exclude={[{ device: device1, intf: intf1 }]}
@@ -44,24 +49,25 @@ export const AddLinkDialog: React.FC<AddLinkDialogProps> = ({ opened, close }) =
                     setDevice={setDevice2}
                     intf={intf2}
                     setIntf={setIntf2}
+                    free
                 />
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => close()}>Cancel</Button>
+                <Button onClick={() => close()}>{t('dialog.common.cancel')}</Button>
                 <Button
                     onClick={() => {
                         try {
                             if (device1 !== null && device2 !== null && intf1 !== null && intf2 !== null) {
                                 network.addLink(device1, intf1, device2, intf2);
-                                enqueueSnackbar('Link added');
+                                enqueueSnackbar(t('dialog.addlink.success'));
                             }
                         } catch (e: any) {
-                            enqueueSnackbar((e as Error).message, { variant: 'error' });
+                            enqueueError(e);
                         }
                         close();
                     }}
                     disabled={device1 === null || intf1 === null || device2 === null || intf2 === null}>
-                    Add
+                    {t('dialog.common.add')}
                 </Button>
             </DialogActions>
         </Dialog>

@@ -1,25 +1,28 @@
 import { TextField } from '@mui/material';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NetworkContext } from '../../NetworkContext';
 
 interface NameInputProps {
     name: string;
     setName: (name: string) => void;
-    setNameError?: (nameError: boolean) => void;
+    setNameError: (nameError: boolean) => void;
+    nameError: boolean;
 }
 
-export const NameInput: React.FC<NameInputProps> = ({ name, setName, setNameError }) => {
+export const NameInput: React.FC<NameInputProps> = ({ name, setName, setNameError, nameError }) => {
     const network = useContext(NetworkContext);
+    const { t } = useTranslation();
 
-    const nameError = name === '' || network.hasDevice(name);
-
-    if (setNameError !== undefined) setNameError(nameError);
+    useEffect(() => {
+        setNameError(name === '' || network.hasDevice(name));
+    }, [setNameError, name, network]);
 
     return (
         <TextField
             variant='standard'
             type='text'
-            label='Name'
+            label={t('field.name.label')}
             fullWidth
             margin='dense'
             value={name}

@@ -1,5 +1,6 @@
 stages:
   - build
+  - test
   - deploy
 
 build:
@@ -7,14 +8,43 @@ build:
   stage: build
   variables:
     PUBLIC_URL: https://maxime.friess.pages.unistra.fr/nathaj/
+  before_script:
+    - yarn install --frozen-lockfile
   script:
-    - yarn install
     - yarn build
     - yarn typedoc
   artifacts:
     paths:
-      - build/
+      - dist/
       - docs/
+  cache:
+    key:
+      files:
+        - yarn.lock
+    paths:
+      - node_modules/
+  needs: []
+
+test:
+  image: node:latest
+  stage: test
+  before_script:
+    - yarn install --frozen-lockfile
+  script:
+    - yarn test --coverage
+  cache:
+    key:
+      files:
+        - yarn.lock
+    paths:
+      - node_modules/
+  coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/clover.xml
+  needs: []
 
 pages:
   image: alpine:latest
@@ -22,8 +52,15 @@ pages:
   variables:
     GIT_STRATEGY: none
   script:
-    - mv build public
-    - mv docs public/docs
+    - mkdir -p public/docs/
+    - mv dist/* "public"
+    - mv docs/* "public/docs"
+  cache:
+    paths:
+      - public
   artifacts:
     paths:
       - public
+  only:
+    - develop
+  needs: ['build']
