@@ -149,6 +149,11 @@ export class Network extends EventTarget {
     private paused_at: number;
 
     /**
+     * Simulation speed factor of the network.
+     */
+    private speed: number;
+
+    /**
      * Create a network
      */
     public constructor() {
@@ -159,6 +164,7 @@ export class Network extends EventTarget {
         this.time_offset = 0;
         this.time_elapsed = 0;
         this.paused_at = 0;
+        this.speed = 1;
     }
 
     /**
@@ -348,7 +354,22 @@ export class Network extends EventTarget {
      */
     public time(): number {
         if (!this.isRunning()) return this.paused_at;
-        return (performance.now() - this.time_offset + this.time_elapsed) / 1000;
+        return ((performance.now() - this.time_offset) * this.getSpeed() + this.time_elapsed) / 1000;
+    }
+
+    public getSpeed(): number {
+        return this.speed;
+    }
+
+    public setSpeed(speed: number) {
+        if (speed <= 0 || isNaN(speed) || speed === Infinity || speed === -Infinity) {
+            throw new RangeError();
+        }
+        if (this.isRunning()) {
+            this.time_elapsed += (performance.now() - this.time_offset) * this.getSpeed();
+            this.time_offset = performance.now();
+        }
+        this.speed = speed;
     }
 
     /**
@@ -379,7 +400,7 @@ export class Network extends EventTarget {
         clearInterval(this.interval);
 
         this.paused_at = this.time();
-        this.time_elapsed += performance.now() - this.time_offset;
+        this.time_elapsed += (performance.now() - this.time_offset) * this.getSpeed();
 
         this.interval = null;
         this.dispatchEvent(new Event('changed'));
