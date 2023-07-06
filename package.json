@@ -1,7 +1,7 @@
 {
   "name": "nathaj",
   "description": "A web-based network simulator written in TypeScript using the React library",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "author": {
     "name": "Maxime FRIESS",
