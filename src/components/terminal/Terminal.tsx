@@ -35,13 +35,21 @@ type ParsedCommand = {
 
 export type CommandFunc = (c: ParsedCommand, f: TermFunctions) => void;
 
+type PrintEntry = {
+    type: PrintType;
+    text: string;
+};
+
 export const Terminal: React.FC<{
     prompt?: string;
     theme?: Theme;
     notFound?: CommandFunc;
     commands?: { [name: string]: CommandFunc };
-}> = ({ prompt, theme, notFound, commands }) => {
-    const [buffer, setBuffer] = useState<React.ReactNode>(<></>);
+    initval?: string;
+}> = ({ prompt, theme, notFound, commands, initval }) => {
+    const [buffer, setBuffer] = useState<PrintEntry[]>(
+        initval === undefined ? [] : [{ type: 'standard', text: initval }]
+    );
     let tmpBuff = buffer;
     const [input, setInput] = useState('');
 
@@ -51,28 +59,18 @@ export const Terminal: React.FC<{
     useEffect(() => scrollToBottom(), [buffer]);
 
     const print: Print = (text: string, type: PrintType = 'standard') => {
-        tmpBuff = (
-            <>
-                {tmpBuff}
-                <span
-                    style={{
-                        color: {
-                            standard: theme.text,
-                            error: theme.error,
-                            success: theme.success,
-                            warning: theme.warning,
-                        }[type],
-                    }}>
-                    {text}
-                    {'\n'}
-                </span>
-            </>
-        );
+        tmpBuff = [
+            ...tmpBuff,
+            {
+                type,
+                text,
+            },
+        ];
         setBuffer(tmpBuff);
     };
 
     const clear = () => {
-        tmpBuff = <></>;
+        tmpBuff = initval === undefined ? [] : [{ type: 'standard', text: initval }];
         setBuffer(tmpBuff);
     };
 
@@ -99,8 +97,22 @@ export const Terminal: React.FC<{
                 color: theme.text,
             }}>
             <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <div style={{ flexGrow: 1, overflowY: 'scroll', overflowX: 'hidden' }}>
-                    {buffer}
+                <div style={{ flexGrow: 1, overflowY: 'scroll', overflowX: 'hidden', padding: '4px' }}>
+                    {buffer.map((entry, key) => (
+                        <span
+                            key={key}
+                            style={{
+                                color: {
+                                    standard: theme.text,
+                                    error: theme.error,
+                                    success: theme.success,
+                                    warning: theme.warning,
+                                }[entry.type],
+                            }}>
+                            {entry.text}
+                            {'\n'}
+                        </span>
+                    ))}
                     <span ref={endRef}></span>
                 </div>
                 <div style={{ display: 'flex', borderTop: '1px solid', borderColor: theme.border, padding: '2px' }}>
@@ -152,7 +164,7 @@ Terminal.defaultProps = {
         border: 'rgba(0, 0, 0, 0.12)',
     },
     notFound: ({ command }: ParsedCommand, { print }: TermFunctions) => {
-        print(`Command ${command} not found!\n`, 'error');
+        print(`Command ${command} not found!`, 'error');
     },
     commands: {},
 };

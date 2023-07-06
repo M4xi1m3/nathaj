@@ -113,6 +113,16 @@ export const NetworkConsole: React.FC = () => {
             }
             intf_subcommand[c.args.shift()](c, f);
         },
+        help: (_, { print }) => {
+            print('Available commands:');
+            print('dev help        Show this help');
+            print('dev add         Add a device');
+            print('dev remove      Remove a device');
+            print('dev link        Link two devices');
+            print('dev unlink      Unlink two devices');
+            print('dev intf        Manage interfaces');
+            print('dev intf help   Show interfaces help');
+        },
     };
 
     const intf_subcommand: { [name: string]: CommandFunc } = {
@@ -176,6 +186,14 @@ export const NetworkConsole: React.FC = () => {
                 print((e as Error).message, 'error');
             }
         },
+        help: (_, { print }) => {
+            print('Available commands:');
+            print('dev intf help       Show this help');
+            print('dev intf add        Add an interface');
+            print('dev intf remove     Remove an interface');
+            print('dev intf link       Link two interfaces');
+            print('dev intf unlink     Unlink two interfaces');
+        },
     };
 
     return (
@@ -208,7 +226,6 @@ export const NetworkConsole: React.FC = () => {
                             }
                             clear();
                         },
-                        print: ({ args }, { print }) => print(args.join(' ')),
                         start: ({ args }, { print }) => {
                             if (args.length !== 0) {
                                 print(`Usage: start`, 'error');
@@ -294,6 +311,20 @@ export const NetworkConsole: React.FC = () => {
                                 }
                             });
                         },
+                        help: (_, { print }) => {
+                            print('Available commands:');
+                            print('help            Show this help');
+                            print('clear           Clear the console');
+                            print('start           Start the simulation');
+                            print('stop            Stop the simulation');
+                            print('reset           Reset the simulation');
+                            print('destroy         Destroy the network');
+                            print('save            Save the network');
+                            print('load            Load a network');
+                            print('dev             Manage devices');
+                            print('dev help        Show device help');
+                            print('dev intf help   Show interfaces help');
+                        },
                     }}
                     theme={{
                         background: 'rgba(0, 0, 0, 0)',
@@ -303,6 +334,13 @@ export const NetworkConsole: React.FC = () => {
                         error: theme.palette.error.main,
                         warning: theme.palette.warning.main,
                     }}
+                    notFound={({ command }, { print }) => {
+                        print(
+                            `Command ${command} not found!\nType "help" to get a list of available commands.`,
+                            'error'
+                        );
+                    }}
+                    initval={`Näthaj console\nType "help" for a list of available commands.`}
                 />
             </Grid>
         </Grid>
