@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { saveJson } from '../../hooks/saveJson';
 import { selectFile } from '../../hooks/selectFile';
 import { NetworkContext } from '../../NetworkContext';
+import { Vector2D } from '../../simulator/drawing/Vector2D';
 import { Host } from '../../simulator/network/peripherals/Host';
 import { Hub } from '../../simulator/network/peripherals/Hub';
 import { STPSwitch } from '../../simulator/network/peripherals/STPSwitch';
@@ -67,9 +68,9 @@ export const NetworkConsole: React.FC = () => {
                 print((e as Error).message, 'error');
             }
         },
-        remove: ({ args }, { print }) => {
+        rm: ({ args }, { print }) => {
             if (args.length < 1) {
-                print(`Usage: dev remove name`, 'error');
+                print(`Usage: dev rm name`, 'error');
                 return;
             }
 
@@ -113,14 +114,101 @@ export const NetworkConsole: React.FC = () => {
             }
             intf_subcommand[c.args.shift()](c, f);
         },
+        move: ({ args }, { print }) => {
+            if (args.length < 3) {
+                print(`Usage: dev move name x y`, 'error');
+                return;
+            }
+
+            if (isNaN(parseInt(args[1]))) {
+                print(`Invalid number ${args[1]}`, 'error');
+                return;
+            }
+            if (isNaN(parseInt(args[2]))) {
+                print(`Invalid number ${args[2]}`, 'error');
+                return;
+            }
+
+            try {
+                network.getDevice(args[0]).setPosition(new Vector2D(parseInt(args[1]), parseInt(args[2])));
+                print('Device moved', 'success');
+            } catch (e: any) {
+                print((e as Error).message, 'error');
+            }
+        },
+        relmove: ({ args }, { print }) => {
+            if (args.length < 3 || args.length > 4) {
+                print(`Usage: dev move name other direction [distance]`, 'error');
+                return;
+            }
+
+            let distance = 50;
+            if (args[3] !== undefined) {
+                if (isNaN(parseInt(args[3]))) {
+                    print(`Invalid number ${args[3]}`, 'error');
+                    return;
+                }
+                distance = parseInt(args[3]);
+            }
+
+            let base = new Vector2D(0, 0);
+            switch (args[2]) {
+                case 'top':
+                case 't':
+                    base = new Vector2D(0, -1);
+                    break;
+                case 'bottom':
+                case 'b':
+                    base = new Vector2D(0, 1);
+                    break;
+                case 'left':
+                case 'l':
+                    base = new Vector2D(-1, 0);
+                    break;
+                case 'right':
+                case 'r':
+                    base = new Vector2D(1, 0);
+                    break;
+                case 'topleft':
+                case 'tl':
+                    base = new Vector2D(-1, -1);
+                    break;
+                case 'bottomleft':
+                case 'bl':
+                    base = new Vector2D(-1, 1);
+                    break;
+                case 'topright':
+                case 'tr':
+                    base = new Vector2D(1, -1);
+                    break;
+                case 'bottomright':
+                case 'br':
+                    base = new Vector2D(1, 1);
+                    break;
+                default:
+                    print(`Invalid direction ${args[2]}`, 'error');
+                    return;
+            }
+
+            try {
+                network
+                    .getDevice(args[0])
+                    .setPosition(network.getDevice(args[1]).getPosition().add(base.mul(distance)));
+                print('Device moved', 'success');
+            } catch (e: any) {
+                print((e as Error).message, 'error');
+            }
+        },
         help: (_, { print }) => {
             print('Available commands:');
             print('dev help        Show this help');
             print('dev add         Add a device');
-            print('dev remove      Remove a device');
+            print('dev rm          Remove a device');
             print('dev link        Link two devices');
             print('dev unlink      Unlink two devices');
             print('dev intf        Manage interfaces');
+            print('dev move        Move a device');
+            print('dev relmove     Move a device relative to an other');
             print('dev intf help   Show interfaces help');
         },
     };
@@ -147,9 +235,9 @@ export const NetworkConsole: React.FC = () => {
                 print((e as Error).message, 'error');
             }
         },
-        remove: ({ args }, { print }) => {
+        rm: ({ args }, { print }) => {
             if (args.length < 2) {
-                print(`Usage: dev intf remove device name`, 'error');
+                print(`Usage: dev intf rm device name`, 'error');
                 return;
             }
 
@@ -190,7 +278,7 @@ export const NetworkConsole: React.FC = () => {
             print('Available commands:');
             print('dev intf help       Show this help');
             print('dev intf add        Add an interface');
-            print('dev intf remove     Remove an interface');
+            print('dev intf rm         Remove an interface');
             print('dev intf link       Link two interfaces');
             print('dev intf unlink     Unlink two interfaces');
         },
