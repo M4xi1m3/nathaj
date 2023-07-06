@@ -8,6 +8,12 @@ import { AddStpSwitchDialog } from '../dialogs/AddStpSwitchDialog';
 import { AddSwitchDialog } from '../dialogs/AddSwitchDialog';
 import { ActionMenu } from './ActionMenu';
 
+import HostImg from '../../assets/host.png';
+import HubImg from '../../assets/hub.png';
+import LinkImg from '../../assets/link.png';
+import STPSwitchImg from '../../assets/stp-switch.png';
+import SwitchImg from '../../assets/switch.png';
+
 export const AddMenu: React.FC<{
     icon?: boolean;
 }> = ({ icon }) => {
@@ -37,24 +43,32 @@ export const AddMenu: React.FC<{
                         action: () => {
                             setAddHostOpened(true);
                         },
+                        icon: HostImg,
+                        dark: true,
                     },
                     {
                         name: t('menu.common.hub'),
                         action: () => {
                             setAddHubOpened(true);
                         },
+                        icon: HubImg,
+                        dark: true,
                     },
                     {
                         name: t('menu.common.switch'),
                         action: () => {
                             setAddSwitchOpened(true);
                         },
+                        icon: SwitchImg,
+                        dark: true,
                     },
                     {
                         name: t('menu.common.stpswitch'),
                         action: () => {
                             setAddStpSwitchOpened(true);
                         },
+                        icon: STPSwitchImg,
+                        dark: true,
                     },
                     'separator',
                     {
@@ -62,6 +76,8 @@ export const AddMenu: React.FC<{
                         action: () => {
                             setAddLinkDialogOpened(true);
                         },
+                        icon: LinkImg,
+                        dark: true,
                     },
                 ]}
             />

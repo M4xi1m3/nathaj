@@ -1,5 +1,6 @@
 import { NavigateNext } from '@mui/icons-material';
 import {
+    Avatar,
     Button,
     Divider,
     IconButton,
@@ -9,6 +10,7 @@ import {
     MenuItem,
     Tooltip,
     Typography,
+    useTheme,
 } from '@mui/material';
 import { bindMenu, bindTrigger, PopupState, usePopupState } from 'material-ui-popup-state/hooks';
 import React from 'react';
@@ -19,6 +21,8 @@ export type ActionElement =
           action?: () => void;
           elements?: ActionElement[];
           shortcut?: string;
+          icon?: string;
+          dark?: boolean;
       }
     | 'separator';
 
@@ -56,6 +60,8 @@ const MenuElement: React.FC<{
     popupState: PopupState;
     rootPopupState: PopupState;
 }> = ({ element, popupState, rootPopupState }) => {
+    const theme = useTheme();
+
     if (element === 'separator') {
         return <Divider />;
     } else if (element.elements !== undefined) {
@@ -76,6 +82,18 @@ const MenuElement: React.FC<{
                         rootPopupState.close();
                     }
                 }}>
+                {element.icon !== undefined ? (
+                    <Avatar
+                        sx={{
+                            width: 24,
+                            height: 24,
+                            marginRight: '6px',
+                            ...(!!element.dark && theme.palette.mode === 'dark' ? { filter: 'invert(1)' } : {}),
+                        }}
+                        variant='square'
+                        src={element.icon}
+                    />
+                ) : null}
                 <ListItemText>{element.name}</ListItemText>
                 {element.shortcut !== undefined ? (
                     <Typography variant='body2' color='text.secondary' sx={{ paddingLeft: '8px' }}>
