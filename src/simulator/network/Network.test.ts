@@ -80,7 +80,7 @@ describe('Network', () => {
         expect(net.hasDevice('dev0')).toEqual(true);
         expect(net.getDevice('dev0')).toBe(dev0);
         expect(net.hasDevice('dev1')).toEqual(false);
-        expect(net.getDevice('dev1')).toBe(undefined);
+        expect(() => net.getDevice('dev1')).toThrow(DeviceNotFound);
     });
 
     /**

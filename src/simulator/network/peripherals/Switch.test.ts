@@ -13,7 +13,7 @@ describe('Switch', () => {
         const h1 = new Host(net, 'h1', '00:00:00:00:00:01');
         const h2 = new Host(net, 'h2', '00:00:00:00:00:02');
         const h3 = new Host(net, 'h3', '00:00:00:00:00:03');
-        const sw1 = new Switch(net, 'sw1', 3, '00:00:00:00:00:04');
+        const sw1 = new Switch(net, 'sw1', '00:00:00:00:00:04', 3);
 
         net.addLink('sw1', 'h1');
         net.addLink('sw1', 'h2');
@@ -72,7 +72,7 @@ describe('Switch', () => {
 
     it('save', () => {
         const net = new Network();
-        const h1 = new Switch(net, 'sw1', 4, '00:00:00:00:00:01');
+        const h1 = new Switch(net, 'sw1', '00:00:00:00:00:01', 4);
 
         expect(h1.save()).toStrictEqual({
             type: 'switch',

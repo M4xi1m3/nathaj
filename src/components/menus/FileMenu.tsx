@@ -9,10 +9,7 @@ import { SaveDialog } from '../dialogs/SaveDialog';
 import { ActionMenu } from './ActionMenu';
 import { ExampleSubMenu } from './ExampleSubMenu';
 
-export const FileMenu: React.FC<{
-    selected: string | null;
-    setSelected: (name: string | null) => void;
-}> = ({ setSelected }) => {
+export const FileMenu: React.FC = () => {
     const { t } = useTranslation();
     const [saveOpened, setSaveOpened] = useState<boolean>(false);
 
@@ -24,7 +21,6 @@ export const FileMenu: React.FC<{
         try {
             net.reset();
             net.load(JSON.parse(data));
-            setSelected(null);
             enqueueSnackbar(t('menu.file.loaded'));
         } catch (e: any) {
             enqueueError(e);
@@ -44,7 +40,6 @@ export const FileMenu: React.FC<{
 
     const clear = () => {
         net.clear();
-        setSelected(null);
     };
 
     useMousetrap('ctrl+s', (e: KeyboardEvent) => {

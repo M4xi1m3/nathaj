@@ -14,10 +14,11 @@ export type Theme = {
     text: string;
     error: string;
     success: string;
+    warning: string;
     border: string;
 };
 
-type PrintType = 'standard' | 'error' | 'success';
+type PrintType = 'standard' | 'error' | 'success' | 'warning';
 
 type Print = (text: string, type?: PrintType) => void;
 
@@ -32,7 +33,7 @@ type ParsedCommand = {
     raw: string;
 };
 
-type CommandFunc = (c: ParsedCommand, f: TermFunctions) => void;
+export type CommandFunc = (c: ParsedCommand, f: TermFunctions) => void;
 
 export const Terminal: React.FC<{
     prompt?: string;
@@ -54,6 +55,7 @@ export const Terminal: React.FC<{
                             standard: theme.text,
                             error: theme.error,
                             success: theme.success,
+                            warning: theme.warning,
                         }[type],
                     }}>
                     {text}
@@ -136,8 +138,9 @@ Terminal.defaultProps = {
     theme: {
         background: 'rgba(0, 0, 0, 0)',
         text: 'rgba(0, 0, 0, 0.87)',
-        error: '#f44336',
-        success: '#66bb6a',
+        error: '#d32f2f',
+        success: '#2e7d32',
+        warning: '#ed6c02',
         border: 'rgba(0, 0, 0, 0.12)',
     },
     notFound: ({ command }: ParsedCommand, { print }: TermFunctions) => {

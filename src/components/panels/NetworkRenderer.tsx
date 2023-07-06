@@ -324,7 +324,6 @@ export const NetworkRenderer: React.FC<{
                                             try {
                                                 network.removeDevice(dev.getName());
                                                 e.currentTarget.style.cursor = 'default';
-                                                if (dev.getName() === selected) setSelected(null);
                                                 enqueueSnackbar(
                                                     t('panel.network.snack.deviceremoved', { name: dev.getName() })
                                                 );
@@ -401,7 +400,6 @@ export const NetworkRenderer: React.FC<{
                                     try {
                                         network.removeDevice(dev.getName());
                                         e.currentTarget.style.cursor = 'default';
-                                        if (dev.getName() === selected) setSelected(null);
                                         enqueueSnackbar(
                                             t('panel.network.snack.deviceremoved', { name: dev.getName() })
                                         );

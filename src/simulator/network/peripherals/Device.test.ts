@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { InvalidMACException } from '../../utils/Mac';
 import { Network } from '../Network';
-import { Device, InterfaceNameTaken, NoFreeInterfaces, SavedDevice } from './Device';
+import { Device, InterfaceNameTaken, InterfaceNotFound, NoFreeInterfaces, SavedDevice } from './Device';
 import { Interface } from './Interface';
 
 describe('Device', () => {
@@ -72,7 +72,7 @@ describe('Device', () => {
         expect(dev.hasInterface('eth0')).toEqual(true);
         expect(dev.getInterface('eth0')).toBe(eth0);
         expect(dev.hasInterface('eth2')).toEqual(false);
-        expect(dev.getInterface('eth2')).toBe(undefined);
+        expect(() => dev.getInterface('eth2')).toThrow(InterfaceNotFound);
     });
 
     /**

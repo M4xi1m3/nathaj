@@ -13,7 +13,7 @@ describe('Hub', () => {
         const h1 = new Host(net, 'h1', '00:00:00:00:00:01');
         const h2 = new Host(net, 'h2', '00:00:00:00:00:02');
         const h3 = new Host(net, 'h3', '00:00:00:00:00:03');
-        new Hub(net, 'hub1', 3, '00:00:00:00:01:01');
+        new Hub(net, 'hub1', '00:00:00:00:01:01', 3);
 
         net.addLink('hub1', 'h1');
         net.addLink('hub1', 'h2');
@@ -39,7 +39,7 @@ describe('Hub', () => {
     });
     it('save', () => {
         const net = new Network();
-        const h1 = new Hub(net, 'h1', 2, '00:00:00:00:00:01');
+        const h1 = new Hub(net, 'h1', '00:00:00:00:00:01', 2);
 
         expect(h1.save()).toStrictEqual({
             type: 'hub',

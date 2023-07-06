@@ -168,7 +168,7 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
      * @returns {string} New mac address (or '' if no interfaces are in the device)
      */
     public generateNextMacAddress(): string {
-        if (this.getInterfaces().length === 0) return '';
+        if (this.getInterfaces().length === 0) return Device.getNextAvailableMac(this.getNetwork());
         return Mac.fromInt(
             this.getInterfaces()
                 .map((i) => Mac.toInt(i.getMac()))
@@ -297,7 +297,10 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
      * @param {string} name Name of the interface
      * @returns {Interface} The new interface
      */
-    public addInterface(name: string, mac: string): T {
+    public addInterface(name?: string, mac?: string): T {
+        if (name === undefined) name = this.generateNextIntfName();
+        if (mac === undefined) mac = this.generateNextMacAddress();
+
         const intf = this.createInterface(
             name,
             mac,
@@ -339,6 +342,8 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
      * @returns {Interface} The interface
      */
     public getInterface(name: string): T | undefined {
+        if (!(name in this.interfaces)) throw new InterfaceNotFound(this, name);
+
         return this.interfaces[name];
     }
 

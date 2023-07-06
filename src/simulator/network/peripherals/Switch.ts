@@ -35,8 +35,12 @@ export class Switch<T extends Interface = Interface> extends Hub<T> {
      * @param {number} ports Number of interfaces to create
      * @param {string} base_mac MAC address of the switch
      */
-    constructor(network: Network, name: string, ports?: number, base_mac?: string) {
-        super(network, name, ports, base_mac);
+    constructor(network: Network, name: string, base_mac?: string, ports?: number) {
+        if (name === undefined) name = Switch.getNextAvailableName(network);
+        if (base_mac === undefined) base_mac = Switch.getNextAvailableMac(network);
+        if (ports === undefined) ports = 4;
+
+        super(network, name, base_mac, ports);
         this.mac_address_table = {};
     }
 

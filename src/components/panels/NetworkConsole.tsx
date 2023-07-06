@@ -5,18 +5,179 @@ import { useTranslation } from 'react-i18next';
 import { saveJson } from '../../hooks/saveJson';
 import { selectFile } from '../../hooks/selectFile';
 import { NetworkContext } from '../../NetworkContext';
-import { Terminal } from '../terminal/Terminal';
+import { Host } from '../../simulator/network/peripherals/Host';
+import { Hub } from '../../simulator/network/peripherals/Hub';
+import { STPSwitch } from '../../simulator/network/peripherals/STPSwitch';
+import { Switch } from '../../simulator/network/peripherals/Switch';
+import { Mac } from '../../simulator/utils/Mac';
+import { CommandFunc, Terminal } from '../terminal/Terminal';
 
 /**
  * Network console component
  */
-export const NetworkConsole: React.FC<{
-    selected: string | null;
-    setSelected: (name: string | null) => void;
-}> = ({ selected, setSelected }) => {
+export const NetworkConsole: React.FC = () => {
     const { t } = useTranslation();
     const network = useContext(NetworkContext);
     const theme = useTheme();
+
+    const dev_subcommand: { [name: string]: CommandFunc } = {
+        add: ({ args }, { print }) => {
+            if (args.length < 1) {
+                print(`Usage: dev add type [name] [mac] [ports]`, 'error');
+                return;
+            }
+
+            if (args[1] === '-') args[1] = undefined;
+            if (args[2] === '-') args[2] = undefined;
+            if (args[3] === '-') args[3] = undefined;
+
+            if (args[2] !== undefined && !Mac.isValid(args[2])) {
+                print(`Invalid mac address ${args[2]}`, 'error');
+                return;
+            }
+
+            if (args[3] !== undefined && isNaN(parseInt(args[3]))) {
+                print(`Invalid port count ${args[3]}`, 'error');
+                return;
+            }
+            const ports = args[3] !== undefined ? parseInt(args[3]) : undefined;
+
+            try {
+                switch (args[0]) {
+                    case 'host':
+                        new Host(network, args[1], args[2]);
+                        print('Host added', 'success');
+                        break;
+                    case 'hub':
+                        new Hub(network, args[1], args[2], ports);
+                        print('Hub added', 'success');
+                        break;
+                    case 'switch':
+                        new Switch(network, args[1], args[2], ports);
+                        print('Switch added', 'success');
+                        break;
+                    case 'stp-switch':
+                        new STPSwitch(network, args[1], args[2], ports);
+                        print('STP Switch added', 'success');
+                        break;
+                    default:
+                        print(`Unknown device type ${args[0]}`, 'error');
+                        break;
+                }
+            } catch (e: any) {
+                print((e as Error).message, 'error');
+            }
+        },
+        remove: ({ args }, { print }) => {
+            if (args.length < 1) {
+                print(`Usage: dev remove name`, 'error');
+                return;
+            }
+
+            try {
+                network.removeDevice(args[0]);
+                print('Device removed', 'success');
+            } catch (e: any) {
+                print((e as Error).message, 'error');
+            }
+        },
+        link: ({ args }, { print }) => {
+            if (args.length < 2) {
+                print(`Usage: dev link device other`, 'error');
+                return;
+            }
+
+            try {
+                network.addLink(args[0], args[1]);
+                print('Link added', 'success');
+            } catch (e: any) {
+                print((e as Error).message, 'error');
+            }
+        },
+        unlink: ({ args }, { print }) => {
+            if (args.length < 2) {
+                print(`Usage: dev unlink device other`, 'error');
+                return;
+            }
+
+            try {
+                network.removeLink(args[0], args[1]);
+                print('Link removed', 'success');
+            } catch (e: any) {
+                print((e as Error).message, 'error');
+            }
+        },
+        intf: (c, f) => {
+            if (c.args.length === 0 || !(c.args[0] in intf_subcommand)) {
+                f.print(`Usage: dev intf command ...args`, 'error');
+                return;
+            }
+            intf_subcommand[c.args.shift()](c, f);
+        },
+    };
+
+    const intf_subcommand: { [name: string]: CommandFunc } = {
+        add: ({ args }, { print }) => {
+            if (args.length < 1) {
+                print(`Usage: dev intf add device [name] [mac]`, 'error');
+                return;
+            }
+
+            if (args[1] === '-') args[1] = undefined;
+            if (args[2] === '-') args[2] = undefined;
+
+            if (args[2] !== undefined && !Mac.isValid(args[2])) {
+                print(`Invalid mac address ${args[2]}`, 'error');
+                return;
+            }
+
+            try {
+                network.getDevice(args[0]).addInterface(args[1], args[2]);
+                print('Interface added', 'success');
+            } catch (e: any) {
+                print((e as Error).message, 'error');
+            }
+        },
+        remove: ({ args }, { print }) => {
+            if (args.length < 2) {
+                print(`Usage: dev intf remove device name`, 'error');
+                return;
+            }
+
+            try {
+                network.getDevice(args[0]).removeInterface(args[1]);
+                print('Interface removed', 'success');
+            } catch (e: any) {
+                print((e as Error).message, 'error');
+            }
+        },
+        link: ({ args }, { print }) => {
+            if (args.length < 4) {
+                print(`Usage: dev intf link device interface other intf`, 'error');
+                return;
+            }
+
+            try {
+                network.addLink(args[0], args[1], args[2], args[3]);
+                print('Link added', 'success');
+            } catch (e: any) {
+                print((e as Error).message, 'error');
+            }
+        },
+        unlink: ({ args }, { print }) => {
+            if (args.length < 4) {
+                print(`Usage: dev intf unlink device interface other intf`, 'error');
+                return;
+            }
+
+            try {
+                network.removeLink(args[0], args[1], args[2], args[3]);
+                print('Link removed', 'success');
+            } catch (e: any) {
+                print((e as Error).message, 'error');
+            }
+        },
+    };
 
     return (
         <Grid container direction='column' flexWrap='nowrap' sx={{ height: '100%' }}>
@@ -38,41 +199,27 @@ export const NetworkConsole: React.FC<{
                 <Divider />
             </Grid>
             {/* TODO: Find a way to do that without using calc with a fixed height */}
-            {/*
-                Command list:
-                 - example load <path>
-                 - example list
-                 - show <panel>
-                 - hide <panel>
-                 - dev add <type> <name> <mac>
-                 - dev remove <name>
-                 - dev link <a> <b>
-                 - dev unlink <a> <b>
-                 - dev set <name> <prop> <value>
-                 - dev get <name> <prop>
-                 - dev info <name>
-                 - dev intf add <name> <intf> <mac>
-                 - dev intf remove <name> <intf>
-                 - dev intf link <a> <intfa> <b> <intfb>
-                 - dev intf unlink <a> <intfa> <b> <intfb>
-                 - dev intf get <name> <intf> <prop>
-                 - dev intf set <name> <intf> <prop> <value>
-                 - dev intf info <name> <intf>
-            */}
             <Grid item sx={{ height: '100%', overflow: 'hidden' }}>
                 <Terminal
                     commands={{
-                        clear: ({ command, args }, { clear, print }) => {
+                        dev: (c, f) => {
+                            if (c.args.length === 0 || !(c.args[0] in dev_subcommand)) {
+                                f.print(`Usage: dev command ...args`, 'error');
+                                return;
+                            }
+                            dev_subcommand[c.args.shift()](c, f);
+                        },
+                        clear: ({ args }, { clear, print }) => {
                             if (args.length !== 0) {
-                                print(`Usage: ${command}`, 'error');
+                                print(`Usage: clear`, 'error');
                                 return;
                             }
                             clear();
                         },
                         print: ({ args }, { print }) => print(args.join(' ')),
-                        start: ({ command, args }, { print }) => {
+                        start: ({ args }, { print }) => {
                             if (args.length !== 0) {
-                                print(`Usage: ${command}`, 'error');
+                                print(`Usage: start`, 'error');
                                 return;
                             }
                             try {
@@ -82,9 +229,9 @@ export const NetworkConsole: React.FC<{
                                 print((e as Error).message, 'error');
                             }
                         },
-                        stop: ({ command, args }, { print }) => {
+                        stop: ({ args }, { print }) => {
                             if (args.length !== 0) {
-                                print(`Usage: ${command}`, 'error');
+                                print(`Usage: stop`, 'error');
                                 return;
                             }
                             try {
@@ -94,9 +241,9 @@ export const NetworkConsole: React.FC<{
                                 print((e as Error).message, 'error');
                             }
                         },
-                        reset: ({ command, args }, { print }) => {
+                        reset: ({ args }, { print }) => {
                             if (args.length !== 0) {
-                                print(`Usage: ${command}`, 'error');
+                                print(`Usage: reset`, 'error');
                                 return;
                             }
                             try {
@@ -106,9 +253,9 @@ export const NetworkConsole: React.FC<{
                                 print((e as Error).message, 'error');
                             }
                         },
-                        destroy: ({ command, args }, { print }) => {
+                        destroy: ({ args }, { print }) => {
                             if (args.length !== 0) {
-                                print(`Usage: ${command}`, 'error');
+                                print(`Usage: destroy`, 'error');
                                 return;
                             }
                             try {
@@ -118,9 +265,9 @@ export const NetworkConsole: React.FC<{
                                 print((e as Error).message, 'error');
                             }
                         },
-                        save: ({ command, args }, { print }) => {
+                        save: ({ args }, { print }) => {
                             if (args.length !== 1) {
-                                print(`Usage: ${command} filename`, 'error');
+                                print(`Usage: save filename`, 'error');
                                 return;
                             }
                             try {
@@ -130,9 +277,9 @@ export const NetworkConsole: React.FC<{
                                 print((e as Error).message, 'error');
                             }
                         },
-                        load: ({ command, args }, { print }) => {
+                        load: ({ args }, { print }) => {
                             if (args.length !== 0) {
-                                print(`Usage: ${command}`, 'error');
+                                print(`Usage: load`, 'error');
                                 return;
                             }
 
@@ -140,7 +287,6 @@ export const NetworkConsole: React.FC<{
                                 try {
                                     network.reset();
                                     network.load(JSON.parse(data));
-                                    setSelected(null);
                                     print('Network loaded', 'success');
                                 } catch (e: any) {
                                     print((e as Error).message, 'error');
@@ -163,6 +309,7 @@ export const NetworkConsole: React.FC<{
                         border: theme.palette.text.primary,
                         success: theme.palette.success.main,
                         error: theme.palette.error.main,
+                        warning: theme.palette.warning.main,
                     }}
                 />
             </Grid>

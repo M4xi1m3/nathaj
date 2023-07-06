@@ -49,16 +49,24 @@ const App: React.FC = () => {
         }
     };
 
+    const handleModified = () => {
+        if (selected !== null) {
+            if (!net.hasDevice(selected)) setSelected(null);
+        }
+    };
+
     // Bin load and unload events
     useEffect(() => {
         window.addEventListener('beforeunload', handleUnload);
         window.addEventListener('load', handleLoad);
+        net.addEventListener('modified', handleModified);
 
         return () => {
             window.removeEventListener('beforeunload', handleUnload);
             window.removeEventListener('load', handleLoad);
+            net.removeEventListener('modified', handleModified);
         };
-    }, [handleUnload]);
+    }, [handleUnload, handleModified, net]);
 
     useMousetrap('ctrl+alt+shift+n', (e: KeyboardEvent) => {
         e.preventDefault();
@@ -85,9 +93,9 @@ const App: React.FC = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', wudth: '100%' }}>
                 <Box sx={{ flexGrow: 1 }}>
                     <TopBar>
-                        <FileMenu selected={selected} setSelected={setSelected} />
+                        <FileMenu />
                         <AddMenu />
-                        <RemoveMenu selected={selected} setSelected={setSelected} />
+                        <RemoveMenu />
                         <ViewMenu
                             elements={[
                                 {
@@ -169,7 +177,7 @@ const App: React.FC = () => {
                                     {viewConsole ? (
                                         <Panel style={{ display: 'flex' }} order={2}>
                                             <Paper sx={{ flexGrow: 1, maxWidth: '100%', overflowX: 'auto', margin: 1 }}>
-                                                <NetworkConsole selected={selected} setSelected={setSelected} />
+                                                <NetworkConsole />
                                             </Paper>
                                         </Panel>
                                     ) : (

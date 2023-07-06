@@ -48,7 +48,7 @@ export const AddStpSwitchDialog: React.FC<AddStpSwitchDialogProps> = ({ opened, 
                 <Button
                     onClick={() => {
                         try {
-                            new STPSwitch(network, name, ports, mac);
+                            new STPSwitch(network, name, mac, ports);
                             enqueueSnackbar(t('dialog.addstpswitch.success', { name }));
                         } catch (e: any) {
                             enqueueError(e);

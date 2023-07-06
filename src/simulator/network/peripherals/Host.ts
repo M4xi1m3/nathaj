@@ -1,5 +1,4 @@
 import { Vector2D } from '../../drawing/Vector2D';
-import { Mac } from '../../utils/Mac';
 import { Network } from '../Network';
 import { Dot3 } from '../packets/definitions/Dot3';
 import { Ethernet } from '../packets/definitions/Ethernet';
@@ -24,7 +23,7 @@ export class Host extends Device {
      */
     constructor(network: Network, name?: string, mac?: string) {
         if (name === undefined) name = Host.getNextAvailableName(network);
-        if (mac === undefined) mac = Mac.random();
+        if (mac === undefined) mac = Host.getNextAvailableMac(network);
 
         super(network, name);
         this.addInterface('eth0', mac);
