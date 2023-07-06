@@ -152,7 +152,10 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
 
     public draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
         this.drawCircle(ctx, this.getPosition().add(offset), 7);
+        const old = ctx.filter;
+        ctx.filter = 'none';
         this.drawInterfaces(ctx, this.getPosition().add(offset), 7, Object.values(this.interfaces));
+        ctx.filter = old;
     }
 
     public getText(): string {
@@ -165,7 +168,7 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
      * @returns {string} New mac address (or '' if no interfaces are in the device)
      */
     public generateNextMacAddress(): string {
-        if (this.getInterfaces().length === 0) return '';
+        if (this.getInterfaces().length === 0) return Device.getNextAvailableMac(this.getNetwork());
         return Mac.fromInt(
             this.getInterfaces()
                 .map((i) => Mac.toInt(i.getMac()))
@@ -246,6 +249,15 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
     }
 
     /**
+     * Get the device common interface prefix
+     *
+     * @returns  {string} Prefix
+     */
+    public static getDevMacPrefix(): string {
+        return '00';
+    }
+
+    /**
      * Get the next available name for this type of device
      *
      * @return {string} Next available name
@@ -259,12 +271,36 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
     }
 
     /**
+     * Get the next available MAC for this type of device.
+     *
+     * This generates mac addresses of type
+     * 02:00:00:XX:YY:ZZ
+     * With:
+     *  - XX: The type of device
+     *  - YY: The id of the device
+     *  - ZZ: The id of the interface in the device
+     *
+     * @param net
+     */
+    public static getNextAvailableMac(net: Network): string {
+        for (let i = 0; ; i++) {
+            const mac = `02:00:00:${this.getDevMacPrefix()}:${i.toString(16).padStart(2, '0')}:00`;
+            if (!net.isMACUsed(mac)) {
+                return mac;
+            }
+        }
+    }
+
+    /**
      * Add an interface to the device
      *
      * @param {string} name Name of the interface
      * @returns {Interface} The new interface
      */
-    public addInterface(name: string, mac: string): T {
+    public addInterface(name?: string, mac?: string): T {
+        if (name === undefined) name = this.generateNextIntfName();
+        if (mac === undefined) mac = this.generateNextMacAddress();
+
         const intf = this.createInterface(
             name,
             mac,
@@ -306,6 +342,8 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
      * @returns {Interface} The interface
      */
     public getInterface(name: string): T | undefined {
+        if (!(name in this.interfaces)) throw new InterfaceNotFound(this, name);
+
         return this.interfaces[name];
     }
 

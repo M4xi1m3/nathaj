@@ -1,6 +1,6 @@
 import { Pause, PlayArrow, RestartAlt } from '@mui/icons-material';
 import { IconButton, Tooltip } from '@mui/material';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import useMousetrap from 'react-hook-mousetrap';
 import { useTranslation } from 'react-i18next';
 import { NetworkContext } from '../NetworkContext';
@@ -8,22 +8,29 @@ import { NetworkContext } from '../NetworkContext';
 /**
  * Network actions component
  */
-export const NetworkActions: React.FC<{
-    playing: boolean;
-    setPlaying: (playing: boolean) => void;
-}> = ({ playing, setPlaying }) => {
+export const NetworkActions: React.FC = () => {
     const { t } = useTranslation();
     const network = useContext(NetworkContext);
+    const [playing, setPlaying] = useState(false);
+
+    const handleChanged = () => {
+        setPlaying(network.isRunning());
+    };
+
+    useEffect(() => {
+        network.addEventListener('changed', handleChanged);
+        return () => {
+            network.removeEventListener('changed', handleChanged);
+        };
+    }, [network]);
 
     const handlePlay = () => {
         if (network.isRunning()) network.stop();
         else network.start();
-        setPlaying(network.isRunning());
     };
 
     const handleReset = () => {
         network.reset();
-        setPlaying(network.isRunning());
     };
 
     useMousetrap('space', (e: KeyboardEvent) => {

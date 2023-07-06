@@ -3,6 +3,7 @@ import { FormControl, FormHelperText, IconButton, Input, InputAdornment, InputLa
 import React, { useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NetworkContext } from '../../NetworkContext';
+import { Mac } from '../../simulator/utils/Mac';
 
 const macRegexp = new RegExp('^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$');
 
@@ -18,15 +19,7 @@ export const MacInput: React.FC<MacInputProps> = ({ mac, setMac, setMacError, ma
     const network = useContext(NetworkContext);
 
     const randomize = () => {
-        const addr = [];
-        addr.push(Math.floor(Math.random() * 256) & 0xfe);
-        addr.push(Math.floor(Math.random() * 256) & 0xff);
-        addr.push(Math.floor(Math.random() * 256) & 0xff);
-        addr.push(Math.floor(Math.random() * 256) & 0xff);
-        addr.push(Math.floor(Math.random() * 256) & 0xff);
-        addr.push(Math.floor(Math.random() * 256) & 0xff);
-
-        setMac(addr.map((n) => n.toString(16).padStart(2, '0')).join(':'));
+        setMac(Mac.random());
         setMacError(false);
     };
 

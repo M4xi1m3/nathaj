@@ -35,8 +35,12 @@ export class Switch<T extends Interface = Interface> extends Hub<T> {
      * @param {number} ports Number of interfaces to create
      * @param {string} base_mac MAC address of the switch
      */
-    constructor(network: Network, name: string, ports?: number, base_mac?: string) {
-        super(network, name, ports, base_mac);
+    constructor(network: Network, name: string, base_mac?: string, ports?: number) {
+        if (name === undefined) name = Switch.getNextAvailableName(network);
+        if (base_mac === undefined) base_mac = Switch.getNextAvailableMac(network);
+        if (ports === undefined) ports = 4;
+
+        super(network, name, base_mac, ports);
         this.mac_address_table = {};
     }
 
@@ -59,7 +63,10 @@ export class Switch<T extends Interface = Interface> extends Hub<T> {
 
     draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
         this.drawSquareImage(ctx, this.getPosition().add(offset), SwitchImage, 12);
+        const old = ctx.filter;
+        ctx.filter = 'none';
         this.drawInterfaces(ctx, this.getPosition().add(offset), 12, this.getInterfaces(), this.intfPositionSquare);
+        ctx.filter = old;
     }
 
     reset(): void {
@@ -115,5 +122,9 @@ export class Switch<T extends Interface = Interface> extends Hub<T> {
 
     public static getDevNamePrefix(): string {
         return 'sw';
+    }
+
+    public static getDevMacPrefix(): string {
+        return '03';
     }
 }

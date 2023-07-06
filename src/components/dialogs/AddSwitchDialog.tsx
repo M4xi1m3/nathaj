@@ -31,8 +31,8 @@ export const AddSwitchDialog: React.FC<AddSwitchDialogProps> = ({ opened, close 
 
     useEffect(() => {
         setName(Switch.getNextAvailableName(network));
+        setMac(Switch.getNextAvailableMac(network));
         setPorts(4);
-        setMac('');
     }, [opened, setName, setPorts, setMac]);
 
     return (
@@ -48,7 +48,7 @@ export const AddSwitchDialog: React.FC<AddSwitchDialogProps> = ({ opened, close 
                 <Button
                     onClick={() => {
                         try {
-                            new Switch(network, name, ports, mac);
+                            new Switch(network, name, mac, ports);
                             enqueueSnackbar(t('dialog.addswitch.success', { name }));
                         } catch (e: any) {
                             enqueueError(e);

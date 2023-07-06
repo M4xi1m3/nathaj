@@ -21,9 +21,12 @@ export class Host extends Device {
      * @param {string} name Name of the host
      * @param {string} mac Mac address of the host
      */
-    constructor(network: Network, name: string, mac?: string) {
+    constructor(network: Network, name?: string, mac?: string) {
+        if (name === undefined) name = Host.getNextAvailableName(network);
+        if (mac === undefined) mac = Host.getNextAvailableMac(network);
+
         super(network, name);
-        if (mac !== undefined) this.addInterface('eth0', mac);
+        this.addInterface('eth0', mac);
         this.LLCTestTimer = null;
         this.expectingLLCFrom = null;
     }
@@ -133,5 +136,9 @@ export class Host extends Device {
 
     public static getDevNamePrefix(): string {
         return 'h';
+    }
+
+    public static getDevMacPrefix(): string {
+        return '01';
     }
 }

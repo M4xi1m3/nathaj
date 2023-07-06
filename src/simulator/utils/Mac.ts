@@ -121,4 +121,21 @@ export class Mac {
             return Mac.fromInt(mac_num + BigInt(toAdd));
         }
     }
+
+    /**
+     * Generate a random MAC address
+     *
+     * @returns {string} Generated mac address
+     */
+    public static random(): string {
+        const addr = [];
+        addr.push(Math.floor(Math.random() * 256) & 0xfc);
+        addr.push(Math.floor(Math.random() * 256) & 0xff);
+        addr.push(Math.floor(Math.random() * 256) & 0xff);
+        addr.push(Math.floor(Math.random() * 256) & 0xff);
+        addr.push(Math.floor(Math.random() * 256) & 0xff);
+        addr.push(Math.floor(Math.random() * 256) & 0xff);
+
+        return addr.map((n) => n.toString(16).padStart(2, '0')).join(':');
+    }
 }

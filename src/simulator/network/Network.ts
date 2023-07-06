@@ -170,6 +170,8 @@ export class Network extends EventTarget {
         if (device.getName() in this.devices) throw new DeviceNameTaken(this, device.getName());
 
         this.devices[device.getName()] = device;
+
+        this.dispatchEvent(new Event('modified'));
     }
 
     /**
@@ -186,6 +188,8 @@ export class Network extends EventTarget {
 
         delete this.devices[device]['network'];
         delete this.devices[device];
+
+        this.dispatchEvent(new Event('modified'));
     }
 
     /**
@@ -194,6 +198,8 @@ export class Network extends EventTarget {
      * @returns {Device} Requested device
      */
     public getDevice(name: string): Device {
+        if (!(name in this.devices)) throw new DeviceNotFound(this, name);
+
         return this.devices[name];
     }
 
@@ -254,19 +260,21 @@ export class Network extends EventTarget {
      */
     public addLink(dev1: string, intf1: string, dev2?: string, intf2?: string) {
         if (dev2 !== undefined && intf2 !== undefined) {
-            this.devices[dev1].getInterface(intf1).connect(this.devices[dev2].getInterface(intf2));
+            this.getDevice(dev1).getInterface(intf1).connect(this.getDevice(dev2).getInterface(intf2));
+            this.dispatchEvent(new Event('modified'));
         } else {
-            const inf1 = this.devices[dev1].getFreeInterface();
+            const inf1 = this.getDevice(dev1).getFreeInterface();
 
             let ignore = undefined;
             if (dev1 === intf1) {
                 ignore = [inf1.getName()];
             }
 
-            const inf2 = this.devices[intf1].getFreeInterface(ignore);
+            const inf2 = this.getDevice(intf1).getFreeInterface(ignore);
 
             if (inf1 !== undefined && inf2 !== undefined) {
                 inf1.connect(inf2);
+                this.dispatchEvent(new Event('modified'));
             }
         }
     }
@@ -283,9 +291,10 @@ export class Network extends EventTarget {
      * @param {string} intf2 Name of the interface ibn the other device
      */
     public addLinkIfDoesntExist(dev1: string, intf1: string, dev2: string, intf2: string) {
-        if (this.devices[dev1].getInterface(intf1).isConnected()) return;
-        if (this.devices[dev2].getInterface(intf2).isConnected()) return;
-        this.devices[dev1].getInterface(intf1).connect(this.devices[dev2].getInterface(intf2));
+        if (this.getDevice(dev1).getInterface(intf1).isConnected()) return;
+        if (this.getDevice(dev2).getInterface(intf2).isConnected()) return;
+        this.getDevice(dev1).getInterface(intf1).connect(this.getDevice(dev2).getInterface(intf2));
+        this.dispatchEvent(new Event('modified'));
     }
 
     /**
@@ -301,14 +310,16 @@ export class Network extends EventTarget {
      */
     public removeLink(dev1: string, intf1: string, dev2?: string, intf2?: string) {
         if (dev2 !== undefined && intf2 !== undefined) {
-            if (this.devices[dev1].getInterface(intf1).getConnection() === this.devices[dev2].getInterface(intf2))
-                this.devices[dev1].getInterface(intf1).disconnect();
+            if (this.getDevice(dev1).getInterface(intf1).getConnection() === this.getDevice(dev2).getInterface(intf2))
+                this.getDevice(dev1).getInterface(intf1).disconnect();
+            this.dispatchEvent(new Event('modified'));
         } else {
             const dev2 = this.getDevice(intf1);
             for (const intf of this.getDevice(dev1).getInterfaces()) {
                 if (intf.isConnected()) {
                     if (intf.getConnection()?.getOwner() === dev2) {
                         intf.disconnect();
+                        this.dispatchEvent(new Event('modified'));
                     }
                 }
             }
@@ -356,6 +367,7 @@ export class Network extends EventTarget {
             // by setInterval
             this.tick();
         }, 0);
+        this.dispatchEvent(new Event('changed'));
     }
 
     /**
@@ -370,6 +382,7 @@ export class Network extends EventTarget {
         this.time_elapsed += performance.now() - this.time_offset;
 
         this.interval = null;
+        this.dispatchEvent(new Event('changed'));
     }
 
     /**
@@ -388,6 +401,7 @@ export class Network extends EventTarget {
                 intf.reset();
             });
         });
+        this.dispatchEvent(new Event('changed'));
     }
 
     /**
@@ -396,6 +410,8 @@ export class Network extends EventTarget {
     public clear(): void {
         this.reset();
         this.devices = {};
+        this.dispatchEvent(new Event('changed'));
+        this.dispatchEvent(new Event('modified'));
     }
 
     /**

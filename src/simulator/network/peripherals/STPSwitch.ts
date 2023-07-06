@@ -496,8 +496,12 @@ export class STPSwitch extends Switch<STPInterface> {
      * @param {number} ports Number of interfaces to create
      * @param {string} base_mac MAC address of the switch
      */
-    constructor(network: Network, name: string, ports?: number, base_mac?: string) {
-        super(network, name, ports, base_mac);
+    constructor(network: Network, name: string, base_mac?: string, ports?: number) {
+        if (name === undefined) name = STPSwitch.getNextAvailableName(network);
+        if (base_mac === undefined) base_mac = STPSwitch.getNextAvailableMac(network);
+        if (ports === undefined) ports = 4;
+
+        super(network, name, base_mac, ports);
         this.identifier = new Identifier(32768, this.getBestMac());
 
         this.message_age = 20;
@@ -777,6 +781,8 @@ export class STPSwitch extends Switch<STPInterface> {
 
     draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
         this.drawSquareImage(ctx, this.getPosition().add(offset), STPSwitchImage, 12);
+        const old = ctx.filter;
+        ctx.filter = 'none';
         this.drawInterfaces(
             ctx,
             this.getPosition().add(offset),
@@ -785,6 +791,7 @@ export class STPSwitch extends Switch<STPInterface> {
             this.intfPositionSquare,
             this.drawSTPInterface.bind(this)
         );
+        ctx.filter = old;
     }
 
     tick(): void {

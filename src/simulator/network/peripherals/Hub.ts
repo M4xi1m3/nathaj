@@ -19,13 +19,15 @@ export function isSavedHub(arg: any): arg is SavedDevice {
  * re-transmits it, untouched, on all of its other interfaces
  */
 export class Hub<T extends Interface = Interface> extends Device<T> {
-    constructor(network: Network, name: string, ports?: number, base_mac?: string) {
+    constructor(network: Network, name?: string, base_mac?: string, ports?: number) {
+        if (name === undefined) name = Hub.getNextAvailableName(network);
+        if (base_mac === undefined) base_mac = Hub.getNextAvailableMac(network);
+        if (ports === undefined) ports = 4;
+
         super(network, name);
 
-        if (ports !== undefined && base_mac !== undefined) {
-            for (let i = 0; i < ports; i++) {
-                this.addInterface('eth' + i, Mac.increment(base_mac, i));
-            }
+        for (let i = 0; i < ports; i++) {
+            this.addInterface('eth' + i, Mac.increment(base_mac, i));
         }
     }
 
@@ -41,7 +43,10 @@ export class Hub<T extends Interface = Interface> extends Device<T> {
 
     draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
         this.drawSquareImage(ctx, this.getPosition().add(offset), HubImage, 12);
+        const old = ctx.filter;
+        ctx.filter = 'none';
         this.drawInterfaces(ctx, this.getPosition().add(offset), 12, this.getInterfaces(), this.intfPositionSquare);
+        ctx.filter = old;
     }
 
     tick(): void {
@@ -88,5 +93,9 @@ export class Hub<T extends Interface = Interface> extends Device<T> {
 
     public static getDevNamePrefix(): string {
         return 'hub';
+    }
+
+    public static getDevMacPrefix(): string {
+        return '02';
     }
 }

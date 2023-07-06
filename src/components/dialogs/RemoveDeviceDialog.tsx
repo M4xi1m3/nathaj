@@ -9,11 +9,9 @@ import { DeviceInput } from '../fields/DeviceInput';
 interface RemoveDeviceDialogProps {
     close: () => void;
     opened: boolean;
-    selected: string | null;
-    setSelected: (name: string | null) => void;
 }
 
-export const RemoveDeviceDialog: React.FC<RemoveDeviceDialogProps> = ({ opened, close, selected, setSelected }) => {
+export const RemoveDeviceDialog: React.FC<RemoveDeviceDialogProps> = ({ opened, close }) => {
     const network = useContext(NetworkContext);
     const { t } = useTranslation();
 
@@ -39,7 +37,6 @@ export const RemoveDeviceDialog: React.FC<RemoveDeviceDialogProps> = ({ opened, 
                         try {
                             if (device !== null) {
                                 network.removeDevice(device);
-                                if (device === selected) setSelected(null);
                                 setDevice(null);
                                 enqueueSnackbar(t('dialog.removedevice.success', { name: device }));
                             }

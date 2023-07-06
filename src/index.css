@@ -7,3 +7,7 @@ body,
     margin: 0;
     overscroll-behavior: none;
 }
+
+#grammalecte_menu_main_button_shadow_host {
+    display: none;
+}
