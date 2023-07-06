@@ -28,7 +28,7 @@ export const AddHostDialog: React.FC<AddHostDialogProps> = ({ opened, close }) =
 
     useEffect(() => {
         setName(Host.getNextAvailableName(network));
-        setMac('');
+        setMac(Host.getNextAvailableMac(network));
     }, [opened, setName, setMac]);
 
     return (

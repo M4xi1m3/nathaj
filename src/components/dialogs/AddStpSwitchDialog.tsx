@@ -31,8 +31,8 @@ export const AddStpSwitchDialog: React.FC<AddStpSwitchDialogProps> = ({ opened, 
 
     useEffect(() => {
         setName(STPSwitch.getNextAvailableName(network));
+        setMac(STPSwitch.getNextAvailableMac(network));
         setPorts(4);
-        setMac('');
     }, [opened, setName, setPorts, setMac]);
 
     return (

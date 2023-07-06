@@ -92,4 +92,8 @@ export class Hub<T extends Interface = Interface> extends Device<T> {
     public static getDevNamePrefix(): string {
         return 'hub';
     }
+
+    public static getDevMacPrefix(): string {
+        return '02';
+    }
 }

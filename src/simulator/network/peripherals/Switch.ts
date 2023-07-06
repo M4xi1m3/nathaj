@@ -119,4 +119,8 @@ export class Switch<T extends Interface = Interface> extends Hub<T> {
     public static getDevNamePrefix(): string {
         return 'sw';
     }
+
+    public static getDevMacPrefix(): string {
+        return '03';
+    }
 }

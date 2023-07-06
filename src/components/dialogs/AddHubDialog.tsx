@@ -31,7 +31,7 @@ export const AddHubDialog: React.FC<AddHubDialogProps> = ({ opened, close }) => 
 
     useEffect(() => {
         setName(Hub.getNextAvailableName(network));
-        setMac('');
+        setMac(Hub.getNextAvailableMac(network));
         setPorts(4);
     }, [opened, setName, setMac, setPorts]);
 

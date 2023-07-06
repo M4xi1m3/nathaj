@@ -249,6 +249,15 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
     }
 
     /**
+     * Get the device common interface prefix
+     *
+     * @returns  {string} Prefix
+     */
+    public static getDevMacPrefix(): string {
+        return '00';
+    }
+
+    /**
      * Get the next available name for this type of device
      *
      * @return {string} Next available name
@@ -257,6 +266,27 @@ export abstract class Device<T extends Interface = Interface> extends Drawable i
         for (let i = 0; ; i++) {
             if (!net.hasDevice(this.getDevNamePrefix() + i)) {
                 return this.getDevNamePrefix() + i;
+            }
+        }
+    }
+
+    /**
+     * Get the next available MAC for this type of device.
+     *
+     * This generates mac addresses of type
+     * 02:00:00:XX:YY:ZZ
+     * With:
+     *  - XX: The type of device
+     *  - YY: The id of the device
+     *  - ZZ: The id of the interface in the device
+     *
+     * @param net
+     */
+    public static getNextAvailableMac(net: Network): string {
+        for (let i = 0; ; i++) {
+            const mac = `02:00:00:${this.getDevMacPrefix()}:${i.toString(16).padStart(2, '0')}:00`;
+            if (!net.isMACUsed(mac)) {
+                return mac;
             }
         }
     }
