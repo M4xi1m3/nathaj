@@ -90,7 +90,7 @@ export abstract class Drawable<T extends Interface = Interface> {
         devRadius: number,
         drawPos: Vector2D,
         direction: Vector2D,
-        color = '#00FF00'
+        color = '#00DD00'
     ) {
         const intfPos = drawPos.add(direction.mul(devRadius + 5));
 

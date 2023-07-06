@@ -11,6 +11,7 @@ import { RemoveMenu } from './components/menus/RemoveMenu';
 import { ViewMenu } from './components/menus/ViewMenu';
 import { NetworkAnalyzer } from './components/panels/NetworkAnalyzer';
 import { NetworkConsole } from './components/panels/NetworkConsole';
+import { NetworkLegend } from './components/panels/NetworkLegend';
 import { NetowrkProperties } from './components/panels/NetworkProperties';
 import { NetworkRenderer } from './components/panels/NetworkRenderer';
 import { NoPanels } from './components/panels/NoPanels';
@@ -25,10 +26,11 @@ const App: React.FC = () => {
     const [viewProperties, setViewProperties] = useState<boolean>(true);
     const [viewAnalyzer, setViewAnalyzer] = useState<boolean>(true);
     const [viewConsole, setViewConsole] = useState<boolean>(false);
+    const [viewLegend, setViewLegend] = useState<boolean>(false);
 
     const [selected, setSelected] = useState<string | null>(null);
 
-    const noPanel = !(viewNetwork || viewProperties || viewAnalyzer || viewConsole);
+    const noPanel = !(viewNetwork || viewProperties || viewAnalyzer || viewConsole || viewLegend);
 
     const net = useContext(NetworkContext);
 
@@ -78,6 +80,11 @@ const App: React.FC = () => {
         setViewProperties(!viewProperties);
     });
 
+    useMousetrap('ctrl+alt+shift+l', (e: KeyboardEvent) => {
+        e.preventDefault();
+        setViewLegend(!viewLegend);
+    });
+
     useMousetrap('ctrl+alt+shift+a', (e: KeyboardEvent) => {
         e.preventDefault();
         setViewAnalyzer(!viewAnalyzer);
@@ -111,6 +118,12 @@ const App: React.FC = () => {
                                     shortcut: 'Ctrl+Alt+Shift+P',
                                 },
                                 {
+                                    name: t('panel.legend.title'),
+                                    view: viewLegend,
+                                    setView: setViewLegend,
+                                    shortcut: 'Ctrl+Alt+Shift+L',
+                                },
+                                {
                                     name: t('panel.analyzer.title'),
                                     view: viewAnalyzer,
                                     setView: setViewAnalyzer,
@@ -129,7 +142,7 @@ const App: React.FC = () => {
                 </Box>
                 {!noPanel ? (
                     <PanelGroup direction='vertical'>
-                        {viewProperties || viewNetwork ? (
+                        {viewProperties || viewNetwork || viewLegend ? (
                             <Panel defaultSize={50} style={{ display: 'flex' }} order={1}>
                                 <PanelGroup direction='horizontal'>
                                     {viewProperties ? (
@@ -141,11 +154,25 @@ const App: React.FC = () => {
                                     ) : (
                                         <></>
                                     )}
-                                    {viewProperties && viewNetwork ? <VerticalDivider /> : <></>}
+                                    {(viewProperties && viewNetwork) || (viewProperties && viewLegend) ? (
+                                        <VerticalDivider />
+                                    ) : (
+                                        <></>
+                                    )}
                                     {viewNetwork ? (
                                         <Panel defaultSize={75} style={{ display: 'flex' }} order={2}>
                                             <Paper sx={{ flexGrow: 1, margin: 1 }}>
                                                 <NetworkRenderer setSelected={setSelected} selected={selected} />
+                                            </Paper>
+                                        </Panel>
+                                    ) : (
+                                        <></>
+                                    )}
+                                    {viewNetwork && viewLegend ? <VerticalDivider /> : <></>}
+                                    {viewLegend ? (
+                                        <Panel style={{ display: 'flex' }} order={3}>
+                                            <Paper sx={{ flexGrow: 1, margin: 1 }}>
+                                                <NetworkLegend />
                                             </Paper>
                                         </Panel>
                                     ) : (
@@ -156,7 +183,7 @@ const App: React.FC = () => {
                         ) : (
                             <></>
                         )}
-                        {(viewProperties || viewNetwork) && (viewAnalyzer || viewConsole) ? (
+                        {(viewProperties || viewNetwork || viewLegend) && (viewAnalyzer || viewConsole) ? (
                             <HorizontalDivider />
                         ) : (
                             <></>

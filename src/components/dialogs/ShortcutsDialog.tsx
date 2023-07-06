@@ -75,6 +75,7 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({ opened, close 
                 <Typography variant='h6'>{t('dialog.shortcuts.view.title')}</Typography>
                 <Shortcut name='dialog.shortcuts.view.network' shortcut='ctrl+alt+shift+n' />
                 <Shortcut name='dialog.shortcuts.view.properties' shortcut='ctrl+alt+shift+p' />
+                <Shortcut name='dialog.shortcuts.view.legend' shortcut='ctrl+alt+shift+l' />
                 <Shortcut name='dialog.shortcuts.view.analyzer' shortcut='ctrl+alt+shift+a' />
                 <Shortcut name='dialog.shortcuts.view.console' shortcut='ctrl+alt+shift+c' />
             </DialogContent>

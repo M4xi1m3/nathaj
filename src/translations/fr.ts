@@ -94,6 +94,36 @@ export const fr = {
                 save: 'Sauvegarder',
                 cancel: 'Annuler',
             },
+            legend: {
+                title: 'Légende',
+                devices: {
+                    title: 'Périphériques',
+                    host: 'Hôte',
+                    hub: 'Concentrateur',
+                    switch: 'Commutateur',
+                    stpswitch: 'Commutateur STP',
+                    interface: 'Interface',
+                },
+                links: {
+                    title: 'Liens',
+                    basic: 'Lien basique',
+                },
+                stproles: {
+                    title: 'Rôles STP',
+                    root: 'Racine',
+                    designated: 'Désigné',
+                    blocking: 'Bloquant',
+                    disabled: 'Désactivé',
+                },
+                stpstates: {
+                    title: 'États STP',
+                    blocking: 'Bloquant',
+                    listening: 'Écoute',
+                    learning: 'Apprentissage',
+                    forwarding: 'Transmission',
+                    disabled: 'Désactivé',
+                },
+            },
             analyzer: {
                 title: 'Analyseur de paquets',
                 nopackets: 'Aucun paquet à afficher',
@@ -196,6 +226,7 @@ export const fr = {
                     title: 'Affichage',
                     network: 'Afficher le Réseau',
                     properties: 'Afficher les propriétés',
+                    legend: 'Afficher la Légende',
                     analyzer: "Afficher l'Analyseur de paquets",
                     console: 'Afficher la console',
                 },
@@ -230,11 +261,11 @@ export const fr = {
         menu: {
             common: {
                 host: 'Hôte',
-                hub: 'Hub',
-                switch: 'Switch',
-                stpswitch: 'Switch STP',
-                link: 'Link',
-                device: 'Device',
+                hub: 'Concentrateur',
+                switch: 'Commutateur',
+                stpswitch: 'Commutateur STP',
+                link: 'Lien',
+                device: 'Périphérique',
             },
             add: {
                 title: 'Ajouter',
