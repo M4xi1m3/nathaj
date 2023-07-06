@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 const fontSx = {
     fontFamily: 'Roboto Mono',
@@ -44,6 +44,11 @@ export const Terminal: React.FC<{
     const [buffer, setBuffer] = useState<React.ReactNode>(<></>);
     let tmpBuff = buffer;
     const [input, setInput] = useState('');
+
+    const endRef = useRef<HTMLSpanElement | null>(null);
+    const scrollToBottom = () => endRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+    useEffect(() => scrollToBottom(), [buffer]);
 
     const print: Print = (text: string, type: PrintType = 'standard') => {
         tmpBuff = (
@@ -94,7 +99,10 @@ export const Terminal: React.FC<{
                 color: theme.text,
             }}>
             <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <div style={{ flexGrow: 1, overflowY: 'scroll', overflowX: 'hidden' }}>{buffer}</div>
+                <div style={{ flexGrow: 1, overflowY: 'scroll', overflowX: 'hidden' }}>
+                    {buffer}
+                    <span ref={endRef}></span>
+                </div>
                 <div style={{ display: 'flex', borderTop: '1px solid', borderColor: theme.border, padding: '2px' }}>
                     <span style={fontSx}>{prompt}</span>
                     <input

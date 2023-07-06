@@ -1,5 +1,4 @@
-import { Delete } from '@mui/icons-material';
-import { Divider, Grid, IconButton, Stack, Tooltip, Typography, useTheme } from '@mui/material';
+import { Divider, Grid, Stack, Typography, useTheme } from '@mui/material';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { saveJson } from '../../hooks/saveJson';
@@ -187,13 +186,6 @@ export const NetworkConsole: React.FC = () => {
                         <Typography component='h2' variant='h6'>
                             {t('panel.console.title')}
                         </Typography>
-                    </Stack>
-                    <Stack direction='row'>
-                        <Tooltip title={t('panel.console.action.clear')}>
-                            <IconButton size='small'>
-                                <Delete color='error' />
-                            </IconButton>
-                        </Tooltip>
                     </Stack>
                 </Stack>
                 <Divider />

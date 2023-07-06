@@ -24,7 +24,7 @@ const App: React.FC = () => {
     const [viewNetwork, setViewNetwork] = useState<boolean>(true);
     const [viewProperties, setViewProperties] = useState<boolean>(true);
     const [viewAnalyzer, setViewAnalyzer] = useState<boolean>(true);
-    const [viewConsole, setViewConsole] = useState<boolean>(true);
+    const [viewConsole, setViewConsole] = useState<boolean>(false);
 
     const [selected, setSelected] = useState<string | null>(null);
 
