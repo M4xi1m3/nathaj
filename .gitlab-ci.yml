@@ -15,8 +15,8 @@ build:
     - yarn typedoc
   artifacts:
     paths:
-      - dist/
-      - docs/
+      - packages/frontend/dist/
+      - packages/simulator/docs/
   cache:
     key:
       files:
@@ -53,8 +53,8 @@ pages:
     GIT_STRATEGY: none
   script:
     - mkdir -p public/docs/
-    - mv dist/* "public"
-    - mv docs/* "public/docs"
+    - mv packages/frontend/dist/* "public"
+    - mv packages/simulator/docs/* "public/docs"
   cache:
     paths:
       - public
@@ -63,4 +63,23 @@ pages:
       - public
   only:
     - develop
+    - master
   needs: ['build']
+
+prod:
+  image: alpine/git:latest
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - git clone https://gitlab-ci-token:${PAGES_PUSH_TOKEN}@git.unistra.fr/nathaj/nathaj.pages.unistra.fr.git/
+    - rm -rf nathaj.pages.unistra.fr/public
+    - mv public nathaj.pages.unistra.fr/public
+    - git -C nathaj.pages.unistra.fr add public
+    - git -C nathaj.pages.unistra.fr config user.email "ci@git.unistra.fr"
+    - git -C nathaj.pages.unistra.fr config user.name "Gitlab CI"
+    - git -C nathaj.pages.unistra.fr commit -m "[automated] ${CI_COMMIT_REF_NAME} - ${CI_COMMIT_SHORT_SHA}"
+    - git -C nathaj.pages.unistra.fr push origin master
+  only:
+    - master
+  needs: ['pages', 'test']
