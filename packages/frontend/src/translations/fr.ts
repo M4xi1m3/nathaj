@@ -16,6 +16,7 @@ export const fr = {
                     removelink: 'Supprimer un lien',
                     autolayout: 'Disposition automatique',
                     centerview: 'Centrer la vue',
+                    resetview: 'Réinitialiser la vue',
                     labels: 'Activer / Désactiver les étiquettes',
                     snap: "Activer / Désactiver l'alignement sur la grille",
                     grid: 'Activer / Désactiver la grille',

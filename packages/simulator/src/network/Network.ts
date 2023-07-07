@@ -1,3 +1,4 @@
+import { Vector2D } from '../drawing';
 import { Mac } from '../utils/Mac';
 import { Device, isSavedDevice, SavedDevice } from './peripherals/Device';
 import { Host, isSavedHost } from './peripherals/Host';
@@ -445,6 +446,31 @@ export class Network extends EventTarget {
      */
     public isRunning(): boolean {
         return this.interval !== null;
+    }
+
+    /**
+     * Get the bounds of the network. If there are no devices in the network,
+     * [(0, 0), (0, 0)] is returned.
+     *
+     * @returns {[Vector2D, Vector2D]} Bounds of the network
+     */
+    public getBounds(): [Vector2D, Vector2D] {
+        const min = new Vector2D(0, 0);
+        const max = new Vector2D(0, 0);
+
+        if (this.getDevices().length > 0) {
+            min.copy(this.getDevices()[0].getPosition());
+            max.copy(min);
+        }
+
+        this.getDevices().forEach((dev) => {
+            if (dev.getPosition().x < min.x) min.x = dev.getPosition().x;
+            if (dev.getPosition().y < min.y) min.y = dev.getPosition().y;
+            if (dev.getPosition().x > max.x) max.x = dev.getPosition().x;
+            if (dev.getPosition().y > max.y) max.y = dev.getPosition().y;
+        });
+
+        return [min, max];
     }
 
     /**

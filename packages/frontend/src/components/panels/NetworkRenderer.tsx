@@ -1,4 +1,4 @@
-import { AddLink, CenterFocusStrong, GridOn, Hub, Label, LinkOff } from '@mui/icons-material';
+import { AddLink, CenterFocusStrong, GridOn, Hub, Label, LinkOff, ModeStandby } from '@mui/icons-material';
 import { Divider, Grid, IconButton, Stack, Tooltip, Typography, useTheme } from '@mui/material';
 import { Layout, Vector2D } from '@nathaj/simulator';
 import { useSnackbar } from 'notistack';
@@ -28,6 +28,7 @@ export const NetworkRenderer: React.FC<{
 
     const offset = useRef(new Vector2D());
     const mousePos = useRef(new Vector2D());
+    const canvasSize = useRef(new Vector2D());
     const scale = useRef(1);
     const startScale = useRef(1);
     const moved = useRef(false);
@@ -133,8 +134,30 @@ export const NetworkRenderer: React.FC<{
                                 <Hub />
                             </IconButton>
                         </Tooltip>
+                        <Tooltip title={t('panel.network.action.resetview')}>
+                            <IconButton
+                                onClick={() => {
+                                    offset.current = new Vector2D(0, 0);
+                                    scale.current = 1;
+                                }}
+                                size='small'>
+                                <ModeStandby />
+                            </IconButton>
+                        </Tooltip>
                         <Tooltip title={t('panel.network.action.centerview')}>
-                            <IconButton onClick={() => (offset.current = new Vector2D(0, 0))} size='small'>
+                            <IconButton
+                                onClick={() => {
+                                    console.log(network.getBounds());
+                                    const [min, max] = network.getBounds();
+                                    offset.current = min.add(max).div(-2);
+
+                                    const size = max.sub(min).add(new Vector2D(75, 75));
+                                    const xscale = canvasSize.current.x / size.x;
+                                    const yscale = canvasSize.current.y / size.y;
+
+                                    scale.current = Math.max(0.1, Math.min(xscale, yscale, 4));
+                                }}
+                                size='small'>
                                 <CenterFocusStrong />
                             </IconButton>
                         </Tooltip>
@@ -503,6 +526,8 @@ export const NetworkRenderer: React.FC<{
                         }
                     }}
                     draw={(ctx) => {
+                        canvasSize.current = new Vector2D(ctx.canvas.width, ctx.canvas.height);
+
                         const centerOffset = new Vector2D(ctx.canvas.width, ctx.canvas.height)
                             .div(2)
                             .div(scale.current);

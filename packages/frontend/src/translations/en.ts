@@ -16,6 +16,7 @@ export const en = {
                     removelink: 'Remove link',
                     autolayout: 'Automatic layout',
                     centerview: 'Center view',
+                    resetview: 'Reset view',
                     labels: 'Toggle labels',
                     snap: 'Toggle snap to grid',
                     grid: 'Toggle grid',
