@@ -1,12 +1,8 @@
-import HubImg from '../../../assets/hub.png';
 import { Vector2D } from '../../drawing/Vector2D';
 import { Mac } from '../../utils/Mac';
 import { Network } from '../Network';
 import { Device, isSavedDevice, SavedDevice } from './Device';
 import { Interface } from './Interface';
-
-const HubImage = new Image();
-HubImage.src = HubImg;
 
 export function isSavedHub(arg: any): arg is SavedDevice {
     return arg && isSavedDevice(arg) && arg.type === 'hub';
@@ -39,14 +35,6 @@ export class Hub<T extends Interface = Interface> extends Device<T> {
 
     collision(other: Vector2D): boolean {
         return this.getPosition().sqdist(other) < 12 * 12;
-    }
-
-    draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
-        this.drawSquareImage(ctx, this.getPosition().add(offset), HubImage, 12);
-        const old = ctx.filter;
-        ctx.filter = 'none';
-        this.drawInterfaces(ctx, this.getPosition().add(offset), 12, this.getInterfaces(), this.intfPositionSquare);
-        ctx.filter = old;
     }
 
     tick(): void {

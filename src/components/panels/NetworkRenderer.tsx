@@ -9,8 +9,9 @@ import { SnapToGrid } from '../../icons/SnapToGrid';
 import { NetworkContext } from '../../NetworkContext';
 import { Layout } from '../../simulator/drawing/Layout';
 import { Vector2D } from '../../simulator/drawing/Vector2D';
-import { Canvas } from '../Canvas';
 import { AddMenu } from '../menus/AddMenu';
+import { Canvas } from '../render/Canvas';
+import { NetworkDrawer } from '../render/NetworkDrawer';
 
 /**
  * Network renderer component
@@ -18,7 +19,7 @@ import { AddMenu } from '../menus/AddMenu';
 export const NetworkRenderer: React.FC<{
     setSelected: (name: string | null) => void;
     selected: string | null;
-}> = ({ setSelected, selected }) => {
+}> = ({ setSelected }) => {
     const network = useContext(NetworkContext);
     const { t } = useTranslation();
     const theme = useTheme();
@@ -602,7 +603,7 @@ export const NetworkRenderer: React.FC<{
                             // If we are in adrk mode, we invert the color of the device
                             ctx.filter = theme.palette.mode === 'dark' ? 'invert(1)' : 'none';
                             // Draw the devices
-                            dev.draw(ctx, offset.current.add(centerOffset));
+                            NetworkDrawer.drawDevice(ctx, dev, offset.current.add(centerOffset));
                             ctx.filter = 'none';
 
                             // And their labels

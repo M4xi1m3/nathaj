@@ -1,13 +1,9 @@
-import SwitchImg from '../../../assets/switch.png';
 import { Vector2D } from '../../drawing/Vector2D';
 import { Network } from '../Network';
 import { Ethernet } from '../packets/definitions/Ethernet';
 import { isSavedDevice, SavedDevice } from './Device';
 import { Hub } from './Hub';
 import { Interface } from './Interface';
-
-const SwitchImage = new Image();
-SwitchImage.src = SwitchImg;
 
 export function isSavedSwitch(arg: any): arg is SavedDevice {
     return arg && isSavedDevice(arg) && arg.type === 'switch';
@@ -59,14 +55,6 @@ export class Switch<T extends Interface = Interface> extends Hub<T> {
                 .filter((intf) => intf !== iface)
                 .forEach((intf) => intf.send(data));
         }
-    }
-
-    draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
-        this.drawSquareImage(ctx, this.getPosition().add(offset), SwitchImage, 12);
-        const old = ctx.filter;
-        ctx.filter = 'none';
-        this.drawInterfaces(ctx, this.getPosition().add(offset), 12, this.getInterfaces(), this.intfPositionSquare);
-        ctx.filter = old;
     }
 
     reset(): void {

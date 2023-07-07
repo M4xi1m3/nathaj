@@ -1,4 +1,3 @@
-import STPSwitchImg from '../../../assets/stp-switch.png';
 import { Vector2D } from '../../drawing/Vector2D';
 import { Mac } from '../../utils/Mac';
 import { Network } from '../Network';
@@ -9,9 +8,6 @@ import { LLC } from '../packets/definitions/LLC';
 import { isSavedDevice, SavedDevice } from './Device';
 import { Interface, isSavedInterface, SavedInterface } from './Interface';
 import { Switch } from './Switch';
-
-const STPSwitchImage = new Image();
-STPSwitchImage.src = STPSwitchImg;
 
 export interface SavedSTPSwitch extends SavedDevice<SavedSTPInterface> {
     priority: number;
@@ -716,82 +712,6 @@ export class STPSwitch extends Switch<STPInterface> {
                     .forEach((intf) => intf.send(data));
             }
         }
-    }
-
-    /**
-     * Draw an STP interface
-     *
-     * @param {CanvasRenderingContext2D} ctx Canvas context used to draw
-     * @param {STPInterface} intf Interface to draw
-     * @param {number} devRadius Radius of the device to draw the interface on
-     * @param {Vector2D} drawPos Draw position of the device
-     * @param {Vector2D} direction Direction at which to put the interface
-     * @param {string} color Color of the interface
-     */
-    private drawSTPInterface(
-        ctx: CanvasRenderingContext2D,
-        intf: Interface,
-        devRadius: number,
-        drawPos: Vector2D,
-        direction: Vector2D
-    ) {
-        const intfPos = drawPos.add(direction.mul(devRadius + 5));
-
-        switch ((intf as STPInterface).role) {
-            case PortRole.Disabled:
-                ctx.fillStyle = '#DD0000';
-                break;
-            case PortRole.Blocking:
-                ctx.fillStyle = '#DDDD00';
-                break;
-            case PortRole.Root:
-                ctx.fillStyle = '#0000DD';
-                break;
-            case PortRole.Designated:
-                ctx.fillStyle = '#00DD00';
-                break;
-        }
-
-        ctx.beginPath();
-        ctx.arc(intfPos.x, intfPos.y, 5, 0.24 * Math.PI, 1.26 * Math.PI);
-        ctx.fill();
-
-        switch ((intf as STPInterface).state) {
-            case PortState.Disabled:
-                ctx.fillStyle = '#DD0000';
-                break;
-            case PortState.Blocking:
-                ctx.fillStyle = '#DDDD00';
-                break;
-            case PortState.Listening:
-                ctx.fillStyle = '#6666DD';
-                break;
-            case PortState.Learning:
-                ctx.fillStyle = '#66DDDD';
-                break;
-            case PortState.Forwarding:
-                ctx.fillStyle = '#00DD00';
-                break;
-        }
-
-        ctx.beginPath();
-        ctx.arc(intfPos.x, intfPos.y, 5, 1.25 * Math.PI, 0.25 * Math.PI);
-        ctx.fill();
-    }
-
-    draw(ctx: CanvasRenderingContext2D, offset: Vector2D): void {
-        this.drawSquareImage(ctx, this.getPosition().add(offset), STPSwitchImage, 12);
-        const old = ctx.filter;
-        ctx.filter = 'none';
-        this.drawInterfaces(
-            ctx,
-            this.getPosition().add(offset),
-            12,
-            this.getInterfaces(),
-            this.intfPositionSquare,
-            this.drawSTPInterface.bind(this)
-        );
-        ctx.filter = old;
     }
 
     tick(): void {
