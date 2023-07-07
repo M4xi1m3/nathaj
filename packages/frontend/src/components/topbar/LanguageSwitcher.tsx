@@ -3,7 +3,7 @@ import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip } from 
 import { bindMenu, bindTrigger, usePopupState } from 'material-ui-popup-state/hooks';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { availableLanguages } from '../i18n';
+import { availableLanguages } from '../../i18n';
 
 export const LanguageSwitcher: React.FC = () => {
     const { t, i18n } = useTranslation();

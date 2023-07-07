@@ -4,8 +4,8 @@ import { NetworkActions } from './NetworkActions';
 
 import { useTranslation } from 'react-i18next';
 import { ReactComponent as Logo } from '../../assets/logo/logo.svg';
-import { LanguageSwitcher } from '../LanguageSwitcher';
-import { LightDarkSwitch } from '../Theme';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { LightDarkSwitch } from './Theme';
 
 export const TopBar: React.FC<{
     children: React.ReactNode;

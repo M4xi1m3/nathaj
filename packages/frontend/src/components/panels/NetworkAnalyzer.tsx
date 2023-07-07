@@ -38,9 +38,9 @@ import { Panel, PanelGroup } from 'react-resizable-panels';
 import { ItemProps, TableComponents, TableVirtuoso, TableVirtuosoHandle } from 'react-virtuoso';
 import { NetworkContext } from '../../NetworkContext';
 import { PcapDialog } from '../dialogs/PcapDialog';
-import { HorizontalDivider } from '../Dividers';
 import { HexDumpRenderer } from '../HexDumpRenderer';
 import { CustomTreeItem } from '../IconExpansionTreeView';
+import { HorizontalDivider } from './Dividers';
 
 interface RowContext {
     selected: null | number;
