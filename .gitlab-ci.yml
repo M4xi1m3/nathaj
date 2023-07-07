@@ -63,4 +63,23 @@ pages:
       - public
   only:
     - develop
+    - master
   needs: ['build']
+
+prod:
+  image: alpine/git:latest
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - git clone https://gitlab-ci-token:${PAGES_PUSH_TOKEN}@git.unistra.fr/nathaj/nathaj.pages.unistra.fr.git/
+    - rm -rf nathaj.pages.unistra.fr/public
+    - mv public nathaj.pages.unistra.fr/public
+    - git -C nathaj.pages.unistra.fr add public
+    - git -C nathaj.pages.unistra.fr config user.email "ci@git.unistra.fr"
+    - git -C nathaj.pages.unistra.fr config user.name "Gitlab CI"
+    - git -C nathaj.pages.unistra.fr commit -m "[automated] ${CI_COMMIT_REF_NAME} - ${CI_COMMIT_SHORT_SHA}"
+    - git -C nathaj.pages.unistra.fr push origin master
+  only:
+    - master
+  needs: ['pages', 'test']
