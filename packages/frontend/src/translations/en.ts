@@ -314,8 +314,8 @@ export const en = {
             dark: 'Dark mode',
             light: 'Light mode',
             language: 'Set language',
-            slowdown: 'Slow Down Simulation',
-            speedup: 'Speed Up Simulation',
+            slowdown: 'Slow Down Simulation (-)',
+            speedup: 'Speed Up Simulation (+)',
             speed: 'Set Simulation Speed',
         },
         exception: {

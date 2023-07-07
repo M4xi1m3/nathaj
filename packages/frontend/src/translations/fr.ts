@@ -314,8 +314,8 @@ export const fr = {
             dark: 'Mode sombre',
             light: 'Mode clair',
             language: 'Définir la langue',
-            slowdown: 'Ralentir la Simulation',
-            speedup: 'Accélérer la Simulation',
+            slowdown: 'Ralentir la Simulation (-)',
+            speedup: 'Accélérer la Simulation (+)',
             speed: 'Définir la Vitesse de la Simulation',
         },
         exception: {
