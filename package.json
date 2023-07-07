@@ -4,7 +4,7 @@
         "packages/*"
     ],
     "scripts": {
-        "start": "concurrently --kill-others \"yarn --cwd packages/simulator start\" \"yarn --cwd packages/frontend start\"",
+        "start": "yarn --cwd packages/frontend start",
         "test": "yarn --cwd packages/simulator test",
         "typedoc": "yarn --cwd packages/simulator typedoc && cp -R doc packages/simulator/docs",
         "build": "yarn --cwd packages/simulator build && yarn --cwd packages/frontend build",
