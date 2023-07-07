@@ -4,7 +4,7 @@
         "packages/*"
     ],
     "scripts": {
-        "start": "yarn --cwd packages/frontend start",
+        "start": "concurrently --kill-others \"yarn --cwd packages/simulator start\" \"yarn --cwd packages/frontend start\"",
         "test": "yarn --cwd packages/simulator test",
         "typedoc": "yarn --cwd packages/simulator typedoc && cp -R doc packages/simulator/docs",
         "build": "yarn --cwd packages/simulator build && yarn --cwd packages/frontend build",
@@ -12,5 +12,8 @@
         "lint-staged": "yarn --cwd packages/simulator lint-staged && yarn --cwd packages/frontend lint-staged",
         "pretty": "yarn --cwd packages/simulator pretty && yarn --cwd packages/frontend pretty",
         "lint": "yarn --cwd packages/simulator lint && yarn --cwd packages/frontend lint"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.0"
     }
 }

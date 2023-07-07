@@ -18,7 +18,7 @@
   },
   "scripts": {
     "build": "vite build",
-    "start": "vite",
+    "start": "vite build --watch",
     "test": "vitest run",
     "pretty": "prettier -w src",
     "lint": "eslint --fix src",
