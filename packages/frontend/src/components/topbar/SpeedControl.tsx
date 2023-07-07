@@ -1,14 +1,12 @@
-import { FastForward, FastRewind, Pause, PlayArrow, RestartAlt } from '@mui/icons-material';
-import { Button, IconButton, Tooltip } from '@mui/material';
-import React, { useContext, useEffect, useState } from 'react';
+import { FastForward, FastRewind } from '@mui/icons-material';
+import { Button, IconButton, ListItemText, Menu, MenuItem, Tooltip } from '@mui/material';
+import { bindMenu, bindTrigger, usePopupState } from 'material-ui-popup-state/hooks';
+import React, { useContext, useState } from 'react';
 import useMousetrap from 'react-hook-mousetrap';
 import { useTranslation } from 'react-i18next';
-import { NetworkContext } from '../NetworkContext';
+import { NetworkContext } from '../../NetworkContext';
 
-/**
- * Network actions component
- */
-export const NetworkActions: React.FC = () => {
+export const SpeedControl: React.FC = () => {
     const speeds = [
         {
             display: '⅛',
@@ -42,28 +40,8 @@ export const NetworkActions: React.FC = () => {
 
     const { t } = useTranslation();
     const network = useContext(NetworkContext);
-    const [playing, setPlaying] = useState(false);
+
     const [speed, setSpeed] = useState(Math.floor(speeds.length / 2));
-
-    const handleChanged = () => {
-        setPlaying(network.isRunning());
-    };
-
-    useEffect(() => {
-        network.addEventListener('changed', handleChanged);
-        return () => {
-            network.removeEventListener('changed', handleChanged);
-        };
-    }, [network]);
-
-    const handlePlay = () => {
-        if (network.isRunning()) network.stop();
-        else network.start();
-    };
-
-    const handleReset = () => {
-        network.reset();
-    };
 
     const handleSlowDown = () => {
         if (speed > 0) {
@@ -79,16 +57,6 @@ export const NetworkActions: React.FC = () => {
         }
     };
 
-    useMousetrap('space', (e: KeyboardEvent) => {
-        e.preventDefault();
-        handlePlay();
-    });
-
-    useMousetrap('s', (e: KeyboardEvent) => {
-        e.preventDefault();
-        handleReset();
-    });
-
     useMousetrap('+', (e: KeyboardEvent) => {
         e.preventDefault();
         handleSpeedUp();
@@ -99,31 +67,36 @@ export const NetworkActions: React.FC = () => {
         handleSlowDown();
     });
 
+    const popupState = usePopupState({ variant: 'popover' });
+
     return (
-        <div>
-            <Tooltip title={t('action.restart')}>
-                <IconButton size='large' onClick={handleReset} color='inherit'>
-                    <RestartAlt />
-                </IconButton>
-            </Tooltip>
+        <>
             <Tooltip title={t('action.slowdown')}>
                 <IconButton size='large' onClick={handleSlowDown} color='inherit' disabled={speed <= 0}>
                     <FastRewind />
                 </IconButton>
             </Tooltip>
-            <Tooltip title={t('action.speed')}>
+            <Tooltip title={t('action.speed')} {...bindTrigger(popupState)}>
                 <Button sx={{ color: 'white', minWidth: '32px', fontSize: '20px' }}>×{speeds[speed].display}</Button>
             </Tooltip>
+            <Menu MenuListProps={{ dense: true }} {...bindMenu(popupState)}>
+                {speeds.map((s, key) => (
+                    <MenuItem
+                        key={key}
+                        selected={s.value === speed}
+                        onClick={() => {
+                            setSpeed(key);
+                            popupState.close();
+                        }}>
+                        <ListItemText>×{s.display}</ListItemText>
+                    </MenuItem>
+                ))}
+            </Menu>
             <Tooltip title={t('action.speedup')}>
                 <IconButton size='large' onClick={handleSpeedUp} color='inherit' disabled={speed >= speeds.length - 1}>
                     <FastForward />
                 </IconButton>
             </Tooltip>
-            <Tooltip title={t(playing ? 'action.pause' : 'action.play')}>
-                <IconButton size='large' onClick={handlePlay} color='inherit'>
-                    {playing ? <Pause /> : <PlayArrow />}
-                </IconButton>
-            </Tooltip>
-        </div>
+        </>
     );
 };

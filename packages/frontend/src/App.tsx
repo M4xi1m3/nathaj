@@ -15,7 +15,7 @@ import { NetworkLegend } from './components/panels/NetworkLegend';
 import { NetowrkProperties } from './components/panels/NetworkProperties';
 import { NetworkRenderer } from './components/panels/NetworkRenderer';
 import { NoPanels } from './components/panels/NoPanels';
-import { TopBar } from './components/TopBar';
+import { TopBar } from './components/topbar/TopBar';
 import { NetworkContext } from './NetworkContext';
 
 const App: React.FC = () => {

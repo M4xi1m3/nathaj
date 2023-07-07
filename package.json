@@ -12,8 +12,5 @@
         "lint-staged": "yarn --cwd packages/simulator lint-staged && yarn --cwd packages/frontend lint-staged",
         "pretty": "yarn --cwd packages/simulator pretty && yarn --cwd packages/frontend pretty",
         "lint": "yarn --cwd packages/simulator lint && yarn --cwd packages/frontend lint"
-    },
-    "devDependencies": {
-        "concurrently": "^8.2.0"
     }
 }
