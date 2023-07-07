@@ -1,0 +1,94 @@
+{
+  "name": "@nathaj/frontend",
+  "description": "A web-based network simulator written in TypeScript using the React library",
+  "version": "1.0.0",
+  "private": true,
+  "author": {
+    "name": "Maxime FRIESS",
+    "email": "M4x1me@protonmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.unistra.fr/nathaj/nathaj.git"
+  },
+  "contributors": [],
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@fontsource/righteous": "^5.0.3",
+    "@fontsource/roboto": "^5.0.3",
+    "@fontsource/roboto-mono": "^5.0.3",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/lab": "^5.0.0-alpha.134",
+    "@mui/material": "^5.13.5",
+    "@nathaj/simulator": "*",
+    "filtrex": "^3.0.0",
+    "i18next": "^23.2.6",
+    "i18next-browser-languagedetector": "^7.1.0",
+    "material-ui-popup-state": "^5.0.9",
+    "notistack": "^3.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-mousetrap": "^2.0.4",
+    "react-i18next": "^13.0.1",
+    "react-resizable-panels": "^0.0.51",
+    "react-virtuoso": "^4.3.10",
+    "typedoc": "^0.24.8",
+    "typescript": "^4.4.2",
+    "web-vitals": "^2.1.0"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "prepare": "husky install",
+    "pretty": "prettier -w src",
+    "lint": "eslint --fix src",
+    "clean": "rm -rf dist"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.2",
+    "@types/node": "^16.7.13",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.0",
+    "@vitejs/plugin-react": "^3.1.0",
+    "@vitest/coverage-v8": "^0.32.2",
+    "eslint": "^8.43.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-react": "^7.32.2",
+    "happy-dom": "^9.20.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.2",
+    "prettier": "2.8.8",
+    "prettier-plugin-organize-imports": "^3.2.2",
+    "vite": "^4.2.1",
+    "vite-plugin-svgr": "^3.2.0",
+    "vitest": "^0.32.2"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write --ignore-unknown"
+    ]
+  }
+}

@@ -15,8 +15,8 @@ build:
     - yarn typedoc
   artifacts:
     paths:
-      - dist/
-      - docs/
+      - packages/frontend/dist/
+      - packages/simulator/docs/
   cache:
     key:
       files:
@@ -53,8 +53,8 @@ pages:
     GIT_STRATEGY: none
   script:
     - mkdir -p public/docs/
-    - mv dist/* "public"
-    - mv docs/* "public/docs"
+    - mv packages/frontend/dist/* "public"
+    - mv packages/simulator/docs/* "public/docs"
   cache:
     paths:
       - public

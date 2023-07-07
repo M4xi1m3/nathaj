@@ -3,10 +3,7 @@
 # dependencies
 /node_modules
 /.pnp
-/.vite
 /.gitlab-ci-local
-/.vscode
-/public
 .pnp.js
 
 # testing
