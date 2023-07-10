@@ -85,8 +85,6 @@ export const NetworkRenderer: React.FC<{
 
     let tmpTouches: SavedTouch[] = touches;
 
-    const GRID_SIZE = scale.current >= 1 ? 25 : scale.current >= 0.3 ? 50 : 100;
-
     return (
         <Grid container direction='column' flexWrap='nowrap' sx={{ height: '100%' }}>
             <Grid item sx={{ width: '100%' }}>
@@ -130,7 +128,12 @@ export const NetworkRenderer: React.FC<{
                         </Tooltip>
                         <Divider orientation='vertical' />
                         <Tooltip title={t('panel.network.action.autolayout')}>
-                            <IconButton onClick={() => Layout.spring_layout(network, GRID_SIZE, snapGrid)} size='small'>
+                            <IconButton
+                                onClick={() => {
+                                    const GRID_SIZE = scale.current >= 1 ? 25 : scale.current >= 0.3 ? 50 : 100;
+                                    Layout.spring_layout(network, GRID_SIZE, snapGrid);
+                                }}
+                                size='small'>
                                 <Hub />
                             </IconButton>
                         </Tooltip>
@@ -252,6 +255,7 @@ export const NetworkRenderer: React.FC<{
                                     .div(scale.current);
 
                                 e.currentTarget.style.cursor = 'grab';
+                                const GRID_SIZE = scale.current >= 1 ? 25 : scale.current >= 0.3 ? 50 : 100;
                                 network
                                     .getDevice(dragged.current)
                                     .setPosition(
@@ -465,6 +469,7 @@ export const NetworkRenderer: React.FC<{
                         ).div(scale.current);
 
                         if (dragging.current && dragged.current !== null) {
+                            const GRID_SIZE = scale.current >= 1 ? 25 : scale.current >= 0.3 ? 50 : 100;
                             e.currentTarget.style.cursor = 'pointer';
                             network
                                 .getDevice(dragged.current)
@@ -491,6 +496,7 @@ export const NetworkRenderer: React.FC<{
 
                         if (dragging.current && dragged.current !== null) {
                             // Drag a device
+                            const GRID_SIZE = scale.current >= 1 ? 25 : scale.current >= 0.3 ? 50 : 100;
                             e.currentTarget.style.cursor = 'grab';
                             network
                                 .getDevice(dragged.current)
@@ -526,6 +532,7 @@ export const NetworkRenderer: React.FC<{
                         }
                     }}
                     draw={(ctx) => {
+                        const GRID_SIZE = scale.current >= 1 ? 25 : scale.current >= 0.3 ? 50 : 100;
                         canvasSize.current = new Vector2D(ctx.canvas.width, ctx.canvas.height);
 
                         const centerOffset = new Vector2D(ctx.canvas.width, ctx.canvas.height)
@@ -567,7 +574,7 @@ export const NetworkRenderer: React.FC<{
                         ctx.fillStyle = theme.palette.text.primary;
                         ctx.strokeStyle = theme.palette.text.primary;
 
-                        // Drazw the grid
+                        // Draw the grid
                         if (showGrid) {
                             for (
                                 let i =
@@ -585,7 +592,8 @@ export const NetworkRenderer: React.FC<{
                                     j < centerOffset.y * 2;
                                     j += GRID_SIZE
                                 ) {
-                                    ctx.fillRect(i, j, 1, 1);
+                                    const size = scale.current >= 1 ? 1 : scale.current >= 0.3 ? 2 : 4;
+                                    ctx.fillRect(i, j, size, size);
                                 }
                             }
                         }
